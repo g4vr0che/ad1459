@@ -6,7 +6,7 @@
   License, v. 2.0. If a copy of the MPL was not distributed with this
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-  This is the main module.
+  This file is the application class.
 """
 
 import gi
@@ -25,4 +25,5 @@ class AdApplication(Gtk.Application):
          Gtk.main()
 
 app = AdApplication()
+
 app.run()
