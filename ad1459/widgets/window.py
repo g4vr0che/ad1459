@@ -13,11 +13,13 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
+from .headerbar import Headerbar
+
 class AdWindow(Gtk.Window):
 
     def __init__(self):
-        super().__init__(self)
-        header = Gtk.HeaderBar()
+        Gtk.Window.__init__(self)
+        header = Headerbar()
         self.set_titlebar(header)
 
         

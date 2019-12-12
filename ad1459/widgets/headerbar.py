@@ -16,4 +16,11 @@ from gi.repository import Gtk
 class Headerbar(Gtk.HeaderBar):
 
     def __init__(self):
-        super().__init__(self)
+        super().__init__()
+
+        self.set_show_close_button(True)
+        self.set_title('AD1459')
+        self.set_has_subtitle(False)
+
+        btn_appmenu = Gtk.MenuButton()
+        self.pack_end(btn_appmenu)
