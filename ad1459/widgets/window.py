@@ -28,7 +28,7 @@ class AdWindow(Gtk.Window):
         self.add(maingrid)
 
         content = Gtk.HPaned()
-        content.set_position(300)
+        content.set_position(200)
         content.set_hexpand(True)
         content.set_vexpand(True)
         maingrid.attach(content, 0, 0, 1, 1)
@@ -50,63 +50,82 @@ class AdWindow(Gtk.Window):
         message_window.set_vexpand(True)
         message_grid.attach(message_window, 0, 0, 1, 1)
 
+        entry_box = Gtk.Box()
+        entry_box.props.margin = 2
+        message_grid.attach(entry_box, 0, 1, 1, 1)
+
+        message_entry = Gtk.Entry()
+        message_entry.set_icon_from_icon_name(
+            Gtk.EntryIconPosition.SECONDARY,
+            'mail-send-symbolic'
+        )
+        message_entry.set_hexpand(True)
+        # message_entry.props.show_emoji_icon = True
+        message_grid.props.margin = 2
+        entry_box.add(message_entry)
+
         self.messages = Gtk.ListBox()
-        servers_window.add(self.messages)
+        message_window.add(self.messages)
+
+        self.populate_test_data()
         
     def populate_test_data(self):
-        test_server1 = RoomRow()
-        test_server1.name = 'Esper'
+        test_server1 = RoomRow('server')
+        test_server1.room_name = 'Esper'
         self.servers_listbox.add(test_server1)
         
-        test_server2 = RoomRow()
-        test_server2.name = '#lobby'
-        test_server2.props.margin_bottom = 24
+        test_server2 = RoomRow('room')
+        test_server2.room_name = '#lobby'
         self.servers_listbox.add(test_server2)
         
-        test_server3 = RoomRow()
-        test_server3.name = 'freenode'
+        test_server6 = RoomRow('user')
+        test_server6.room_name = 'LordRyan'
+        self.servers_listbox.add(test_server6)
+        
+        test_server3 = RoomRow('server')
+        test_server3.room_name = 'freenode'
         self.servers_listbox.add(test_server3)
         
-        test_server4 = RoomRow()
-        test_server4.name = '##fosters'
+        test_server4 = RoomRow('room')
+        test_server4.room_name = '##fosters'
         self.servers_listbox.add(test_server4)
         
-        test_server5 = RoomRow()
-        test_server5.name = '##iciloo'
+        test_server5 = RoomRow('room')
+        test_server5.room_name = '##iciloo'
         self.servers_listbox.add(test_server5)
         
-        test_server6 = RoomRow()
-        test_server6.name = '##werewolf'
+        test_server6 = RoomRow('room')
+        test_server6.room_name = '##werewolf'
         self.servers_listbox.add(test_server6)
 
         test_message = MessageRow()
         test_message.time = '25:67'
         test_message.sender = 'jeans'
-        test_message.message = ('Hi')
+        test_message.text = ('Hi')
         self.messages.add(test_message)
 
         test_message = MessageRow()
         test_message.time = '25:67'
         test_message.sender = 'gav'
-        test_message.message = ('hoi')
+        test_message.text = ('hoi')
         self.messages.add(test_message)
 
         test_message = MessageRow()
         test_message.time = '25:68'
         test_message.sender = 'jeans'
-        test_message.message = ('How are things')
+        test_message.text = ('How are things')
         self.messages.add(test_message)
 
         test_message = MessageRow()
         test_message.time = '25:69'
         test_message.sender = 'gav'
-        test_message.message = ('Okay')
+        test_message.text = ('Okay')
         self.messages.add(test_message)
 
         test_message = MessageRow()
         test_message.time = '25:70'
         test_message.sender = 'jeans'
-        test_message.message = (
+        test_message.text = (
             'This is a really long message that I want to send because I want '
             'to see what it looks like in-context. Now it\'s going to be really '
             'long, yay!'
@@ -116,18 +135,76 @@ class AdWindow(Gtk.Window):
         test_message = MessageRow()
         test_message.time = '25:70'
         test_message.sender = 'gav'
-        test_message.message = ('wow spam')
+        test_message.text = ('wow spam')
         self.messages.add(test_message)
 
         test_message = MessageRow()
         test_message.time = '25:71'
         test_message.sender = 'notgav'
-        test_message.message = ('rood')
+        test_message.text = ('rood')
         self.messages.add(test_message)
 
         test_message = MessageRow()
         test_message.time = '25:72'
         test_message.sender = 'jeans'
-        test_message.message = ('sorry')
+        test_message.text = ('sorry')
+        self.messages.add(test_message)
+
+        test_message = MessageRow()
+        test_message.time = '25:67'
+        test_message.sender = 'jeans'
+        test_message.text = (
+            'Now it\'s even longer and it will run off the edge of the boundary '
+            'so that I can see what it will look like really long. '
+            'This is a really long message that I want to send because I want '
+            'to see what it looks like in-context. Now it\'s going to be really '
+            'long, yay!'
+        )
+        self.messages.add(test_message)
+
+        test_message = MessageRow()
+        test_message.time = '25:67'
+        test_message.sender = 'gav'
+        test_message.text = ('hoi')
+        self.messages.add(test_message)
+
+        test_message = MessageRow()
+        test_message.time = '25:68'
+        test_message.sender = 'jeans'
+        test_message.text = ('How are things')
+        self.messages.add(test_message)
+
+        test_message = MessageRow()
+        test_message.time = '25:69'
+        test_message.sender = 'gav'
+        test_message.text = ('Okay')
+        self.messages.add(test_message)
+
+        test_message = MessageRow()
+        test_message.time = '25:70'
+        test_message.sender = 'jeans'
+        test_message.text = (
+            'This is a really long message that I want to send because I want '
+            'to see what it looks like in-context. Now it\'s going to be really '
+            'long, yay!'
+        )
+        self.messages.add(test_message)
+
+        test_message = MessageRow()
+        test_message.time = '25:70'
+        test_message.sender = 'gav'
+        test_message.text = ('wow spam')
+        self.messages.add(test_message)
+
+        test_message = MessageRow()
+        test_message.time = '25:71'
+        test_message.sender = 'notgav'
+        test_message.text = ('rood')
+        self.messages.add(test_message)
+
+        test_message = MessageRow()
+        test_message.time = '25:72'
+        test_message.sender = 'jeans'
+        test_message.text = ('sorry')
         self.messages.add(test_message)
         
