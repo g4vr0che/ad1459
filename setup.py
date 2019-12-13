@@ -20,7 +20,7 @@ setup(
     scripts=['ad1459/ad1459'],
 
     # Dependencies
-    install_requires=['twisted'],
+    # install_requires=['twisted'],
 
     # Project Metadata
     author='Gaven Royer',
