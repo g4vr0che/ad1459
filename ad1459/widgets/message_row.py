@@ -19,6 +19,7 @@ class MessageRow(Gtk.ListBoxRow):
         Gtk.ListBoxRow.__init__(self)
 
         message_grid = Gtk.Grid()
+        message_grid.set_hexpand(True)
         message_grid.set_column_spacing(12)
         self.add(message_grid)
 
@@ -27,6 +28,7 @@ class MessageRow(Gtk.ListBoxRow):
         self.message_sender = Gtk.Label()
         message_grid.attach(self.message_sender, 1, 0, 1, 1)
         self.message_text = Gtk.Label()
+        self.message_text.props.halign = Gtk.Align.END
         message_grid.attach(self.message_text, 2, 0, 1, 1)
 
     @property
