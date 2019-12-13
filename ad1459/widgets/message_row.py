@@ -17,19 +17,30 @@ class MessageRow(Gtk.ListBoxRow):
 
     def __init__(self):
         Gtk.ListBoxRow.__init__(self)
+        self.props.selectable = False
 
         message_grid = Gtk.Grid()
+        message_grid.props.margin = 6
         message_grid.set_hexpand(True)
         message_grid.set_column_spacing(12)
         self.add(message_grid)
 
         self.message_time = Gtk.Label()
-        message_grid.attach(self.message_time, 0, 0, 1, 1)
+        self.message_time.props.halign = Gtk.Align.END
+        self.message_time.props.valign = Gtk.Align.START
+        message_grid.attach(self.message_time, 0, 1, 1, 1)
         self.message_sender = Gtk.Label()
-        message_grid.attach(self.message_sender, 1, 0, 1, 1)
+        self.message_sender.props.xalign = 1
+        self.message_sender.props.halign = Gtk.Align.END
+        self.message_sender.props.valign = Gtk.Align.END
+        self.message_sender.props.width_request = 100
+        message_grid.attach(self.message_sender, 0, 0, 1, 1)
         self.message_text = Gtk.Label()
-        self.message_text.props.halign = Gtk.Align.END
-        message_grid.attach(self.message_text, 2, 0, 1, 1)
+        self.message_text.props.halign = Gtk.Align.START
+        self.message_text.set_line_wrap(True)
+        self.message_text.set_hexpand(True)
+        self.message_text.props.xalign = 0
+        message_grid.attach(self.message_text, 2, 0, 1, 2)
 
     @property
     def time(self):
