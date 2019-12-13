@@ -25,9 +25,9 @@ class MessageRow(Gtk.ListBoxRow):
         self.message_time = Gtk.Label()
         message_grid.attach(self.message_time, 0, 0, 1, 1)
         self.message_sender = Gtk.Label()
-        message_grid.attach(self.message_sender, 0, 1, 1, 1)
+        message_grid.attach(self.message_sender, 1, 0, 1, 1)
         self.message_text = Gtk.Label()
-        message_grid.attach(self.message_text, 0, 2, 1, 1)
+        message_grid.attach(self.message_text, 2, 0, 1, 1)
 
     @property
     def time(self):
