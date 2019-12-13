@@ -9,4 +9,3 @@
   This file controls and maintains connections.
 """
 
-from twisted.words.protocols.irc import IRCClient

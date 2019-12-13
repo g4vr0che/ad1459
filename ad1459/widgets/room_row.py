@@ -15,7 +15,7 @@ from gi.repository import Gtk
 
 class RoomRow(Gtk.ListBoxRow):
 
-    def __init__(self, kind):
+    def __init__(self, kind, room):
         Gtk.ListBoxRow.__init__(self)
 
         room_grid = Gtk.Grid()
@@ -25,6 +25,7 @@ class RoomRow(Gtk.ListBoxRow):
         room_grid.attach(self.room_label, 0, 0, 1, 1)
 
         self.kind = kind
+        self.room = room
     
     @property
     def room_name(self):

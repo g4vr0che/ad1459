@@ -12,7 +12,7 @@
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
-from .widgets.window import AdWindow
+from .window import AdWindow
 
 class AdApplication(Gtk.Application):
 

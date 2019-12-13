@@ -26,16 +26,21 @@ class MessageRow(Gtk.ListBoxRow):
         self.add(message_grid)
 
         self.message_time = Gtk.Label()
+        self.message_time.set_use_markup(True)
         self.message_time.props.halign = Gtk.Align.END
         self.message_time.props.valign = Gtk.Align.START
+        self.message_time.props.opacity = 0.5
         message_grid.attach(self.message_time, 0, 1, 1, 1)
         self.message_sender = Gtk.Label()
+        self.message_sender.set_use_markup(True)
         self.message_sender.props.xalign = 1
         self.message_sender.props.halign = Gtk.Align.END
         self.message_sender.props.valign = Gtk.Align.END
         self.message_sender.props.width_request = 100
+        self.message_sender.props.opacity = 0.8
         message_grid.attach(self.message_sender, 0, 0, 1, 1)
         self.message_text = Gtk.Label()
+        self.message_text.set_use_markup(True)
         self.message_text.props.halign = Gtk.Align.START
         self.message_text.set_line_wrap(True)
         self.message_text.set_hexpand(True)
@@ -48,7 +53,7 @@ class MessageRow(Gtk.ListBoxRow):
     
     @time.setter
     def time(self, time):
-        self.message_time.set_text(time)
+        self.message_time.set_markup(f'<i>{time}</i>')
     
     @property
     def sender(self):
@@ -56,7 +61,7 @@ class MessageRow(Gtk.ListBoxRow):
     
     @sender.setter
     def sender(self, sender):
-        self.message_sender.set_text(sender)
+        self.message_sender.set_markup(sender)
     
     @property
     def text(self):
@@ -64,4 +69,4 @@ class MessageRow(Gtk.ListBoxRow):
     
     @text.setter
     def text(self, text):
-        self.message_text.set_text(text)
+        self.message_text.set_markup(text)

@@ -24,3 +24,6 @@ class Headerbar(Gtk.HeaderBar):
 
         btn_appmenu = Gtk.MenuButton()
         self.pack_end(btn_appmenu)
+        
+        appmenu = Gtk.Popover()
+        
