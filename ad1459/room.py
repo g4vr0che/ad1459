@@ -23,7 +23,7 @@ class Room():
     def __init__(self):
         self.messages = Gtk.ListBox()
         self.row = RoomRow('room', self)
-        self.add_message('jeans has joined')
+        self.add_message(f'You have joined')
         # self.populate_test_data()
     
     @property

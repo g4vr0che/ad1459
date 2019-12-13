@@ -40,6 +40,7 @@ class AdWindow(Gtk.Window):
         servers_grid.attach(servers_window, 0, 0, 1, 1)
 
         self.servers_listbox = Gtk.ListBox()
+        self.servers_listbox.set_selection_mode(Gtk.SelectionMode.BROWSE)
         self.servers_listbox.connect('row-selected', self.on_server_selected)
         servers_window.add(self.servers_listbox)
         
@@ -60,17 +61,20 @@ class AdWindow(Gtk.Window):
         entry_box.props.spacing = 6
         message_grid.attach(entry_box, 0, 1, 1, 1)
 
-        nick_button = Gtk.Button.new_with_label('jeans')
-        nick_button.set_halign(Gtk.Align.START)
-        Gtk.StyleContext.add_class(nick_button.get_style_context(), 'flat')
-        entry_box.add(nick_button)
-
         message_entry = Gtk.Entry()
         message_entry.set_hexpand(True)
         message_entry.set_placeholder_text('Enter a message')
         message_entry.connect('activate', self.on_send_button_clicked, message_entry)
         message_entry.props.show_emoji_icon = True
         message_entry.props.max_width_chars = 5000
+
+        self.nick_button = Gtk.Button.new_with_label('jeans')
+        self.nick = 'user'
+        self.nick_button.set_halign(Gtk.Align.START)
+        self.nick_button.connect('clicked', self.on_nick_button_clicked, message_entry)
+        Gtk.StyleContext.add_class(self.nick_button.get_style_context(), 'flat')
+
+        entry_box.add(self.nick_button)
         entry_box.add(message_entry)
 
         send_button = Gtk.Button.new_from_icon_name(
@@ -88,10 +92,23 @@ class AdWindow(Gtk.Window):
 
         self.populate_test_data()
     
+    @property
+    def nick(self):
+        return self.nick_button.get_label()
+    
+    @nick.setter
+    def nick(self, nick):
+        self.nick_button.set_label(nick)
+    
+    def on_nick_button_clicked(self, button, entry):
+        new_nick = entry.get_text()
+        self.nick = new_nick
+        entry.set_text('')
+    
     def on_send_button_clicked(self, button, entry):
         message_text = entry.get_text()
         room = self.get_active_room()
-        room.add_message(message_text, sender='jeans')
+        room.add_message(message_text, sender=self.nick)
         self.show_all()
         entry.set_text('')
 
