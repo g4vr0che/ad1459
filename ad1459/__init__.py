@@ -6,7 +6,8 @@
   License, v. 2.0. If a copy of the MPL was not distributed with this
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-  This is the main module.
+  This is the main module. When imported, it should run the application and 
+  spawn the GUI.
 """
 
 import gi
@@ -15,6 +16,7 @@ from gi.repository import Gtk, Gdk
 from .window import AdWindow
 
 class AdApplication(Gtk.Application):
+  """ The main application class."""
 
     def do_activate(self):
          self.window = AdWindow()
