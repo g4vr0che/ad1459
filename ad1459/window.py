@@ -17,6 +17,7 @@ from .widgets.headerbar import Headerbar
 from .room import Room
 
 class AdWindow(Gtk.Window):
+    """ The main application window."""
 
     def __init__(self):
         Gtk.Window.__init__(self)
@@ -114,18 +115,32 @@ class AdWindow(Gtk.Window):
     
     @property
     def nick(self):
+        """str: The current user's nickname."""
         return self.nick_button.get_label()
     
     @nick.setter
     def nick(self, nick):
+        """ We just store this on the nickname button for convenience."""
         self.nick_button.set_label(nick)
     
     def on_nick_button_clicked(self, button, entry):
+        """ clicked signal handler for nickname button.
+
+        Arguments:
+            button (:obj:`Gtk.Button`): The button the user clicked.
+            entry (:obj:`Gtk.Entry`): The chat entry with the new nickname.
+        """
         new_nick = entry.get_text()
         self.nick = new_nick
         entry.set_text('')
     
     def on_send_button_clicked(self, button, entry):
+        """ clicked signal handler for send button.
+
+        Arguments:
+            button (:obj:`Gtk.Button`): The send button the user clicked.
+            entry (:obj:`Gtk.Entry`): The chat entry with the message.
+        """
         message_text = entry.get_text()
         room = self.get_active_room()
         room.add_message(message_text, sender=self.nick, css='mine')
@@ -133,10 +148,17 @@ class AdWindow(Gtk.Window):
         entry.set_text('')
 
     def get_active_room(self):
+        """ Gets the name of the currently active room. """
         current_row = self.servers_listbox.get_selected_row()
         return current_row.room
     
     def on_server_selected(self, listbox, row):
+        """ row-selected signal handler for server_listbox.
+
+        Arguments:
+            listbox (:obj:`Gtk.ListBox`): The server_listbox
+            row (:obj:`Gtk.ListBoxRow`): The row the user clicked on.
+        """
         new_room = row.room_name
         self.message_stack.set_visible_child_name(new_room)
         self.message_stack.get_visible_child().connect(
@@ -144,6 +166,7 @@ class AdWindow(Gtk.Window):
         )
     
     def on_new_message_scroll(self, widget, data=None):
+        """ Handler to keep the window scrolled to the bottom of the buffer."""
         adj = self.message_window.get_vadjustment()
         adj.set_value(adj.props.upper - adj.props.page_size)
         
