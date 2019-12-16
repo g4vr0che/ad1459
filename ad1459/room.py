@@ -19,6 +19,13 @@ from .widgets.message_row import MessageRow
 from .widgets.room_row import RoomRow
 
 class Room():
+    """ The class to represent a room.
+
+    Attributes: 
+        messages (:obj:`Gtk.ListBox`): The list of messages in this room's 
+            buffer
+        row (:obj:`RoomRow`): The row object for this room in the room list.
+    """
 
     def __init__(self):
         self.messages = Gtk.ListBox()
@@ -28,6 +35,7 @@ class Room():
     
     @property
     def name(self):
+        """str: The name of this room (as displayed in the room list)."""
         return self.row.room_name
     
     @name.setter
@@ -35,9 +43,24 @@ class Room():
         self.row.room_name = name
 
     def get_messages(self):
+        """Get the messages for this room.
+        
+        Returns:
+            :obj:`Gtk.ListBox`: A listbox containing all of the messages.
+        """
         return self.messages
     
     def add_message(self, message, sender=None, msg_time=None, css=None):
+        """ Adds a new message into this room's buffer.
+
+        Arguments:
+            message (str): The message text to add to this room.
+            sender (str): The nickname who sent the message, or None for server
+                messages.
+            msg_time (str): The timestamp of this message, or None for the 
+                current time.
+            css (str): A CSS class to add to this message.
+        """
         new_message = MessageRow()
 
         if css:
