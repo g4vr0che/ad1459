@@ -37,8 +37,14 @@ class Room():
     def get_messages(self):
         return self.messages
     
-    def add_message(self, message, sender=None, msg_time=None):
+    def add_message(self, message, sender=None, msg_time=None, css=None):
         new_message = MessageRow()
+
+        if css:
+            Gtk.StyleContext.add_class(
+                new_message.get_style_context(),
+                css
+            )
 
         if msg_time:
             new_message.time = msg_time

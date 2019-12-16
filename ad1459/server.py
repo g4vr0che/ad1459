@@ -15,11 +15,13 @@ from gi.repository import Gtk
 
 from .widgets.room_row import RoomRow
 from .widgets.message_row import MessageRow
+from .room import Room
 
 class Server():
 
     def __init__(self):
         self.rooms = []
+        self.server_messages = ServerRoom()
 
     @property
     def host(self):
@@ -34,4 +36,15 @@ class Server():
             pass
     
     def join_room(self, room):
-        pass
+        new_room = Room()
+        new_room_index = len(self.rooms) + 2
+        self.rooms.append((new_room_index, new_room))
+    
+    def get_room_for_index(self, index):
+        return self.rooms[index]
+
+class ServerRoom(Room):
+
+    def display_motd(self, motd):
+        self.add_message(motd)
+    

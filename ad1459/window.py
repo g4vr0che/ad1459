@@ -11,7 +11,7 @@
 
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 
 from .widgets.headerbar import Headerbar
 from .room import Room
@@ -22,6 +22,26 @@ class AdWindow(Gtk.Window):
         Gtk.Window.__init__(self)
         header = Headerbar()
         self.set_titlebar(header)
+
+        # Set up CSS
+        css = (
+            b'.message-row {'
+            b'  margin: 3px;'
+            b'  border-radius: 6px;'
+            b'  background-color: alpha(@theme_selected_bg_color, 0.1);'
+            b'}'
+            b'.mine {'
+            b'  background-color: alpha(@theme_selected_bg_color, 0.2);'
+            b'}'
+        )
+
+        screen = Gdk.Screen.get_default()
+        css_provider = Gtk.CssProvider()
+        css_provider.load_from_data(css)
+        style_context = Gtk.StyleContext()
+        style_context.add_provider_for_screen(
+            screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
 
         maingrid = Gtk.Grid()
         self.add(maingrid)
@@ -46,15 +66,15 @@ class AdWindow(Gtk.Window):
         
         message_grid = Gtk.Grid()
         content.add2(message_grid)
-        message_window = Gtk.ScrolledWindow()
-        message_window.set_hexpand(True)
-        message_window.set_vexpand(True)
-        message_grid.attach(message_window, 0, 0, 1, 1)
+        self.message_window = Gtk.ScrolledWindow()
+        self.message_window.set_hexpand(True)
+        self.message_window.set_vexpand(True)
+        message_grid.attach(self.message_window, 0, 0, 1, 1)
 
         self.message_stack = Gtk.Stack()
         self.message_stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         self.message_stack.set_transition_duration(100)
-        message_window.add(self.message_stack)
+        self.message_window.add(self.message_stack)
 
         entry_box = Gtk.HBox()
         entry_box.props.margin = 6
@@ -108,7 +128,7 @@ class AdWindow(Gtk.Window):
     def on_send_button_clicked(self, button, entry):
         message_text = entry.get_text()
         room = self.get_active_room()
-        room.add_message(message_text, sender=self.nick)
+        room.add_message(message_text, sender=self.nick, css='mine')
         self.show_all()
         entry.set_text('')
 
@@ -119,6 +139,13 @@ class AdWindow(Gtk.Window):
     def on_server_selected(self, listbox, row):
         new_room = row.room_name
         self.message_stack.set_visible_child_name(new_room)
+        self.message_stack.get_visible_child().connect(
+            'size-allocate', self.on_new_message_scroll
+        )
+    
+    def on_new_message_scroll(self, widget, data=None):
+        adj = self.message_window.get_vadjustment()
+        adj.set_value(adj.props.upper - adj.props.page_size)
         
     def populate_test_data(self):
         test_room1 = Room()
@@ -131,4 +158,20 @@ class AdWindow(Gtk.Window):
         test_room2.name = '#lobby'
         self.servers_listbox.add(test_room2.row)
         self.message_stack.add_named(test_room2.messages, test_room2.name)
+
+        test_room3 = Room()
+        test_room3.name = 'freenode'
+        test_room3.row.kind = 'server'
+        self.servers_listbox.add(test_room3.row)
+        self.message_stack.add_named(test_room3.messages, test_room3.name)
+
+        test_room4 = Room()
+        test_room4.name = '##club_nomicon'
+        self.servers_listbox.add(test_room4.row)
+        self.message_stack.add_named(test_room4.messages, test_room4.name)
+
+        test_room5 = Room()
+        test_room5.name = '##fosters'
+        self.servers_listbox.add(test_room5.row)
+        self.message_stack.add_named(test_room5.messages, test_room5.name)
         
