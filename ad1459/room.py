@@ -28,8 +28,19 @@ class Room():
     """
 
     def __init__(self):
+        
+        self.window = Gtk.ScrolledWindow()
+        self.window.set_vexpand(True)
+        self.window.set_hexpand(True)
+        self.window.connect('size-allocate', self.on_new_message_scroll)
+
+        self.view = Gtk.Viewport()
+        self.adj = self.window.get_vadjustment()
+        
         self.messages = Gtk.ListBox()
-        self.row = RoomRow('room', self)
+        self.view.add(self.messages)
+
+        self.row = RoomRow('channel', self)
         self.add_message(f'You have joined')
         # self.populate_test_data()
     
@@ -41,6 +52,10 @@ class Room():
     @name.setter
     def name(self, name):
         self.row.room_name = name
+    
+    def on_new_message_scroll(self, window, data=None):
+        """ size-allocate signal handler for self.window."""
+        self.adj.set_value(self.adj.props.upper - adj.props.page_size)
 
     def get_messages(self):
         """Get the messages for this room.
