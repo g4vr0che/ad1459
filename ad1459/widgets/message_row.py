@@ -14,6 +14,17 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 class MessageRow(Gtk.ListBoxRow):
+    """ A ListBoxRow representing a message.
+
+    The attributes for this class are stored directly in the Gtk.Label widgets
+    drawn within these rows, as this obviates the need to store extra variables
+    in memory.
+
+    Attributes:
+        time (str): The time the message was sent.
+        sender (str): The user/server who sent the message. "*" by default.
+        text (str): The text of the message.
+    """
 
     def __init__(self):
         Gtk.ListBoxRow.__init__(self)
@@ -51,6 +62,7 @@ class MessageRow(Gtk.ListBoxRow):
 
     @property
     def time(self):
+        """str: The time the message was sent."""
         return self.message_time.get_text()
     
     @time.setter
@@ -59,6 +71,7 @@ class MessageRow(Gtk.ListBoxRow):
     
     @property
     def sender(self):
+        """ The sender of the message, or * for none/server. """
         return self.message_sender.get_text()
     
     @sender.setter
@@ -67,6 +80,7 @@ class MessageRow(Gtk.ListBoxRow):
     
     @property
     def text(self):
+        """ The message text."""
         return self.message_text.get_text()
     
     @text.setter
