@@ -9,13 +9,44 @@
   ListBoxRows for servers/rooms.
 """
 
+from enum import Enum
+
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
-class RoomRow(Gtk.ListBoxRow):
+class RoomKind(Enum):
+    """ An enum to classify the type of room this is.
+    """
+    SERVER = 1
+    CHANNEL = 2
+    ROOM = 2
+    PRIVMSG = 3
+    QUERY = 3
+    DIALOG = 3
+    WHISPER = 3
 
-    def __init__(self, kind, room):
+    def __str__(self):
+        """ Turn this back into a string. """
+        strings = {
+            1: 'server',
+            2: 'channel',
+            3: 'user'
+        }
+        return strings[self.value]
+
+class RoomRow(Gtk.ListBoxRow):
+    """ A dedicated ListBoxRow for representing a room in the Room List.
+
+    Arguments:
+        kind (:obj:`RoomKind`): The type of room this is.
+    
+    Attributes:
+        room_name (str): The name of this room.
+        kind (RoomKind Enum): The type of room this is.
+    """
+
+    def __init__(self, room, kind='CHANNEL'):
         Gtk.ListBoxRow.__init__(self)
 
         room_grid = Gtk.Grid()
@@ -29,29 +60,34 @@ class RoomRow(Gtk.ListBoxRow):
     
     @property
     def room_name(self):
+        """str: The name of this room in the room list."""
         return self.room_label.get_text()
     
     @room_name.setter
     def room_name(self, name):
+        """ We just store this in the label for the room."""
         self.room_label.set_text(name)
     
     @property
-    def kind(self):
-        try:
+    def kind(self, str=False):
+        """ RoomKind Enum: The type of room this is. """
+        if str:
+            return str(self._type)
+        else:
             return self._type
-        except AttributeError:
-            self._type = 'room'
-            return self._type
+
             
     @kind.setter
     def kind(self, kind):
-        if kind == 'server':
+        """ We need to set some GTK Styling prefs when this is set. """
+        self._type = RoomKind[kind.upper()]
+
+        if self._type is RoomKind.SERVER:
             self.set_margin_top(12) 
             self.set_margin_start(0)
-        elif kind == 'room': 
+        elif self._type == RoomKind.CHANNEL: 
             self.set_margin_top(0)
             self.set_margin_start(12)
         else:
             self.set_margin_top(0)
             self.set_margin_start(18)
-        self._type = kind
