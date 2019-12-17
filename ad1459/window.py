@@ -19,8 +19,9 @@ from .room import Room
 class AdWindow(Gtk.Window):
     """ The main application window."""
 
-    def __init__(self):
-        Gtk.Window.__init__(self)
+    def __init__(self, client):
+        super()
+        self.client = client
         header = Headerbar()
         self.set_titlebar(header)
 
