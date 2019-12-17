@@ -67,15 +67,11 @@ class AdWindow(Gtk.Window):
         
         message_grid = Gtk.Grid()
         content.add2(message_grid)
-        self.message_window = Gtk.ScrolledWindow()
-        self.message_window.set_hexpand(True)
-        self.message_window.set_vexpand(True)
-        message_grid.attach(self.message_window, 0, 0, 1, 1)
 
         self.message_stack = Gtk.Stack()
         self.message_stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         self.message_stack.set_transition_duration(100)
-        self.message_window.add(self.message_stack)
+        message_grid.attach(self.message_stack, 0, 0, 1, 1)
 
         entry_box = Gtk.HBox()
         entry_box.props.margin = 6
@@ -161,40 +157,32 @@ class AdWindow(Gtk.Window):
         """
         new_room = row.room_name
         self.message_stack.set_visible_child_name(new_room)
-        self.message_stack.get_visible_child().connect(
-            'size-allocate', self.on_new_message_scroll
-        )
-    
-    def on_new_message_scroll(self, widget, data=None):
-        """ Handler to keep the window scrolled to the bottom of the buffer."""
-        adj = self.message_window.get_vadjustment()
-        adj.set_value(adj.props.upper - adj.props.page_size)
         
     def populate_test_data(self):
         test_room1 = Room()
         test_room1.name = 'Esper'
         test_room1.row.kind = 'server'
         self.servers_listbox.add(test_room1.row)
-        self.message_stack.add_named(test_room1.messages, test_room1.name)
+        self.message_stack.add_named(test_room1.window, test_room1.name)
 
         test_room2 = Room()
         test_room2.name = '#lobby'
         self.servers_listbox.add(test_room2.row)
-        self.message_stack.add_named(test_room2.messages, test_room2.name)
+        self.message_stack.add_named(test_room2.window, test_room2.name)
 
         test_room3 = Room()
         test_room3.name = 'freenode'
         test_room3.row.kind = 'server'
         self.servers_listbox.add(test_room3.row)
-        self.message_stack.add_named(test_room3.messages, test_room3.name)
+        self.message_stack.add_named(test_room3.window, test_room3.name)
 
         test_room4 = Room()
         test_room4.name = '##club_nomicon'
         self.servers_listbox.add(test_room4.row)
-        self.message_stack.add_named(test_room4.messages, test_room4.name)
+        self.message_stack.add_named(test_room4.window, test_room4.name)
 
         test_room5 = Room()
         test_room5.name = '##fosters'
         self.servers_listbox.add(test_room5.row)
-        self.message_stack.add_named(test_room5.messages, test_room5.name)
+        self.message_stack.add_named(test_room5.window, test_room5.name)
         
