@@ -39,12 +39,14 @@ class MessageRow(Gtk.ListBoxRow):
         self.add(message_grid)
 
         self.message_time = Gtk.Label()
+        self.message_time.set_selectable(True)
         self.message_time.set_use_markup(True)
         self.message_time.props.halign = Gtk.Align.END
         self.message_time.props.valign = Gtk.Align.START
         self.message_time.props.opacity = 0.5
         message_grid.attach(self.message_time, 0, 1, 1, 1)
         self.message_sender = Gtk.Label()
+        self.message_sender.set_selectable(True)
         self.message_sender.set_use_markup(True)
         self.message_sender.props.xalign = 1
         self.message_sender.props.halign = Gtk.Align.END
@@ -53,6 +55,7 @@ class MessageRow(Gtk.ListBoxRow):
         self.message_sender.props.opacity = 0.8
         message_grid.attach(self.message_sender, 0, 0, 1, 1)
         self.message_text = Gtk.Label()
+        self.message_text.set_selectable(True)
         self.message_text.set_use_markup(True)
         self.message_text.props.halign = Gtk.Align.START
         self.message_text.set_line_wrap(True)
