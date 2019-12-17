@@ -18,13 +18,13 @@ from .window import AdWindow
 class AdApplication(Gtk.Application):
   """ The main application class."""
 
-    def do_activate(self):
-         self.window = AdWindow()
-         self.window.set_default_size(1000,600)
-         self.window.connect('delete-event', Gtk.main_quit)
-         self.window.show_all()
+  def do_activate(self):
+        self.window = AdWindow()
+        self.window.set_default_size(1000,600)
+        self.window.connect('delete-event', Gtk.main_quit)
+        self.window.show_all()
 
-         Gtk.main()
+        Gtk.main()
 
 app = AdApplication()
 
