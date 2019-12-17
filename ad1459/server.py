@@ -29,7 +29,7 @@ class Server():
 
     def __init__(self):
         self.rooms = []
-        self.server_messages = ServerRoom()
+        self.room = ServerRoom(self)
 
     @property
     def host(self):
@@ -40,6 +40,16 @@ class Server():
     def host(self, host):
         self._host = host
     
+    @property
+    def name(self):
+        """str: The name of this server (and its room)."""
+        return self.room.name
+    
+    @name.setter
+    def name(self, name):
+        """This is actually tracked by the room."""
+        self.room.name = name
+    
     def connect(self):
         """ Connect to the server, disconnecting first if already connected. """
         if self.host is not "test":
@@ -47,10 +57,13 @@ class Server():
     
     def join_room(self, room):
         """ Join a new room/channel, or start a new private message with a user.
+
+        Arguments:
+            room (str): The name of the room/channel
         """
-        new_room = Room()
-        new_room_index = len(self.rooms) + 2
-        self.rooms.append((new_room_index, new_room))
+        new_room = Room(self)
+        new_room.name = room
+        self.rooms.append(new_room)
     
     def get_room_for_index(self, index):
         """ Get a room from the room list.
@@ -66,6 +79,10 @@ class Server():
 
 class ServerRoom(Room):
     """ A special Room class for the server message buffer/room. """
+
+    def __init__(self, server):
+        super().__init__(server)
+        self.row.kind = 'SERVER'
 
     def display_motd(self, motd):
         self.add_message(motd)

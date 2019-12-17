@@ -15,15 +15,31 @@ from gi.repository import Gtk, Gdk
 
 from .widgets.headerbar import Headerbar
 from .room import Room
+from .server import Server
 
 class AdWindow(Gtk.Window):
     """ The main application window."""
 
     def __init__(self, client):
         super()
+        self.servers = []
         self.client = client
         header = Headerbar()
         self.set_titlebar(header)
+
+        server_button = Gtk.Button.new_from_icon_name(
+            'network-server-symbolic',
+            Gtk.IconSize.BUTTON
+        )
+        server_button.connect('clicked', self.on_server_button_clicked)
+        header.pack_start(server_button)
+
+        channel_button = Gtk.Button.new_from_icon_name(
+            'list-add-symbolic',
+            Gtk.IconSize.BUTTON
+        )
+        channel_button.connect('clicked', self.on_channel_button_clicked)
+        header.pack_start(channel_button)
 
         # Set up CSS
         css = (
@@ -79,21 +95,21 @@ class AdWindow(Gtk.Window):
         entry_box.props.spacing = 6
         message_grid.attach(entry_box, 0, 1, 1, 1)
 
-        message_entry = Gtk.Entry()
-        message_entry.set_hexpand(True)
-        message_entry.set_placeholder_text('Enter a message')
-        message_entry.connect('activate', self.on_send_button_clicked, message_entry)
-        message_entry.props.show_emoji_icon = True
-        message_entry.props.max_width_chars = 5000
+        self.message_entry = Gtk.Entry()
+        self.message_entry.set_hexpand(True)
+        self.message_entry.set_placeholder_text('Enter a message')
+        self.message_entry.connect('activate', self.on_send_button_clicked, self.message_entry)
+        self.message_entry.props.show_emoji_icon = True
+        self.message_entry.props.max_width_chars = 5000
 
         self.nick_button = Gtk.Button.new_with_label('jeans')
         self.nick = 'user'
         self.nick_button.set_halign(Gtk.Align.START)
-        self.nick_button.connect('clicked', self.on_nick_button_clicked, message_entry)
+        self.nick_button.connect('clicked', self.on_nick_button_clicked, self.message_entry)
         Gtk.StyleContext.add_class(self.nick_button.get_style_context(), 'flat')
 
         entry_box.add(self.nick_button)
-        entry_box.add(message_entry)
+        entry_box.add(self.message_entry)
 
         send_button = Gtk.Button.new_from_icon_name(
             'mail-send-symbolic',
@@ -101,14 +117,14 @@ class AdWindow(Gtk.Window):
         )
         send_button.set_hexpand(False)
         send_button.set_halign(Gtk.Align.END)
-        send_button.connect('clicked', self.on_send_button_clicked, message_entry)
+        send_button.connect('clicked', self.on_send_button_clicked, self.message_entry)
         Gtk.StyleContext.add_class(
             send_button.get_style_context(), 
             'suggested-action'
         )
         entry_box.add(send_button)
 
-        self.populate_test_data()
+        # self.populate_test_data()
     
     @property
     def nick(self):
@@ -119,6 +135,16 @@ class AdWindow(Gtk.Window):
     def nick(self, nick):
         """ We just store this on the nickname button for convenience."""
         self.nick_button.set_label(nick)
+    
+    def on_channel_button_clicked(self, button, data=None):
+        """ clicked signal handler for channel button."""
+        self.join_channel(self.message_entry.get_text())
+        self.message_entry.set_text('')
+    
+    def on_server_button_clicked(self, button, data=None):
+        """ clicked signal handler for the server button."""
+        self.add_server(self.message_entry.get_text())
+        self.message_entry.set_text('')
     
     def on_nick_button_clicked(self, button, entry):
         """ clicked signal handler for nickname button.
@@ -143,11 +169,43 @@ class AdWindow(Gtk.Window):
         room.add_message(message_text, sender=self.nick, css='mine')
         self.show_all()
         entry.set_text('')
+    
+    def join_channel(self, channel_name):
+        """ Joins a channel on the current server.
+        
+        Arguments:
+            channel_name (str): The name of the channel to join.
+        """
+        current_server = self.get_active_server()
+        current_server.join_room(self.message_entry.get_text())
+        self.servers_listbox.add(current_server.rooms[-1].row)
+        self.message_stack.add_named(
+            current_server.rooms[-1].window, current_server.rooms[-1].name
+        )
+        self.show_all()
+    
+    def add_server(self, server_name, host='test'):
+        """ Adds a new server to the list.
+        
+        Arguments:
+            server_name (str): The name for this server
+            host (str): The hostname of this server, or 'test'
+        """
+        new_server = Server()
+        new_server.host = host
+        new_server.name = server_name
+        self.servers.append(new_server)
+        self.servers_listbox.add(new_server.room.row)
+        self.message_stack.add_named(new_server.room.window, new_server.name)
+        self.show_all()
 
     def get_active_room(self):
-        """ Gets the name of the currently active room. """
-        current_row = self.servers_listbox.get_selected_row()
-        return current_row.room
+        """ Gets the currently active room object. """
+        return self.message_stack.get_visible_child().room
+    
+    def get_active_server(self):
+        """ Gets the server object for the currently active room."""
+        return self.message_stack.get_visible_child().server
     
     def on_server_selected(self, listbox, row):
         """ row-selected signal handler for server_listbox.
@@ -160,30 +218,7 @@ class AdWindow(Gtk.Window):
         self.message_stack.set_visible_child_name(new_room)
         
     def populate_test_data(self):
-        test_room1 = Room()
-        test_room1.name = 'Esper'
-        test_room1.row.kind = 'server'
-        self.servers_listbox.add(test_room1.row)
-        self.message_stack.add_named(test_room1.window, test_room1.name)
-
-        test_room2 = Room()
-        test_room2.name = '#lobby'
-        self.servers_listbox.add(test_room2.row)
-        self.message_stack.add_named(test_room2.window, test_room2.name)
-
-        test_room3 = Room()
-        test_room3.name = 'freenode'
-        test_room3.row.kind = 'server'
-        self.servers_listbox.add(test_room3.row)
-        self.message_stack.add_named(test_room3.window, test_room3.name)
-
-        test_room4 = Room()
-        test_room4.name = '##club_nomicon'
-        self.servers_listbox.add(test_room4.row)
-        self.message_stack.add_named(test_room4.window, test_room4.name)
-
-        test_room5 = Room()
-        test_room5.name = '##fosters'
-        self.servers_listbox.add(test_room5.row)
-        self.message_stack.add_named(test_room5.window, test_room5.name)
+        """ Currently empty, but allows quick population of data for 
+        screenshots and similar.
+        """
         

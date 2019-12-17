@@ -46,8 +46,9 @@ class RoomRow(Gtk.ListBoxRow):
         kind (RoomKind Enum): The type of room this is.
     """
 
-    def __init__(self, room, kind='CHANNEL'):
+    def __init__(self, room, server, kind='CHANNEL'):
         Gtk.ListBoxRow.__init__(self)
+        self.server = server
 
         room_grid = Gtk.Grid()
         self.add(room_grid)

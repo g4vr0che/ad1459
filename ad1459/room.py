@@ -27,12 +27,14 @@ class Room():
         row (:obj:`RoomRow`): The row object for this room in the room list.
     """
 
-    def __init__(self):
+    def __init__(self, server):
+        self.server = server
         
         self.window = Gtk.ScrolledWindow()
         self.window.set_vexpand(True)
         self.window.set_hexpand(True)
-        
+        self.window.server = self.server
+        self.window.room = self
 
         self.view = Gtk.Viewport()
         self.window.add(self.view)
@@ -44,7 +46,7 @@ class Room():
 
         self.adj.connect('value-changed', self.on_window_scrolled)
 
-        self.row = RoomRow(self, kind='channel')
+        self.row = RoomRow(self, self.server, kind='channel')
         self.add_message(f'You have joined')
         # self.populate_test_data()
     
