@@ -35,7 +35,7 @@ class Server():
         self.app = app
         self.rooms = []
         self.room = ServerRoom(self)
-        self.client = pydle.Client(self.app.nick)
+        self.client = Client(self.app.nick)
 
     @property
     def host(self):
