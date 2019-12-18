@@ -9,6 +9,9 @@
   Handling for servers and their rooms.
 """
 
+import asyncio
+import pydle
+
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -32,10 +35,11 @@ class Server():
         self.app = app
         self.rooms = []
         self.room = ServerRoom(self)
+        self.client = pydle.Client(self.app.nick)
 
     @property
     def host(self):
-        """str: The hostname for this connection, in the format host:port."""
+        """str: The hostname for this connection"""
         return self._host
     
     @host.setter
@@ -43,19 +47,70 @@ class Server():
         self._host = host
     
     @property
+    def port(self):
+        """int: the port for this connection."""
+        try:
+            return self._port
+        except AttributeError:
+            return 6679
+    
+    @port.setter
+    def port(self, port):
+        self._port = port
+    
+    @property
+    def tls(self):
+        """bool: True if the connection uses TLS, otherwise False (default)."""
+        try:
+            return self._tls
+        except AttributeError:
+            return False
+    
+    @tls.setter
+    def tls(self, tls):
+        self._tls = tls
+    
+    @property
+    def password(self):
+        """str: any required password for this server."""
+        try:
+            return self._password
+        except AttributeError:
+            return ''
+    
+    @password.setter
+    def password(self, password):
+        self._password = password
+    
+    @property
     def name(self):
         """str: The name of this server (and its room)."""
-        return self.room.name
+        try:
+            return self.room.name
+        except AttributeError:
+            return self.host
     
     @name.setter
     def name(self, name):
         """This is actually tracked by the room."""
         self.room.name = name
     
+    async def do_connect(self):
+        """ Connect to the actual server."""
+        print(f'{self.app.nick} connecting {self.host}:{self.port} tls={self.tls}')
+        await self.client.connect(
+            self.host,
+            port=self.port,
+            tls=self.tls,
+            password=self.password
+        )
+        print('Connected!')
+    
     def connect(self):
         """ Connect to the server, disconnecting first if already connected. """
         if self.host is not "test":
-            pass
+            loop = asyncio.get_event_loop()
+            asyncio.run_coroutine_threadsafe(self.do_connect(), loop=loop)
     
     def join_room(self, room):
         """ Join a new room/channel, or start a new private message with a user.

@@ -21,7 +21,7 @@ class AdWindow(Gtk.Window):
     """ The main application window."""
 
     def __init__(self, app):
-        super()
+        super().__init__()
         self.servers = []
         self.app = app
         header = Headerbar()
@@ -129,12 +129,14 @@ class AdWindow(Gtk.Window):
     @property
     def nick(self):
         """str: The current user's nickname."""
-        return self.nick_button.get_label()
+        self.nick_button.set_label(self.app.nick)
+        return self.app.nick
     
     @nick.setter
     def nick(self, nick):
         """ We just store this on the nickname button for convenience."""
         self.nick_button.set_label(nick)
+        self.app.nick = nick
     
     def on_channel_button_clicked(self, button, data=None):
         """ clicked signal handler for channel button."""
@@ -184,17 +186,25 @@ class AdWindow(Gtk.Window):
         )
         self.show_all()
     
-    def add_server(self, server_name, host='test'):
+    def add_server(self, server_line):
         """ Adds a new server to the list.
         
         Arguments:
             server_name (str): The name for this server
             host (str): The hostname of this server, or 'test'
         """
-        new_server = Server()
-        new_server.host = host
-        new_server.name = server_name
+        server_list = server_line.split()
+        new_server = Server(self.app)
+        new_server.name = server_list[0]
+        new_server.host = server_list[1]
+        new_server.port = int(server_list[2])
+        if server_list[3] == 'tls':
+            new_server.tls = True
+        if 'password=' in server_list[-1]:
+            new_server.password = server_list[-1].split('=')[1]
+        
         self.servers.append(new_server)
+        new_server.connect()
         self.servers_listbox.add(new_server.room.row)
         self.message_stack.add_named(new_server.room.window, new_server.name)
         self.show_all()
