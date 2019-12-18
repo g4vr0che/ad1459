@@ -10,9 +10,14 @@
   spawn the GUI.
 """
 
+import asyncio
+import pydle
+import threading
+
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
+
 from .window import AdWindow
 
 class AdApplication(Gtk.Application):
@@ -26,6 +31,10 @@ class AdApplication(Gtk.Application):
         self.nick = "ad1459"
         self.username = 'ad1459'
         self.realname = 'AD1459 User'
+
+        irc = threading.Thread(target=asyncio.get_event_loop().run_forever)
+        irc.daemon = True
+        irc.start()
 
         Gtk.main()
 
