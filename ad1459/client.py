@@ -14,6 +14,10 @@ import asyncio
 
 class Client(pydle.Client):
 
+    def __init__(self, nick, server):
+        super().__init__(nick)
+        self.server = server
+
     async def on_message(self, target, source, message):
         await super().on_message(target, source, message)
         # update_label(
