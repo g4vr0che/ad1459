@@ -24,13 +24,15 @@ class AdApplication(Gtk.Application):
   """ The main application class."""
 
   def do_activate(self):
+
+        self.nick = "ad1459"
+        self.username = 'ad1459'
+        self.realname = 'AD1459 User'
+        
         self.window = AdWindow(self)
         self.window.set_default_size(1000,600)
         self.window.connect('delete-event', Gtk.main_quit)
         self.window.show_all()
-        self.nick = "ad1459"
-        self.username = 'ad1459'
-        self.realname = 'AD1459 User'
 
         irc = threading.Thread(target=asyncio.get_event_loop().run_forever)
         irc.daemon = True

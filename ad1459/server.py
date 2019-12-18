@@ -13,6 +13,7 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
+from .client import Client
 from .widgets.room_row import RoomRow
 from .widgets.message_row import MessageRow
 from .room import Room
@@ -27,7 +28,8 @@ class Server():
             messages.
     """
 
-    def __init__(self):
+    def __init__(self, app):
+        self.app = app
         self.rooms = []
         self.room = ServerRoom(self)
 

@@ -20,10 +20,10 @@ from .server import Server
 class AdWindow(Gtk.Window):
     """ The main application window."""
 
-    def __init__(self, client):
+    def __init__(self, app):
         super()
         self.servers = []
-        self.client = client
+        self.app = app
         header = Headerbar()
         self.set_titlebar(header)
 
