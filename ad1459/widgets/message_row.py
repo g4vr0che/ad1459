@@ -56,7 +56,7 @@ class MessageRow(Gtk.ListBoxRow):
         message_grid.attach(self.message_sender, 0, 0, 1, 1)
         self.message_text = Gtk.Label()
         self.message_text.set_selectable(True)
-        self.message_text.set_use_markup(True)
+        self.message_text.set_use_markup(False)
         self.message_text.props.halign = Gtk.Align.START
         self.message_text.set_line_wrap(True)
         self.message_text.set_hexpand(True)
