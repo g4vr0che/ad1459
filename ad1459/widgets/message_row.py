@@ -88,4 +88,4 @@ class MessageRow(Gtk.ListBoxRow):
     
     @text.setter
     def text(self, text):
-        self.message_text.set_markup(text)
+        self.message_text.set_text(text)
