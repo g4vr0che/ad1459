@@ -53,6 +53,9 @@ class AdWindow(Gtk.Window):
             b'.mine {'
             b'  background-color: alpha(@theme_selected_bg_color, 0.2);'
             b'}'
+            b'.highlight {'
+            b'    background-color: alpha(@success_color, 0.5);'
+            b'}'
         )
 
         screen = Gdk.Screen.get_default()
@@ -158,9 +161,11 @@ class AdWindow(Gtk.Window):
         """
         message_text = entry.get_text()
         room = self.get_active_room(room='current')
+        server = self.get_active_server()
         loop = asyncio.get_event_loop()
+        print(f'Sending message to {room.name} on {server.name}')
         asyncio.run_coroutine_threadsafe(
-            room.server.client.message(room.name, message_text),
+            server.client.message(room.name, message_text),
             loop=loop
         )
         # room.add_message(message_text, sender=self.nick, css='mine')

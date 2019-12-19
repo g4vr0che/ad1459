@@ -149,7 +149,12 @@ class Server():
     def add_message_to_room(self, channel, sender, message):
         room = self.app.window.get_active_room(room=channel)
         print(f'{room.name} | <{sender}> {message}')
-        room.add_message(message, sender=sender)
+        css = None
+        if sender == self.nick:
+            css = 'mine'
+        elif self.nick in message:
+            css = 'highlight'
+        room.add_message(message, sender=sender, css=css)
         if self.app.window.get_active_room() != room:
             print(f'Showing unread indicator for {room.name}')
             if self.nick in message:
