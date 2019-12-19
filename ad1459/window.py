@@ -164,7 +164,7 @@ class AdWindow(Gtk.Window):
             loop=loop
         )
         # room.add_message(message_text, sender=self.nick, css='mine')
-        self.show_all()
+        # self.show_all()
         entry.set_text('')
     
     def join_channel(self, channel_name, server='current'):
@@ -229,6 +229,7 @@ class AdWindow(Gtk.Window):
             row (:obj:`Gtk.ListBoxRow`): The row the user clicked on.
         """
         new_room = row.room_name
+        row.unread_indicator.set_visible(False)
         self.message_stack.set_visible_child_name(new_room)
         
     def populate_test_data(self):

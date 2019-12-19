@@ -63,6 +63,10 @@ class MessageRow(Gtk.ListBoxRow):
         self.message_text.props.xalign = 0
         message_grid.attach(self.message_text, 2, 0, 1, 2)
 
+        self.message_text.show()
+        self.message_time.show()
+        self.message_sender.show()
+
     @property
     def time(self):
         """str: The time the message was sent."""
@@ -88,4 +92,9 @@ class MessageRow(Gtk.ListBoxRow):
     
     @text.setter
     def text(self, text):
-        self.message_text.set_text(text)
+        text = text.replace('<', '\<')
+        text = text.replace('>', '\>')
+        self.message_text.set_markup(text)
+    
+    def show_all_contents(self):
+        self.show_all()

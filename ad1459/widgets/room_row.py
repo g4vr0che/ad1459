@@ -51,10 +51,18 @@ class RoomRow(Gtk.ListBoxRow):
         self.server = server
 
         room_grid = Gtk.Grid()
+        room_grid.set_column_spacing(6)
         self.add(room_grid)
 
         self.room_label = Gtk.Label()
         room_grid.attach(self.room_label, 0, 0, 1, 1)
+        
+        self.unread_indicator = Gtk.Image.new_from_icon_name(
+            'starred-symbolic',
+            Gtk.IconSize.SMALL_TOOLBAR
+        )
+        self.unread_indicator.set_visible(False)
+        room_grid.attach(self.unread_indicator, 1, 0, 1, 1)
 
         self.kind = kind
         self.room = room

@@ -150,7 +150,9 @@ class Server():
         room = self.app.window.get_active_room(room=channel)
         print(f'{room.name} | <{sender}> {message}')
         room.add_message(message, sender=sender)
-        self.app.window.show_all()
+        if self.app.window.get_active_room() != room:
+            print(f'Showing unread indicator for {room.name}')
+            room.row.unread_indicator.set_visible(True)
 
     
     """ METHODS CALLED FROM ASYNCIO/PYDLE """

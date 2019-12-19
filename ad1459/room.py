@@ -123,9 +123,9 @@ class Room():
             new_message.sender = sender
         
         new_message.text = message
-
+        
+        new_message.show_all_contents()
         self.messages.add(new_message)
-        self.window.show_all()
 
     def populate_test_data(self):
         
