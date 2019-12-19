@@ -150,6 +150,7 @@ class Server():
         room = self.app.window.get_active_room(room=channel)
         print(f'{room.name} | <{sender}> {message}')
         room.add_message(message, sender=sender)
+        self.app.window.show_all()
 
     
     """ METHODS CALLED FROM ASYNCIO/PYDLE """

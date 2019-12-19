@@ -9,6 +9,8 @@
   This file is the application window.
 """
 
+import asyncio
+
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
@@ -156,7 +158,12 @@ class AdWindow(Gtk.Window):
         """
         message_text = entry.get_text()
         room = self.get_active_room(room='current')
-        room.add_message(message_text, sender=self.nick, css='mine')
+        loop = asyncio.get_event_loop()
+        asyncio.run_coroutine_threadsafe(
+            room.server.client.message(room.name, message_text),
+            loop=loop
+        )
+        # room.add_message(message_text, sender=self.nick, css='mine')
         self.show_all()
         entry.set_text('')
     
