@@ -9,6 +9,8 @@
   This file is the application window.
 """
 
+import asyncio
+
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
@@ -20,10 +22,10 @@ from .server import Server
 class AdWindow(Gtk.Window):
     """ The main application window."""
 
-    def __init__(self, client):
-        super()
+    def __init__(self, app):
+        super().__init__()
         self.servers = []
-        self.client = client
+        self.app = app
         header = Headerbar()
         self.set_titlebar(header)
 
@@ -126,16 +128,6 @@ class AdWindow(Gtk.Window):
 
         # self.populate_test_data()
     
-    @property
-    def nick(self):
-        """str: The current user's nickname."""
-        return self.nick_button.get_label()
-    
-    @nick.setter
-    def nick(self, nick):
-        """ We just store this on the nickname button for convenience."""
-        self.nick_button.set_label(nick)
-    
     def on_channel_button_clicked(self, button, data=None):
         """ clicked signal handler for channel button."""
         self.join_channel(self.message_entry.get_text())
@@ -165,47 +157,69 @@ class AdWindow(Gtk.Window):
             entry (:obj:`Gtk.Entry`): The chat entry with the message.
         """
         message_text = entry.get_text()
-        room = self.get_active_room()
-        room.add_message(message_text, sender=self.nick, css='mine')
+        room = self.get_active_room(room='current')
+        loop = asyncio.get_event_loop()
+        asyncio.run_coroutine_threadsafe(
+            room.server.client.message(room.name, message_text),
+            loop=loop
+        )
+        # room.add_message(message_text, sender=self.nick, css='mine')
         self.show_all()
         entry.set_text('')
     
-    def join_channel(self, channel_name):
+    def join_channel(self, channel_name, server='current'):
         """ Joins a channel on the current server.
         
         Arguments:
             channel_name (str): The name of the channel to join.
         """
-        current_server = self.get_active_server()
-        current_server.join_room(self.message_entry.get_text())
+        print(f'Joining {channel_name}...')
+        current_server = self.get_active_server(server)
+        current_server.join_room(channel_name)
         self.servers_listbox.add(current_server.rooms[-1].row)
         self.message_stack.add_named(
             current_server.rooms[-1].window, current_server.rooms[-1].name
         )
         self.show_all()
     
-    def add_server(self, server_name, host='test'):
+    def add_server(self, server_line):
         """ Adds a new server to the list.
         
         Arguments:
             server_name (str): The name for this server
             host (str): The hostname of this server, or 'test'
         """
-        new_server = Server()
-        new_server.host = host
-        new_server.name = server_name
+        # Format is servername host port nick (tls) (password=(password))
+        server_list = server_line.split()
+        new_server = Server(self.app, server_list[3])
+        new_server.name = server_list[0]
+        new_server.host = server_list[1]
+        new_server.port = int(server_list[2])
+        if server_list[4] == 'tls':
+            new_server.tls = True
+        if 'password=' in server_list[-1]:
+            new_server.password = server_list[-1].split('=')[1]
+        
         self.servers.append(new_server)
+        new_server.connect()
         self.servers_listbox.add(new_server.room.row)
         self.message_stack.add_named(new_server.room.window, new_server.name)
         self.show_all()
 
-    def get_active_room(self):
+    def get_active_room(self, room='current'):
         """ Gets the currently active room object. """
-        return self.message_stack.get_visible_child().room
+        print(f'Getting room for {room}')
+        if room == 'current':
+            return self.message_stack.get_visible_child().room
+        else:
+            return self.message_stack.get_child_by_name(room).room
     
-    def get_active_server(self):
+    def get_active_server(self, server='current'):
         """ Gets the server object for the currently active room."""
-        return self.message_stack.get_visible_child().server
+        if server == 'current':
+            return self.message_stack.get_visible_child().server
+        else:
+            return self.message_stack.get_child_by_name(server).server
     
     def on_server_selected(self, listbox, row):
         """ row-selected signal handler for server_listbox.

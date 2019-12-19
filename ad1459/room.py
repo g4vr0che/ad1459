@@ -18,6 +18,12 @@ from gi.repository import Gtk
 from .widgets.message_row import MessageRow
 from .widgets.room_row import RoomRow
 
+class RoomWindow(Gtk.ScrolledWindow):
+
+    def __init__(self, room):
+        super().__init__()
+        self.room = room
+
 class Room():
     """ The class to represent a room.
 
@@ -30,7 +36,7 @@ class Room():
     def __init__(self, server):
         self.server = server
         
-        self.window = Gtk.ScrolledWindow()
+        self.window = RoomWindow(self)
         self.window.set_vexpand(True)
         self.window.set_hexpand(True)
         self.window.server = self.server
@@ -119,6 +125,7 @@ class Room():
         new_message.text = message
 
         self.messages.add(new_message)
+        self.window.show_all()
 
     def populate_test_data(self):
         
