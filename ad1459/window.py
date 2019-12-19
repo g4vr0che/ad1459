@@ -126,18 +126,6 @@ class AdWindow(Gtk.Window):
 
         # self.populate_test_data()
     
-    @property
-    def nick(self):
-        """str: The current user's nickname."""
-        self.nick_button.set_label(self.app.nick)
-        return self.app.nick
-    
-    @nick.setter
-    def nick(self, nick):
-        """ We just store this on the nickname button for convenience."""
-        self.nick_button.set_label(nick)
-        self.app.nick = nick
-    
     def on_channel_button_clicked(self, button, data=None):
         """ clicked signal handler for channel button."""
         self.join_channel(self.message_entry.get_text())
@@ -194,12 +182,13 @@ class AdWindow(Gtk.Window):
             server_name (str): The name for this server
             host (str): The hostname of this server, or 'test'
         """
+        # Format is servername host port nick (tls) (password=(password))
         server_list = server_line.split()
-        new_server = Server(self.app)
+        new_server = Server(self.app, server_list[3])
         new_server.name = server_list[0]
         new_server.host = server_list[1]
         new_server.port = int(server_list[2])
-        if server_list[3] == 'tls':
+        if server_list[4] == 'tls':
             new_server.tls = True
         if 'password=' in server_list[-1]:
             new_server.password = server_list[-1].split('=')[1]

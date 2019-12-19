@@ -32,11 +32,21 @@ class Server():
             messages.
     """
 
-    def __init__(self, app):
+    def __init__(self, app, nick):
         self.app = app
+        self.nick = nick
         self.rooms = []
         self.room = ServerRoom(self)
-        self.client = Client(self.app.nick, self)
+        self.client = Client(self.nick, self)
+    
+    @property
+    def nick(self):
+        """str: the user's nickname for this server."""
+        return self._nick
+    
+    @nick.setter
+    def nick(self, nick):
+        self._nick = nick
 
     @property
     def host(self):
@@ -143,6 +153,10 @@ class Server():
 
     
     """ METHODS CALLED FROM ASYNCIO/PYDLE """
+
+    def on_own_nick_change(self, new_nick):
+        self.nick = new_nick
+        GLib.idle_add(self.app.window.nick_button.set_label, new_nick)
 
     def on_rcvd_message(self, channel, sender, message):
         GLib.idle_add(self.add_message_to_room, channel, sender, message)
