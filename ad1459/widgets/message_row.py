@@ -92,9 +92,7 @@ class MessageRow(Gtk.ListBoxRow):
     
     @text.setter
     def text(self, text):
-        text = text.replace('<', '\<')
-        text = text.replace('>', '\>')
-        self.message_text.set_markup(text)
+        self.message_text.set_text(text)
     
     def show_all_contents(self):
         self.show_all()

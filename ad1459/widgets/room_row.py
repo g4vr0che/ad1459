@@ -58,10 +58,9 @@ class RoomRow(Gtk.ListBoxRow):
         room_grid.attach(self.room_label, 0, 0, 1, 1)
         
         self.unread_indicator = Gtk.Image.new_from_icon_name(
-            'starred-symbolic',
+            'mail-read-symbolic',
             Gtk.IconSize.SMALL_TOOLBAR
         )
-        self.unread_indicator.set_visible(False)
         room_grid.attach(self.unread_indicator, 1, 0, 1, 1)
 
         self.kind = kind

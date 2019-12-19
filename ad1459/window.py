@@ -229,7 +229,10 @@ class AdWindow(Gtk.Window):
             row (:obj:`Gtk.ListBoxRow`): The row the user clicked on.
         """
         new_room = row.room_name
-        row.unread_indicator.set_visible(False)
+        row.unread_indicator.set_from_icon_name(
+            'mail-read-symbolic',
+            Gtk.IconSize.SMALL_TOOLBAR
+        )
         self.message_stack.set_visible_child_name(new_room)
         
     def populate_test_data(self):

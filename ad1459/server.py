@@ -152,7 +152,16 @@ class Server():
         room.add_message(message, sender=sender)
         if self.app.window.get_active_room() != room:
             print(f'Showing unread indicator for {room.name}')
-            room.row.unread_indicator.set_visible(True)
+            if self.nick in message:
+                room.row.unread_indicator.set_from_icon_name(
+                    'dialog-information-symbolic',
+                    Gtk.IconSize.SMALL_TOOLBAR
+                )
+            else:
+                room.row.unread_indicator.set_from_icon_name(
+                    'mail-unread-symbolic',
+                    Gtk.IconSize.SMALL_TOOLBAR
+                )
 
     
     """ METHODS CALLED FROM ASYNCIO/PYDLE """
