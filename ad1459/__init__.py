@@ -11,6 +11,7 @@
 """
 
 import asyncio
+import logging
 import pydle
 import threading
 

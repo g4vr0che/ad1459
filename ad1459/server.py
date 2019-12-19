@@ -11,10 +11,11 @@
 
 import asyncio
 import pydle
+import time
 
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 from .client import Client
 from .widgets.room_row import RoomRow
@@ -120,6 +121,7 @@ class Server():
         """
         new_room = Room(self)
         new_room.name = room
+        new_room.window.name = room
         self.rooms.append(new_room)
     
     def get_room_for_index(self, index):
@@ -133,6 +135,20 @@ class Server():
             :obj:`Room`: The room at the given index.
         """
         return self.rooms[index]
+    
+    def add_message_to_room(self, channel, sender, message):
+        room = self.app.window.get_active_room(room=channel)
+        print(f'{room.name} | <{sender}> {message}')
+        room.add_message(message, sender=sender)
+
+    
+    """ METHODS CALLED FROM ASYNCIO/PYDLE """
+
+    def on_rcvd_message(self, channel, sender, message):
+        GLib.idle_add(self.add_message_to_room, channel, sender, message)
+    
+    def on_join_channel(self, channel):
+        GLib.idle_add(self.app.window.join_channel, channel, server=self.name)
 
 class ServerRoom(Room):
     """ A special Room class for the server message buffer/room. """

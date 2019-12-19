@@ -167,19 +167,20 @@ class AdWindow(Gtk.Window):
             entry (:obj:`Gtk.Entry`): The chat entry with the message.
         """
         message_text = entry.get_text()
-        room = self.get_active_room()
+        room = self.get_active_room(room='current')
         room.add_message(message_text, sender=self.nick, css='mine')
         self.show_all()
         entry.set_text('')
     
-    def join_channel(self, channel_name):
+    def join_channel(self, channel_name, server='current'):
         """ Joins a channel on the current server.
         
         Arguments:
             channel_name (str): The name of the channel to join.
         """
-        current_server = self.get_active_server()
-        current_server.join_room(self.message_entry.get_text())
+        print(f'Joining {channel_name}...')
+        current_server = self.get_active_server(server)
+        current_server.join_room(channel_name)
         self.servers_listbox.add(current_server.rooms[-1].row)
         self.message_stack.add_named(
             current_server.rooms[-1].window, current_server.rooms[-1].name
@@ -209,13 +210,20 @@ class AdWindow(Gtk.Window):
         self.message_stack.add_named(new_server.room.window, new_server.name)
         self.show_all()
 
-    def get_active_room(self):
+    def get_active_room(self, room='current'):
         """ Gets the currently active room object. """
-        return self.message_stack.get_visible_child().room
+        print(f'Getting room for {room}')
+        if room == 'current':
+            return self.message_stack.get_visible_child().room
+        else:
+            return self.message_stack.get_child_by_name(room).room
     
-    def get_active_server(self):
+    def get_active_server(self, server='current'):
         """ Gets the server object for the currently active room."""
-        return self.message_stack.get_visible_child().server
+        if server == 'current':
+            return self.message_stack.get_visible_child().server
+        else:
+            return self.message_stack.get_child_by_name(server).server
     
     def on_server_selected(self, listbox, row):
         """ row-selected signal handler for server_listbox.
