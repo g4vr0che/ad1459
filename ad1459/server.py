@@ -124,7 +124,6 @@ class Server():
     
     async def do_connect(self):
         """ Connect to the actual server."""
-        print(f'{self.nick} connecting {self.host}:{self.port} via {self.auth}, tls={self.tls}')
         if self.auth == 'pass':
             await self.client.connect(
                 self.host,
@@ -179,25 +178,22 @@ class Server():
     
     def add_message_to_room(self, channel, sender, message):
         room = self.app.window.get_active_room(room=channel)
-        print(f'{room.name} | <{sender}> {message}')
         css = None
         skip = False
         
-        if sender == self.nick:
+        if sender == (self.nick or '*'):
             messages = room.messages.get_children()
             for each in messages:
                 mtext = each.message_text.get_text()
                 mtime = each.message_time.get_text()
                 ctime = time.ctime().split()[3]
-                print(f'{ctime} vs {mtime}')
-                if message == mtext and ctime == mtime:
+                if (message or f'{self.nick} {message}') == mtext and ctime == mtime:
                     skip = True
         elif self.nick in message:
             css = 'highlight'
         if not skip:
             room.add_message(message, sender=sender, css=css)
             if self.app.window.get_active_room() != room:
-                print(f'Showing unread indicator for {room.name}')
                 if self.nick in message:
                     room.row.unread_indicator.set_from_icon_name(
                         'dialog-information-symbolic',
@@ -220,7 +216,8 @@ class Server():
         GLib.idle_add(self.add_message_to_room, channel, sender, message)
     
     def on_join_channel(self, channel):
-        GLib.idle_add(self.app.window.join_channel, channel, server=self.name)
+        print(f'219: joining {channel} on {self.name}')
+        GLib.idle_add(self.app.window.join_channel, channel, self.name)
 
 class ServerRoom(Room):
     """ A special Room class for the server message buffer/room. """

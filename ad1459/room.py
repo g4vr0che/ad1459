@@ -65,6 +65,9 @@ class Room():
     def name(self, name):
         self.row.room_name = name
     
+    def print_info(self):
+        print(f'{self.name}, {self.server}')
+    
     def on_new_message_scroll(self, window, data=None):
         """ size-allocate signal handler for self.messages."""
         max_value = self.adj.get_upper() - self.adj.get_page_size()

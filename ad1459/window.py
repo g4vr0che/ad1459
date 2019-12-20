@@ -195,14 +195,13 @@ class AdWindow(Gtk.Window):
         """
         message_text = entry.get_text()
         room = self.get_active_room(room='current')
-        server = self.get_active_server()
+        server = room.server
         loop = asyncio.get_event_loop()
         for command in self.commands:
             if command in message_text:
                 self.commands[command](message_text, room)
                 pass
             else:
-                print(f'Sending message to {room.name} on {server.name}')
                 asyncio.run_coroutine_threadsafe(
                     server.client.message(room.name, message_text),
                     loop=loop
@@ -231,8 +230,8 @@ class AdWindow(Gtk.Window):
         Arguments:
             channel_name (str): The name of the channel to join.
         """
-        print(f'Joining {channel_name}...')
-        current_server = self.get_active_server(server)
+        print(f'233: joining {channel_name} on {server}')
+        current_server = self.get_active_server(server=server)
         current_server.join_room(channel_name)
         self.servers_listbox.add(current_server.rooms[-1].row)
         self.message_stack.add_named(
@@ -249,7 +248,6 @@ class AdWindow(Gtk.Window):
         """
         # new: none|pass|sasl servername host port username (tls) (password)
         server_list = server_line.split()
-        print(f'line: {server_line}\nlist: {server_list}')
         if server_list[0] == 'sasl':
             new_server = Server(
                 self.app, 
@@ -282,7 +280,6 @@ class AdWindow(Gtk.Window):
 
     def get_active_room(self, room='current'):
         """ Gets the currently active room object. """
-        print(f'Getting room for {room}')
         if room == 'current':
             return self.message_stack.get_visible_child().room
         else:
@@ -291,9 +288,9 @@ class AdWindow(Gtk.Window):
     def get_active_server(self, server='current'):
         """ Gets the server object for the currently active room."""
         if server == 'current':
-            return self.message_stack.get_visible_child().server
+            return self.get_active_room().server
         else:
-            return self.message_stack.get_child_by_name(server).server
+            return self.message_stack.get_child_by_name(server).room.server
     
     def on_server_selected(self, listbox, row):
         """ row-selected signal handler for server_listbox.
@@ -302,12 +299,13 @@ class AdWindow(Gtk.Window):
             listbox (:obj:`Gtk.ListBox`): The server_listbox
             row (:obj:`Gtk.ListBoxRow`): The row the user clicked on.
         """
-        new_room = row.room_name
+        new_room = row.room
         row.unread_indicator.set_from_icon_name(
             'mail-read-symbolic',
             Gtk.IconSize.SMALL_TOOLBAR
         )
-        self.message_stack.set_visible_child_name(new_room)
+        print(f'New room: {row.room.name} on server {row.room.server.name}')
+        self.message_stack.set_visible_child_name(new_room.name)
     
     """ Commands parsed by the client."""
 
