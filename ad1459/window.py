@@ -36,6 +36,24 @@ class AdWindow(Gtk.Window):
         server_button.connect('clicked', self.on_server_button_clicked)
         header.pack_start(server_button)
 
+        self.server_popup = Gtk.Popover()
+        server_popup_grid = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        Gtk.StyleContext.add_class(server_popup_grid.get_style_context(), 'linked')
+        server_popup_grid.props.margin = 6
+        self.server_popup.add(server_popup_grid)
+
+        server_entry = Gtk.Entry()
+        server_entry.set_placeholder_text('Enter a server to connect to')
+        server_entry.set_width_chars(80)
+        server_popup_grid.pack_start(server_entry, False, True, 0)
+        server_entry.connect('activate', self.on_server_connect_clicked, server_entry)
+
+        server_connect = Gtk.Button()
+        server_connect.set_label('Connect')
+        Gtk.StyleContext.add_class(server_connect.get_style_context(), 'suggested-action')
+        server_connect.connect('clicked', self.on_server_connect_clicked, server_entry)
+        server_popup_grid.pack_end(server_connect, False, True, 0)
+
         channel_button = Gtk.Button.new_from_icon_name(
             'list-add-symbolic',
             Gtk.IconSize.BUTTON
@@ -143,9 +161,16 @@ class AdWindow(Gtk.Window):
         self.message_entry.set_text('')
     
     def on_server_button_clicked(self, button, data=None):
+        """ clicked signal handler for server button."""
+        self.server_popup.set_relative_to(button)
+        self.server_popup.show_all()
+        self.server_popup.popup()
+    
+    def on_server_connect_clicked(self, button, entry, data=None):
         """ clicked signal handler for the server button."""
-        self.add_server(self.message_entry.get_text())
-        self.message_entry.set_text('')
+        self.add_server(entry.get_text())
+        entry.set_text('')
+        self.server_popup.popdown()
     
     def on_nick_button_clicked(self, button, entry):
         """ clicked signal handler for nickname button.
