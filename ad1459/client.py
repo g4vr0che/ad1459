@@ -45,4 +45,3 @@ class Client(pydle.Client):
         print(f'action: by={by}, target={target}, contents={contents}')
         message = f'{by} {contents}'
         self.server.on_rcvd_message(target, '*', message)
-        await super().on_ctcp_action(by, target, contents)
