@@ -23,6 +23,9 @@ class AdWindow(Gtk.Window):
     """ The main application window."""
 
     def __init__(self, app):
+        self.commands = {
+            '/me': self.send_action
+        }
         super().__init__()
         self.servers = []
         self.app = app
@@ -194,12 +197,17 @@ class AdWindow(Gtk.Window):
         room = self.get_active_room(room='current')
         server = self.get_active_server()
         loop = asyncio.get_event_loop()
-        print(f'Sending message to {room.name} on {server.name}')
-        asyncio.run_coroutine_threadsafe(
-            server.client.message(room.name, message_text),
-            loop=loop
-        )
-        room.add_message(message_text, sender=server.nick, css='mine')
+        for command in self.commands:
+            if command in message_text:
+                self.commands[command](message_text, room)
+                pass
+            else:
+                print(f'Sending message to {room.name} on {server.name}')
+                asyncio.run_coroutine_threadsafe(
+                    server.client.message(room.name, message_text),
+                    loop=loop
+                )
+                room.add_message(message_text, sender=server.nick, css='mine')
         self.show_all()
         entry.set_text('')
     
@@ -300,6 +308,25 @@ class AdWindow(Gtk.Window):
             Gtk.IconSize.SMALL_TOOLBAR
         )
         self.message_stack.set_visible_child_name(new_room)
+    
+    """ Commands parsed by the client."""
+
+    def send_action(self, message, target):
+        """ the IRC /me command; CTCP ACTION
+        
+        Arguments:
+            message (str): The action to do.
+            target (str): Where to send the action.
+        """
+        message = message.replace('/me', '', 1).strip()
+        server = self.get_active_server()
+        loop = asyncio.get_event_loop()
+        asyncio.run_coroutine_threadsafe(
+            server.client.ctcp(target.name, 'ACTION', message),
+            loop=loop
+        )
+        target.add_message(f'{server.nick} {message}', css='mine')
+
         
     def populate_test_data(self):
         """ Currently empty, but allows quick population of data for 

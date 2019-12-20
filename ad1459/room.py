@@ -106,6 +106,8 @@ class Room():
             css (str): A CSS class to add to this message.
         """
         new_message = MessageRow()
+        if sender == self.server.nick:
+            css = 'mine'
 
         if css:
             Gtk.StyleContext.add_class(

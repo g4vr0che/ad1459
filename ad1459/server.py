@@ -182,8 +182,16 @@ class Server():
         print(f'{room.name} | <{sender}> {message}')
         css = None
         skip = False
+        
         if sender == self.nick:
-            skip = True
+            messages = room.messages.get_children()
+            for each in messages:
+                mtext = each.message_text.get_text()
+                mtime = each.message_time.get_text()
+                ctime = time.ctime().split()[3]
+                print(f'{ctime} vs {mtime}')
+                if message == mtext and ctime == mtime:
+                    skip = True
         elif self.nick in message:
             css = 'highlight'
         if not skip:

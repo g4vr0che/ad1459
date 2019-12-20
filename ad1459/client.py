@@ -40,4 +40,9 @@ class Client(pydle.Client):
     async def on_message(self, target, source, message):
         self.server.on_rcvd_message(target, source, message)
         await super().on_message(target, source, message)
-        
+    
+    async def on_ctcp_action(self, by, target, contents):
+        print(f'action: by={by}, target={target}, contents={contents}')
+        message = f'{by} {contents}'
+        self.server.on_rcvd_message(target, '*', message)
+        await super().on_ctcp_action(by, target, contents)
