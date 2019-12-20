@@ -133,7 +133,13 @@ class AdWindow(Gtk.Window):
     
     def on_channel_button_clicked(self, button, data=None):
         """ clicked signal handler for channel button."""
-        self.join_channel(self.message_entry.get_text())
+        new_channel = self.message_entry.get_text()
+        server = self.get_active_server()
+        loop = asyncio.get_event_loop()
+        asyncio.run_coroutine_threadsafe(
+            server.client.join(new_channel),
+            loop=loop
+        )
         self.message_entry.set_text('')
     
     def on_server_button_clicked(self, button, data=None):
@@ -149,7 +155,7 @@ class AdWindow(Gtk.Window):
             entry (:obj:`Gtk.Entry`): The chat entry with the new nickname.
         """
         new_nick = entry.get_text()
-        self.nick = new_nick
+        self.change_nick(new_nick)
         entry.set_text('')
     
     def on_send_button_clicked(self, button, entry):
@@ -168,9 +174,23 @@ class AdWindow(Gtk.Window):
             server.client.message(room.name, message_text),
             loop=loop
         )
-        # room.add_message(message_text, sender=self.nick, css='mine')
-        # self.show_all()
+        room.add_message(message_text, sender=server.nick, css='mine')
+        self.show_all()
         entry.set_text('')
+    
+    def change_nick(self, new_nick):
+        server = self.get_active_server()
+        server.nick = new_nick
+        loop = asyncio.get_event_loop()
+        server = self.get_active_server()
+        asyncio.run_coroutine_threadsafe(
+            server.client.set_nickname(new_nick),
+            loop=loop
+        )
+        self.set_nick(new_nick)
+    
+    def set_nick(self, new_nick):
+        self.nick_button.set_label(new_nick)
     
     def join_channel(self, channel_name, server='current'):
         """ Joins a channel on the current server.
@@ -194,22 +214,38 @@ class AdWindow(Gtk.Window):
             server_name (str): The name for this server
             host (str): The hostname of this server, or 'test'
         """
-        # Format is servername host port nick (tls) (password=(password))
+        # new: none|pass|sasl servername host port username (tls) (password)
         server_list = server_line.split()
-        new_server = Server(self.app, server_list[3])
-        new_server.name = server_list[0]
-        new_server.host = server_list[1]
-        new_server.port = int(server_list[2])
-        if server_list[4] == 'tls':
-            new_server.tls = True
-        if 'password=' in server_list[-1]:
-            new_server.password = server_list[-1].split('=')[1]
+        print(f'line: {server_line}\nlist: {server_list}')
+        if server_list[0] == 'sasl':
+            new_server = Server(
+                self.app, 
+                server_list[4],
+                sasl_u=server_list[4],
+                sasl_p=server_list[-1]
+            )
+        else:
+            new_server = Server(self.app, server_list[4])
+
+        new_server.auth = server_list[0]
+        new_server.name = server_list[1]
+        new_server.host = server_list[2]
+        new_server.port = int(server_list[3])
+        new_server.nick = server_list[4]
+        if new_server.auth == ('pass' or 'sasl'):
+            new_server.password = server_list[-1]
+        try:
+            if server_list[5] == 'tls':
+                new_server.tls = True
+        except AttributeError:
+            new_server.tls = False
         
         self.servers.append(new_server)
         new_server.connect()
         self.servers_listbox.add(new_server.room.row)
         self.message_stack.add_named(new_server.room.window, new_server.name)
         self.show_all()
+        self.set_nick(new_server.nick)
 
     def get_active_room(self, room='current'):
         """ Gets the currently active room object. """

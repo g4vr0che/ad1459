@@ -15,8 +15,8 @@ import time
 
 class Client(pydle.Client):
 
-    def __init__(self, nick, server):
-        super().__init__(nick)
+    def __init__(self, nick, server, sasl_username=None, sasl_password=None, **kwargs):
+        super().__init__(nick, sasl_username=sasl_username, sasl_password=sasl_password, **kwargs)
         self.server = server
     
     async def on_raw(self, message):
@@ -26,6 +26,7 @@ class Client(pydle.Client):
     
     async def on_nick_change(self, old, new):
         if old == self.server.nick:
+            print(f'changing my nick from {old} to {new}')
             self.server.on_own_nick_change(new)
         await super().on_nick_change(old, new)
     

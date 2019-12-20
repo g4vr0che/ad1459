@@ -32,12 +32,17 @@ class Server():
             messages.
     """
 
-    def __init__(self, app, nick):
+    def __init__(self, app, nick, sasl_u=None, sasl_p=None):
+        self.sasl_u = sasl_u
+        self.sasl_p = sasl_p
         self.app = app
         self.nick = nick
         self.rooms = []
         self.room = ServerRoom(self)
-        self.client = Client(self.nick, self)
+        if sasl_p:
+            self.client = Client(self.nick, self, sasl_password=sasl_p, sasl_username=sasl_u)
+        else:
+            self.client = Client(self.nick, self)
     
     @property
     def nick(self):
@@ -94,6 +99,17 @@ class Server():
         self._password = password
     
     @property
+    def auth(self):
+        """str: The authentication method, none, sasl, or pass"""
+        try:
+            return self._auth
+        except AttributeError:
+            return 'none'
+    @auth.setter
+    def auth(self, mode):
+        self._auth = mode
+    
+    @property
     def name(self):
         """str: The name of this server (and its room)."""
         try:
@@ -108,13 +124,28 @@ class Server():
     
     async def do_connect(self):
         """ Connect to the actual server."""
-        print(f'{self.app.nick} connecting {self.host}:{self.port} tls={self.tls}')
-        await self.client.connect(
-            self.host,
-            port=self.port,
-            tls=self.tls,
-            password=self.password
-        )
+        print(f'{self.nick} connecting {self.host}:{self.port} via {self.auth}, tls={self.tls}')
+        if self.auth == 'pass':
+            await self.client.connect(
+                self.host,
+                port=self.port,
+                tls=self.tls,
+                password=self.password
+            )
+        # elif self.auth == 'sasl':
+        #     await self.client.connect(
+        #         self.host,
+        #         port=self.port,
+        #         tls=self.tls,
+        #         sasl_password=self.sasl_p,
+        #         sasl_username=self.sasl_u
+        #     )
+        else:
+            await self.client.connect(
+                self.host,
+                port=self.port,
+                tls=self.tls
+            )
         print('Connected!')
     
     def connect(self):
@@ -150,30 +181,32 @@ class Server():
         room = self.app.window.get_active_room(room=channel)
         print(f'{room.name} | <{sender}> {message}')
         css = None
+        skip = False
         if sender == self.nick:
-            css = 'mine'
+            skip = True
         elif self.nick in message:
             css = 'highlight'
-        room.add_message(message, sender=sender, css=css)
-        if self.app.window.get_active_room() != room:
-            print(f'Showing unread indicator for {room.name}')
-            if self.nick in message:
-                room.row.unread_indicator.set_from_icon_name(
-                    'dialog-information-symbolic',
-                    Gtk.IconSize.SMALL_TOOLBAR
-                )
-            else:
-                room.row.unread_indicator.set_from_icon_name(
-                    'mail-unread-symbolic',
-                    Gtk.IconSize.SMALL_TOOLBAR
-                )
+        if not skip:
+            room.add_message(message, sender=sender, css=css)
+            if self.app.window.get_active_room() != room:
+                print(f'Showing unread indicator for {room.name}')
+                if self.nick in message:
+                    room.row.unread_indicator.set_from_icon_name(
+                        'dialog-information-symbolic',
+                        Gtk.IconSize.SMALL_TOOLBAR
+                    )
+                else:
+                    room.row.unread_indicator.set_from_icon_name(
+                        'mail-unread-symbolic',
+                        Gtk.IconSize.SMALL_TOOLBAR
+                    )
 
     
     """ METHODS CALLED FROM ASYNCIO/PYDLE """
 
     def on_own_nick_change(self, new_nick):
         self.nick = new_nick
-        GLib.idle_add(self.app.window.nick_button.set_label, new_nick)
+        GLib.idle_add(self.app.window.change_nick, new_nick)
 
     def on_rcvd_message(self, channel, sender, message):
         GLib.idle_add(self.add_message_to_room, channel, sender, message)
