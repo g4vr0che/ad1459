@@ -11,7 +11,7 @@
 
 from setuptools import setup, find_packages
 
-VERSION = '0.0.0'
+VERSION = '0.0.1'
 
 setup(
     name='ad1459',
@@ -20,7 +20,10 @@ setup(
     scripts=['ad1459/ad1459'],
 
     # Dependencies
-    # install_requires=['twisted'],
+    install_requires=[
+      'pydle',
+      'pure-sasl'
+    ],
 
     # Project Metadata
     author='Gaven Royer',
