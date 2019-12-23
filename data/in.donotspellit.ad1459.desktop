@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=0.0.1
+Type=Application
+Exec=ad1459
+Icon=internet-chat
+StartupNotify=true
+Terminal=false
+Categories=Internet
+Name=AD1459 
+Comment=AD1459 IRC Client

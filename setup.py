@@ -25,6 +25,10 @@ setup(
       'pure-sasl'
     ],
 
+    data_files=[
+      ('/usr/share/applications', ['data/in.donotspellit.ad1459.desktop']),
+    ],
+
     # Project Metadata
     author='Gaven Royer',
     author_email='gavroyer@gmail.com',
