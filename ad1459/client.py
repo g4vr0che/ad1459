@@ -16,10 +16,10 @@ import time
 
 class Client(pydle.Client):
 
-    def __init__(self, nick, server, sasl_username=None, sasl_password=None, **kwargs):
+    def __init__(self, nick, network, sasl_username=None, sasl_password=None, **kwargs):
         self.log = logging.getLogger('ad1459.client')
         super().__init__(nick, sasl_username=sasl_username, sasl_password=sasl_password, **kwargs)
-        self.server = server
+        self.server = network
         self.log.debug('Created client for server %s', self.server.name)
     
     # async def connect(self, hostname=None, password=None, **kwargs):
