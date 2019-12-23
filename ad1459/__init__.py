@@ -25,6 +25,14 @@ class AdApplication(Gtk.Application):
   """ The main application class."""
 
   def do_activate(self):
+        print('Setting up logging')
+        log = logging.getLogger('ad1459')
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+        handler.setFormatter(formatter)
+        log.addHandler(handler)
+        log.setLevel(logging.DEBUG)
+        log.debug('Initializing application')
 
         self.nick = "ad1459"
         self.username = 'ad1459'
@@ -35,10 +43,12 @@ class AdApplication(Gtk.Application):
         self.window.connect('delete-event', Gtk.main_quit)
         self.window.show_all()
 
+        log.debug('Initializing IRC thread')
         irc = threading.Thread(target=asyncio.get_event_loop().run_forever)
         irc.daemon = True
         irc.start()
 
+        log.debug('Starting GTK Main Loop')
         Gtk.main()
 
 app = AdApplication()

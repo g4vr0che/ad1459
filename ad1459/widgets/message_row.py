@@ -22,7 +22,7 @@ class MessageRow(Gtk.ListBoxRow):
 
     Attributes:
         time (str): The time the message was sent.
-        sender (str): The user/server who sent the message. "*" by default.
+        sender (str): The user/network who sent the message. "*" by default.
         text (str): The text of the message.
     """
 
@@ -78,7 +78,7 @@ class MessageRow(Gtk.ListBoxRow):
     
     @property
     def sender(self):
-        """ The sender of the message, or * for none/server. """
+        """ The sender of the message, or * for none/network. """
         return self.message_sender.get_text()
     
     @sender.setter

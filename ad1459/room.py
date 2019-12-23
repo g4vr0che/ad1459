@@ -9,6 +9,7 @@
   Handling for rooms and their messages.
 """
 
+import logging
 import time
 
 import gi
@@ -33,13 +34,14 @@ class Room():
         row (:obj:`RoomRow`): The row object for this room in the room list.
     """
 
-    def __init__(self, server):
-        self.server = server
+    def __init__(self, network):
+        self.log = logging.getLogger('ad1459.room')
+        self.network = network
         
         self.window = RoomWindow(self)
         self.window.set_vexpand(True)
         self.window.set_hexpand(True)
-        self.window.server = self.server
+        self.window.network = self.network
         self.window.room = self
 
         self.view = Gtk.Viewport()
@@ -52,7 +54,7 @@ class Room():
 
         self.adj.connect('value-changed', self.on_window_scrolled)
 
-        self.row = RoomRow(self, self.server, kind='channel')
+        self.row = RoomRow(self, self.network, kind='channel')
         self.add_message(f'You have joined')
         # self.populate_test_data()
     
@@ -66,7 +68,7 @@ class Room():
         self.row.room_name = name
     
     def print_info(self):
-        print(f'{self.name}, {self.server}')
+        self.log.info(f'{self.name}, {self.network}')
     
     def on_new_message_scroll(self, window, data=None):
         """ size-allocate signal handler for self.messages."""
@@ -102,14 +104,14 @@ class Room():
 
         Arguments:
             message (str): The message text to add to this room.
-            sender (str): The nickname who sent the message, or None for server
+            sender (str): The nickname who sent the message, or None for network
                 messages.
             msg_time (str): The timestamp of this message, or None for the 
                 current time.
             css (str): A CSS class to add to this message.
         """
         new_message = MessageRow()
-        if sender == self.server.nick:
+        if sender == self.network.nick:
             css = 'mine'
 
         if css:

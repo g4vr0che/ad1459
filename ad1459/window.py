@@ -10,6 +10,7 @@
 """
 
 import asyncio
+import logging
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -17,45 +18,48 @@ from gi.repository import Gtk, Gdk
 
 from .widgets.headerbar import Headerbar
 from .room import Room
-from .server import Server
+from .network import Network
 
 class AdWindow(Gtk.Window):
     """ The main application window."""
 
     def __init__(self, app):
+        self.log = logging.getLogger('ad1459.window')
         self.commands = {
             '/me': self.send_action
         }
+
+        self.log.debug('Creating window')
         super().__init__()
-        self.servers = []
+        self.networks = []
         self.app = app
         header = Headerbar()
         self.set_titlebar(header)
 
-        server_button = Gtk.Button.new_from_icon_name(
+        network_button = Gtk.Button.new_from_icon_name(
             'network-server-symbolic',
             Gtk.IconSize.BUTTON
         )
-        server_button.connect('clicked', self.on_server_button_clicked)
-        header.pack_start(server_button)
+        network_button.connect('clicked', self.on_network_button_clicked)
+        header.pack_start(network_button)
 
-        self.server_popup = Gtk.Popover()
-        server_popup_grid = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        Gtk.StyleContext.add_class(server_popup_grid.get_style_context(), 'linked')
-        server_popup_grid.props.margin = 6
-        self.server_popup.add(server_popup_grid)
+        self.network_popup = Gtk.Popover()
+        network_popup_grid = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        Gtk.StyleContext.add_class(network_popup_grid.get_style_context(), 'linked')
+        network_popup_grid.props.margin = 6
+        self.network_popup.add(network_popup_grid)
 
-        server_entry = Gtk.Entry()
-        server_entry.set_placeholder_text('Enter a server to connect to')
-        server_entry.set_width_chars(80)
-        server_popup_grid.pack_start(server_entry, False, True, 0)
-        server_entry.connect('activate', self.on_server_connect_clicked, server_entry)
+        network_entry = Gtk.Entry()
+        network_entry.set_placeholder_text('Enter a network to connect to')
+        network_entry.set_width_chars(80)
+        network_popup_grid.pack_start(network_entry, False, True, 0)
+        network_entry.connect('activate', self.on_network_connect_clicked, network_entry)
 
-        server_connect = Gtk.Button()
-        server_connect.set_label('Connect')
-        Gtk.StyleContext.add_class(server_connect.get_style_context(), 'suggested-action')
-        server_connect.connect('clicked', self.on_server_connect_clicked, server_entry)
-        server_popup_grid.pack_end(server_connect, False, True, 0)
+        network_connect = Gtk.Button()
+        network_connect.set_label('Connect')
+        Gtk.StyleContext.add_class(network_connect.get_style_context(), 'suggested-action')
+        network_connect.connect('clicked', self.on_network_connect_clicked, network_entry)
+        network_popup_grid.pack_end(network_connect, False, True, 0)
 
         channel_button = Gtk.Button.new_from_icon_name(
             'list-add-symbolic',
@@ -96,17 +100,17 @@ class AdWindow(Gtk.Window):
         content.set_vexpand(True)
         maingrid.attach(content, 0, 0, 1, 1)
 
-        servers_grid = Gtk.Grid()
-        content.add1(servers_grid)
-        servers_window = Gtk.ScrolledWindow()
-        servers_window.set_hexpand(True)        
-        servers_window.set_vexpand(True)
-        servers_grid.attach(servers_window, 0, 0, 1, 1)
+        networks_grid = Gtk.Grid()
+        content.add1(networks_grid)
+        networks_window = Gtk.ScrolledWindow()
+        networks_window.set_hexpand(True)        
+        networks_window.set_vexpand(True)
+        networks_grid.attach(networks_window, 0, 0, 1, 1)
 
-        self.servers_listbox = Gtk.ListBox()
-        self.servers_listbox.set_selection_mode(Gtk.SelectionMode.BROWSE)
-        self.servers_listbox.connect('row-selected', self.on_server_selected)
-        servers_window.add(self.servers_listbox)
+        self.networks_listbox = Gtk.ListBox()
+        self.networks_listbox.set_selection_mode(Gtk.SelectionMode.BROWSE)
+        self.networks_listbox.connect('row-selected', self.on_network_selected)
+        networks_window.add(self.networks_listbox)
         
         message_grid = Gtk.Grid()
         content.add2(message_grid)
@@ -150,30 +154,34 @@ class AdWindow(Gtk.Window):
         )
         entry_box.add(send_button)
 
+        self.log.debug('Window created')
+
         # self.populate_test_data()
     
     def on_channel_button_clicked(self, button, data=None):
-        """ clicked signal handler for channel button."""
+        """ clicked signal handler for channel button."""        
         new_channel = self.message_entry.get_text()
-        server = self.get_active_server()
+        self.log.info('Joining channel: %s', new_channel)
+        network = self.get_active_network()
         loop = asyncio.get_event_loop()
         asyncio.run_coroutine_threadsafe(
-            server.client.join(new_channel),
+            network.client.join(new_channel),
             loop=loop
         )
         self.message_entry.set_text('')
     
-    def on_server_button_clicked(self, button, data=None):
-        """ clicked signal handler for server button."""
-        self.server_popup.set_relative_to(button)
-        self.server_popup.show_all()
-        self.server_popup.popup()
+    def on_network_button_clicked(self, button, data=None):
+        """ clicked signal handler for network button."""
+        self.network_popup.set_relative_to(button)
+        self.network_popup.show_all()
+        self.network_popup.popup()
     
-    def on_server_connect_clicked(self, button, entry, data=None):
-        """ clicked signal handler for the server button."""
-        self.add_server(entry.get_text())
+    def on_network_connect_clicked(self, button, entry, data=None):
+        """ clicked signal handler for the network button."""
+        self.log.info('Connecting to new network')
+        self.add_network(entry.get_text())
         entry.set_text('')
-        self.server_popup.popdown()
+        self.network_popup.popdown()
     
     def on_nick_button_clicked(self, button, entry):
         """ clicked signal handler for nickname button.
@@ -183,6 +191,7 @@ class AdWindow(Gtk.Window):
             entry (:obj:`Gtk.Entry`): The chat entry with the new nickname.
         """
         new_nick = entry.get_text()
+        self.log.info('New nick: %s', new_nick)
         self.change_nick(new_nick)
         entry.set_text('')
     
@@ -195,7 +204,7 @@ class AdWindow(Gtk.Window):
         """
         message_text = entry.get_text()
         room = self.get_active_room(room='current')
-        server = room.server
+        network = room.network
         loop = asyncio.get_event_loop()
         for command in self.commands:
             if command in message_text:
@@ -203,100 +212,105 @@ class AdWindow(Gtk.Window):
                 pass
             else:
                 asyncio.run_coroutine_threadsafe(
-                    server.client.message(room.name, message_text),
+                    network.client.message(room.name, message_text),
                     loop=loop
                 )
-                room.add_message(message_text, sender=server.nick, css='mine')
+                room.add_message(message_text, sender=network.nick, css='mine')
         self.show_all()
         entry.set_text('')
     
     def change_nick(self, new_nick):
-        server = self.get_active_server()
-        server.nick = new_nick
+        network = self.get_active_network()
+        network.nick = new_nick
+        self.log.info('Set new nick %s on network %s', new_nick, network.nick)
         loop = asyncio.get_event_loop()
-        server = self.get_active_server()
+        network = self.get_active_network()
         asyncio.run_coroutine_threadsafe(
-            server.client.set_nickname(new_nick),
+            network.client.set_nickname(new_nick),
             loop=loop
         )
         self.set_nick(new_nick)
     
     def set_nick(self, new_nick):
+        self.log.debug('Setting nick button label')
         self.nick_button.set_label(new_nick)
     
-    def join_channel(self, channel_name, server='current'):
-        """ Joins a channel on the current server.
+    def join_channel(self, channel_name, network='current'):
+        """ Joins a channel on the current network.
         
         Arguments:
             channel_name (str): The name of the channel to join.
         """
-        print(f'233: joining {channel_name} on {server}')
-        current_server = self.get_active_server(server=server)
-        current_server.join_room(channel_name)
-        self.servers_listbox.add(current_server.rooms[-1].row)
+        self.log.info(f'Joining {channel_name} on {network}')
+        current_network = self.get_active_network(network=network)
+        current_network.join_room(channel_name)
+        self.networks_listbox.add(current_network.rooms[-1].row)
         self.message_stack.add_named(
-            current_server.rooms[-1].window, current_server.rooms[-1].name
+            current_network.rooms[-1].window, current_network.rooms[-1].name
         )
         self.show_all()
     
-    def add_server(self, server_line):
-        """ Adds a new server to the list.
+    def add_network(self, network_line):
+        """ Adds a new network to the list.
         
         Arguments:
-            server_name (str): The name for this server
-            host (str): The hostname of this server, or 'test'
+            network_name (str): The name for this network
+            host (str): The hostname of this network, or 'test'
         """
-        # new: none|pass|sasl servername host port username (tls) (password)
-        server_list = server_line.split()
-        if server_list[0] == 'sasl':
-            new_server = Server(
+        # new: none|pass|sasl networkname host port username (tls) (password)
+        network_list = network_line.split()
+        if network_list[0] == 'sasl':
+            new_network = Network(
                 self.app, 
-                server_list[4],
-                sasl_u=server_list[4],
-                sasl_p=server_list[-1]
+                network_list[1],
+                network_list[4],
+                sasl_u=network_list[4],
+                sasl_p=network_list[-1]
             )
         else:
-            new_server = Server(self.app, server_list[4])
+            new_network = Network(self.app, network_list[1], network_list[4])
 
-        new_server.auth = server_list[0]
-        new_server.name = server_list[1]
-        new_server.host = server_list[2]
-        new_server.port = int(server_list[3])
-        new_server.nick = server_list[4]
-        if new_server.auth == ('pass' or 'sasl'):
-            new_server.password = server_list[-1]
+        new_network.auth = network_list[0]
+        new_network.name = network_list[1]
+        new_network.host = network_list[2]
+        new_network.port = int(network_list[3])
+        new_network.nick = network_list[4]
+        if new_network.auth == ('pass' or 'sasl'):
+            new_network.password = network_list[-1]
         try:
-            if server_list[5] == 'tls':
-                new_server.tls = True
+            if network_list[5] == 'tls':
+                new_network.tls = True
         except AttributeError:
-            new_server.tls = False
+            new_network.tls = False
         
-        self.servers.append(new_server)
-        new_server.connect()
-        self.servers_listbox.add(new_server.room.row)
-        self.message_stack.add_named(new_server.room.window, new_server.name)
+        self.networks.append(new_network)
+        new_network.connect()
+        self.networks_listbox.add(new_network.room.row)
+        self.message_stack.add_named(new_network.room.window, new_network.name)
         self.show_all()
-        self.set_nick(new_server.nick)
+        self.set_nick(new_network.nick)
 
     def get_active_room(self, room='current'):
         """ Gets the currently active room object. """
+        # self.log.debug('Getting room for %s', room)
         if room == 'current':
             return self.message_stack.get_visible_child().room
         else:
             return self.message_stack.get_child_by_name(room).room
     
-    def get_active_server(self, server='current'):
-        """ Gets the server object for the currently active room."""
-        if server == 'current':
-            return self.get_active_room().server
+    def get_active_network(self, network='current'):
+        """ Gets the network object for the currently active room."""
+        # self.log.debug('Getting network for %s', network)
+        if network == 'current':
+            return self.get_active_room().network
         else:
-            return self.message_stack.get_child_by_name(server).room.server
+            return self.message_stack.get_child_by_name(network).room.network
     
-    def on_server_selected(self, listbox, row):
-        """ row-selected signal handler for server_listbox.
+    def on_network_selected(self, listbox, row):
+        """ row-selected signal handler for network_listbox.
 
         Arguments:
-            listbox (:obj:`Gtk.ListBox`): The server_listbox
+            listbox (:obj:`Gtk.ListBox`): The network_listbox
             row (:obj:`Gtk.ListBoxRow`): The row the user clicked on.
         """
         new_room = row.room
@@ -304,7 +318,7 @@ class AdWindow(Gtk.Window):
             'mail-read-symbolic',
             Gtk.IconSize.SMALL_TOOLBAR
         )
-        print(f'New room: {row.room.name} on server {row.room.server.name}')
+        self.log.debug(f'New room: {row.room.name} on network {row.room.network.name}')
         self.message_stack.set_visible_child_name(new_room.name)
     
     """ Commands parsed by the client."""
@@ -317,13 +331,13 @@ class AdWindow(Gtk.Window):
             target (str): Where to send the action.
         """
         message = message.replace('/me', '', 1).strip()
-        server = self.get_active_server()
+        network = self.get_active_network()
         loop = asyncio.get_event_loop()
         asyncio.run_coroutine_threadsafe(
-            server.client.ctcp(target.name, 'ACTION', message),
+            network.client.ctcp(target.name, 'ACTION', message),
             loop=loop
         )
-        target.add_message(f'{server.nick} {message}', css='mine')
+        target.add_message(f'{network.nick} {message}', css='mine')
 
         
     def populate_test_data(self):

@@ -6,11 +6,11 @@
   License, v. 2.0. If a copy of the MPL was not distributed with this
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-  Handling for servers and their rooms.
+  Handling for networks and their rooms.
 """
 
 import asyncio
-import pydle
+import logging
 import time
 
 import gi
@@ -22,23 +22,26 @@ from .widgets.room_row import RoomRow
 from .widgets.message_row import MessageRow
 from .room import Room
 
-class Server():
-    """ A representation of a server, with all open rooms on that server.
+class Network():
+    """ A representation of a network, with all open rooms on that network.
 
     Attributes:
         rooms (list of :obj:`Room`): A list containing the rooms currently in 
-            use on this server.
-        server_messages (:obj:`ServerRoom`): A room for this server's server 
+            use on this network.
+        network_messages (:obj:`NetworkRoom`): A room for this network's network 
             messages.
     """
 
-    def __init__(self, app, nick, sasl_u=None, sasl_p=None):
+    def __init__(self, app, name, nick, sasl_u=None, sasl_p=None):
+        self.log = logging.getLogger('ad1459.network')
+        self.log.debug('Creating network for %s', name)
         self.sasl_u = sasl_u
         self.sasl_p = sasl_p
         self.app = app
         self.nick = nick
         self.rooms = []
-        self.room = ServerRoom(self)
+        self.room = NetworkRoom(self)
+        self.name = name
         if sasl_p:
             self.client = Client(self.nick, self, sasl_password=sasl_p, sasl_username=sasl_u)
         else:
@@ -46,7 +49,7 @@ class Server():
     
     @property
     def nick(self):
-        """str: the user's nickname for this server."""
+        """str: the user's nickname for this network."""
         return self._nick
     
     @nick.setter
@@ -88,7 +91,7 @@ class Server():
     
     @property
     def password(self):
-        """str: any required password for this server."""
+        """str: any required password for this network."""
         try:
             return self._password
         except AttributeError:
@@ -111,7 +114,7 @@ class Server():
     
     @property
     def name(self):
-        """str: The name of this server (and its room)."""
+        """str: The name of this network (and its room)."""
         try:
             return self.room.name
         except AttributeError:
@@ -123,8 +126,11 @@ class Server():
         self.room.name = name
     
     async def do_connect(self):
-        """ Connect to the actual server."""
+        """ Connect to the actual network."""
+        self.log.debug('Spinning up async connection')
         if self.auth == 'pass':
+            self.log.debug('Using password authentication')
+            self.log.debug('Client: %s', self.client)
             await self.client.connect(
                 self.host,
                 port=self.port,
@@ -140,18 +146,50 @@ class Server():
         #         sasl_username=self.sasl_u
         #     )
         else:
+            self.log.debug('Using SASL authentication (or none)')
             await self.client.connect(
                 self.host,
                 port=self.port,
                 tls=self.tls
             )
-        print('Connected!')
+        self.log.debug('Connected to %s!', self.name)
     
     def connect(self):
-        """ Connect to the server, disconnecting first if already connected. """
+        """ Connect to the network, disconnecting first if already connected. """
         if self.host is not "test":
             loop = asyncio.get_event_loop()
-            asyncio.run_coroutine_threadsafe(self.do_connect(), loop=loop)
+            self.log.debug('Initiating connection')
+            self.log.debug('Spinning up async connection')
+            if self.auth == 'pass':
+                self.log.debug('Using password authentication')
+                self.log.debug('Client connection method: %s', self.client.connect)
+                asyncio.run_coroutine_threadsafe(
+                    self.client.connect(
+                        self.host,
+                        port=self.port,
+                        tls=self.tls,
+                        password=self.password
+                    ),
+                    loop=loop
+                )
+            # elif self.auth == 'sasl':
+            #     await self.client.connect(
+            #         self.host,
+            #         port=self.port,
+            #         tls=self.tls,
+            #         sasl_password=self.sasl_p,
+            #         sasl_username=self.sasl_u
+            #     )
+            else:
+                self.log.debug('Using SASL authentication (or none)')
+                asyncio.run_coroutine_threadsafe(
+                    self.client.connect(
+                        self.host,
+                        port=self.port,
+                        tls=self.tls
+                    ),
+                    loop=loop
+                )
     
     def join_room(self, room):
         """ Join a new room/channel, or start a new private message with a user.
@@ -169,7 +207,7 @@ class Server():
 
         Arguments:
             index (int): The index of the room to get, with 0 being the 
-                server_room
+                network_room
 
         Returns:
             :obj:`Room`: The room at the given index.
@@ -219,11 +257,11 @@ class Server():
         print(f'219: joining {channel} on {self.name}')
         GLib.idle_add(self.app.window.join_channel, channel, self.name)
 
-class ServerRoom(Room):
-    """ A special Room class for the server message buffer/room. """
+class NetworkRoom(Room):
+    """ A special Room class for the network message buffer/room. """
 
-    def __init__(self, server):
-        super().__init__(server)
+    def __init__(self, network):
+        super().__init__(network)
         self.row.kind = 'SERVER'
 
     def display_motd(self, motd):
