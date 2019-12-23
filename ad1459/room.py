@@ -9,6 +9,7 @@
   Handling for rooms and their messages.
 """
 
+import logging
 import time
 
 import gi
@@ -34,6 +35,7 @@ class Room():
     """
 
     def __init__(self, network):
+        self.log = logging.getLogger('ad1459.room')
         self.network = network
         
         self.window = RoomWindow(self)
@@ -66,7 +68,7 @@ class Room():
         self.row.room_name = name
     
     def print_info(self):
-        print(f'{self.name}, {self.network}')
+        self.log.info(f'{self.name}, {self.network}')
     
     def on_new_message_scroll(self, window, data=None):
         """ size-allocate signal handler for self.messages."""
