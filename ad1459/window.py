@@ -159,8 +159,9 @@ class AdWindow(Gtk.Window):
         # self.populate_test_data()
     
     def on_channel_button_clicked(self, button, data=None):
-        """ clicked signal handler for channel button."""
+        """ clicked signal handler for channel button."""        
         new_channel = self.message_entry.get_text()
+        self.log.info('Joining channel: %s', new_channel)
         network = self.get_active_network()
         loop = asyncio.get_event_loop()
         asyncio.run_coroutine_threadsafe(
@@ -177,6 +178,7 @@ class AdWindow(Gtk.Window):
     
     def on_network_connect_clicked(self, button, entry, data=None):
         """ clicked signal handler for the network button."""
+        self.log.info('Connecting to new network')
         self.add_network(entry.get_text())
         entry.set_text('')
         self.network_popup.popdown()
@@ -189,6 +191,7 @@ class AdWindow(Gtk.Window):
             entry (:obj:`Gtk.Entry`): The chat entry with the new nickname.
         """
         new_nick = entry.get_text()
+        self.log.info('New nick: %s', new_nick)
         self.change_nick(new_nick)
         entry.set_text('')
     
@@ -219,6 +222,7 @@ class AdWindow(Gtk.Window):
     def change_nick(self, new_nick):
         network = self.get_active_network()
         network.nick = new_nick
+        self.log.info('Set new nick %s on network %s', new_nick, network.nick)
         loop = asyncio.get_event_loop()
         network = self.get_active_network()
         asyncio.run_coroutine_threadsafe(
@@ -228,6 +232,7 @@ class AdWindow(Gtk.Window):
         self.set_nick(new_nick)
     
     def set_nick(self, new_nick):
+        self.log.debug('Setting nivk button label')
         self.nick_button.set_label(new_nick)
     
     def join_channel(self, channel_name, network='current'):
@@ -236,7 +241,7 @@ class AdWindow(Gtk.Window):
         Arguments:
             channel_name (str): The name of the channel to join.
         """
-        print(f'233: joining {channel_name} on {network}')
+        self.log.info(f'Joining {channel_name} on {network}')
         current_network = self.get_active_network(network=network)
         current_network.join_room(channel_name)
         self.networks_listbox.add(current_network.rooms[-1].row)
@@ -257,12 +262,13 @@ class AdWindow(Gtk.Window):
         if network_list[0] == 'sasl':
             new_network = Network(
                 self.app, 
+                network_list[1],
                 network_list[4],
                 sasl_u=network_list[4],
                 sasl_p=network_list[-1]
             )
         else:
-            new_network = Network(self.app, network_list[4])
+            new_network = Network(self.app, network_list[1], network_list[4])
 
         new_network.auth = network_list[0]
         new_network.name = network_list[1]
@@ -286,6 +292,7 @@ class AdWindow(Gtk.Window):
 
     def get_active_room(self, room='current'):
         """ Gets the currently active room object. """
+        self.log.debug('Getting room for %s', room)
         if room == 'current':
             return self.message_stack.get_visible_child().room
         else:
@@ -293,6 +300,7 @@ class AdWindow(Gtk.Window):
     
     def get_active_network(self, network='current'):
         """ Gets the network object for the currently active room."""
+        self.log.debug('Getting network for %s', network)
         if network == 'current':
             return self.get_active_room().network
         else:
@@ -310,7 +318,7 @@ class AdWindow(Gtk.Window):
             'mail-read-symbolic',
             Gtk.IconSize.SMALL_TOOLBAR
         )
-        print(f'New room: {row.room.name} on network {row.room.network.name}')
+        self.log.debug(f'New room: {row.room.name} on network {row.room.network.name}')
         self.message_stack.set_visible_child_name(new_room.name)
     
     """ Commands parsed by the client."""

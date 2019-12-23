@@ -20,7 +20,7 @@ class Client(pydle.Client):
         self.log = logging.getLogger('ad1459.client')
         super().__init__(nick, sasl_username=sasl_username, sasl_password=sasl_password, **kwargs)
         self.server = network
-        self.log.debug('Created client for server %s', self.server.name)
+        self.log.debug('Created client for network %s', self.server.name)
     
     # async def connect(self, hostname=None, password=None, **kwargs):
     #     self.log.debug('Client initiating connection to %s', hostname)
@@ -34,12 +34,13 @@ class Client(pydle.Client):
         await super().on_raw(message)
     
     async def on_nick_change(self, old, new):
+        self.log.debug('User %s is now %s', old, new)
         if old == self.server.nick:
             self.server.on_own_nick_change(new)
         await super().on_nick_change(old, new)
     
     async def on_join(self, channel, user):
-        print(f'User {user} joined {channel} on {self.server.name}')
+        self.log.debug(f'User {user} joined {channel} on {self.server.name}')
         if user == self.server.nick:
             self.server.on_join_channel(channel)
         await super().on_join(channel, user)

@@ -10,7 +10,7 @@
 """
 
 import asyncio
-import pydle
+import logging
 import time
 
 import gi
@@ -32,13 +32,16 @@ class Network():
             messages.
     """
 
-    def __init__(self, app, nick, sasl_u=None, sasl_p=None):
+    def __init__(self, app, name, nick, sasl_u=None, sasl_p=None):
+        self.log = logging.getLogger('ad1459.network')
+        self.log.debug('Creating network for %s', name)
         self.sasl_u = sasl_u
         self.sasl_p = sasl_p
         self.app = app
         self.nick = nick
         self.rooms = []
         self.room = NetworkRoom(self)
+        self.name = name
         if sasl_p:
             self.client = Client(self.nick, self, sasl_password=sasl_p, sasl_username=sasl_u)
         else:
@@ -145,7 +148,7 @@ class Network():
                 port=self.port,
                 tls=self.tls
             )
-        print('Connected!')
+        self.log.debug('Connected to %s!', self.name)
     
     def connect(self):
         """ Connect to the network, disconnecting first if already connected. """
