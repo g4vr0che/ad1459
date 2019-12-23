@@ -26,7 +26,7 @@ setup(
     ],
 
     data_files=[
-      ('/usr/share/applications', ['data/in.donotspellit.ad1459.desktop']),
+      ('/usr/share/applications', ['data/in.donotspellitgav.ad1459.desktop']),
     ],
 
     # Project Metadata
