@@ -6,7 +6,7 @@
   License, v. 2.0. If a copy of the MPL was not distributed with this
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-  ListBoxRows for servers/rooms.
+  ListBoxRows for networks/rooms.
 """
 
 from enum import Enum
@@ -29,7 +29,7 @@ class RoomKind(Enum):
     def __str__(self):
         """ Turn this back into a string. """
         strings = {
-            1: 'server',
+            1: 'network',
             2: 'channel',
             3: 'user'
         }
@@ -46,9 +46,9 @@ class RoomRow(Gtk.ListBoxRow):
         kind (RoomKind Enum): The type of room this is.
     """
 
-    def __init__(self, room, server, kind='CHANNEL'):
+    def __init__(self, room, network, kind='CHANNEL'):
         Gtk.ListBoxRow.__init__(self)
-        self.server = server
+        self.network = network
 
         room_grid = Gtk.Grid()
         room_grid.set_column_spacing(6)

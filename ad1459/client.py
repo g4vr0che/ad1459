@@ -10,14 +10,25 @@
 """
 
 import asyncio
+import logging
 import pydle
 import time
 
 class Client(pydle.Client):
 
     def __init__(self, nick, server, sasl_username=None, sasl_password=None, **kwargs):
+        self.log = logging.getLogger('ad1459.client')
         super().__init__(nick, sasl_username=sasl_username, sasl_password=sasl_password, **kwargs)
         self.server = server
+        self.log.debug('Created client for server %s', self.server.name)
+    
+    # async def connect(self, hostname=None, password=None, **kwargs):
+    #     self.log.debug('Client initiating connection to %s', hostname)
+    #     await super().connect(hostname=None, password=None, **kwargs)
+    
+    # async def on_connect(self):
+    #     self.log.info('Connected to %s', self.server.name)
+    #     await super().on_connect()
     
     async def on_raw(self, message):
         await super().on_raw(message)
