@@ -125,35 +125,6 @@ class Network():
         """This is actually tracked by the room."""
         self.room.name = name
     
-    async def do_connect(self):
-        """ Connect to the actual network."""
-        self.log.debug('Spinning up async connection')
-        if self.auth == 'pass':
-            self.log.debug('Using password authentication')
-            self.log.debug('Client: %s', self.client)
-            await self.client.connect(
-                self.host,
-                port=self.port,
-                tls=self.tls,
-                password=self.password
-            )
-        # elif self.auth == 'sasl':
-        #     await self.client.connect(
-        #         self.host,
-        #         port=self.port,
-        #         tls=self.tls,
-        #         sasl_password=self.sasl_p,
-        #         sasl_username=self.sasl_u
-        #     )
-        else:
-            self.log.debug('Using SASL authentication (or none)')
-            await self.client.connect(
-                self.host,
-                port=self.port,
-                tls=self.tls
-            )
-        self.log.debug('Connected to %s!', self.name)
-    
     def connect(self):
         """ Connect to the network, disconnecting first if already connected. """
         if self.host is not "test":
@@ -172,14 +143,6 @@ class Network():
                     ),
                     loop=loop
                 )
-            # elif self.auth == 'sasl':
-            #     await self.client.connect(
-            #         self.host,
-            #         port=self.port,
-            #         tls=self.tls,
-            #         sasl_password=self.sasl_p,
-            #         sasl_username=self.sasl_u
-            #     )
             else:
                 self.log.debug('Using SASL authentication (or none)')
                 asyncio.run_coroutine_threadsafe(
