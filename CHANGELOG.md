@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github-g///compare/v1.1.0...v1.1.1) (2019-12-24)
+
+
+### Bug Fixes
+
+* bump version in setup ([90ad227](https://github-g///commit/90ad227a6027315dd2fc25a63799b3f0ef07a151))
+
 ## [1.1.0](https://github-g///compare/v1.0.0...v1.1.0) (2019-12-24)
 
 
