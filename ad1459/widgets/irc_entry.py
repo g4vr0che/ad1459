@@ -37,7 +37,6 @@ class IrcEntry(Gtk.Entry):
             text = self.get_text()
             text_list = text.split()
             current_word = text_list[-1]
-            network = self.parent.get_active_network()
             channel = self.parent.get_active_room()
             if not self.prematched:
                 channel.update_tab_complete()
