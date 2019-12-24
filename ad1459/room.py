@@ -55,9 +55,12 @@ class Room():
         self.adj.connect('value-changed', self.on_window_scrolled)
 
         self.row = RoomRow(self, self.network, kind='channel')
-        self.add_message(f'You have joined')
+        self.tab_complete = []
+        self.prematched = False
+        #self.add_message(f'You have joined')
+
         # self.populate_test_data()
-    
+
     @property
     def name(self):
         """str: The name of this room (as displayed in the room list)."""
@@ -66,6 +69,9 @@ class Room():
     @name.setter
     def name(self, name):
         self.row.room_name = name
+    
+    def update_tab_complete(self):
+        self.tab_complete = list(self.network.client.channels[self.name]['users'])
     
     def print_info(self):
         self.log.info(f'{self.name}, {self.network}')
@@ -110,6 +116,9 @@ class Room():
                 current time.
             css (str): A CSS class to add to this message.
         """
+        if not self.prematched:
+            self.update_tab_complete()
+            self.prematched = True
         new_message = MessageRow()
         if sender == self.network.nick:
             css = 'mine'
@@ -133,6 +142,9 @@ class Room():
         
         new_message.show_all_contents()
         self.messages.add(new_message)
+        if not sender == '*':
+            self.tab_complete.remove(sender)
+            self.tab_complete.insert(0, sender)
 
     def populate_test_data(self):
         

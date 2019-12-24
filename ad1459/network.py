@@ -40,12 +40,13 @@ class Network():
         self.app = app
         self.nick = nick
         self.rooms = []
-        self.room = NetworkRoom(self)
-        self.name = name
         if sasl_p:
             self.client = Client(self.nick, self, sasl_password=sasl_p, sasl_username=sasl_u)
         else:
             self.client = Client(self.nick, self)
+        
+        self.room = NetworkRoom(self)
+        self.name = name
     
     @property
     def nick(self):
@@ -59,7 +60,10 @@ class Network():
     @property
     def host(self):
         """str: The hostname for this connection"""
-        return self._host
+        try:
+            return self._host
+        except AttributeError:
+            return None
     
     @host.setter
     def host(self, host):
@@ -206,6 +210,15 @@ class Network():
                         Gtk.IconSize.SMALL_TOOLBAR
                     )
 
+    def join_part_user_to_room(self, channel, user, action='join'):
+        room = self.app.window.get_active_room(room=channel)
+        if action == 'join':
+            room.tab_complete.append(user)
+        elif action == 'part':
+            room.tab_complete.remove(user)
+        jp_message = f'{user} has {action}ed {channel}'
+        self.add_message_to_room(channel, '*', jp_message)
+
     
     """ METHODS CALLED FROM ASYNCIO/PYDLE """
 
@@ -219,6 +232,11 @@ class Network():
     def on_join_channel(self, channel):
         print(f'219: joining {channel} on {self.name}')
         GLib.idle_add(self.app.window.join_channel, channel, self.name)
+    
+    def on_user_join_part(self, channel, user, action='join'):
+        self.log.debug('User %s has %sed %s', user, action, channel)
+        GLib.idle_add(self.join_part_user_to_room, channel, user, action)
+
 
 class NetworkRoom(Room):
     """ A special Room class for the network message buffer/room. """
@@ -226,6 +244,7 @@ class NetworkRoom(Room):
     def __init__(self, network):
         super().__init__(network)
         self.row.kind = 'SERVER'
+        self.tab_complete = []
 
     def display_motd(self, motd):
         self.add_message(motd)

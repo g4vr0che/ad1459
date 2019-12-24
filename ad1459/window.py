@@ -17,6 +17,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
 from .widgets.headerbar import Headerbar
+from .widgets.irc_entry import IrcEntry
 from .room import Room
 from .network import Network
 
@@ -125,12 +126,8 @@ class AdWindow(Gtk.Window):
         entry_box.props.spacing = 6
         message_grid.attach(entry_box, 0, 1, 1, 1)
 
-        self.message_entry = Gtk.Entry()
-        self.message_entry.set_hexpand(True)
-        self.message_entry.set_placeholder_text('Enter a message')
+        self.message_entry = IrcEntry(self)
         self.message_entry.connect('activate', self.on_send_button_clicked, self.message_entry)
-        self.message_entry.props.show_emoji_icon = True
-        self.message_entry.props.max_width_chars = 5000
 
         self.nick_button = Gtk.Button.new_with_label('jeans')
         self.nick = 'user'
