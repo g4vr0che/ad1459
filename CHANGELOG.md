@@ -21,6 +21,18 @@ All notable changes to this project will be documented in this file. See [standa
 
 * better tab completion ([3e47d48](https://github-g///commit/3e47d48d2142f4f8663069b9896a5bdc941cd638))
 
+
+### Bug Fixes
+
+* Remove unneded variable ([3d07110](https://github-g///commit/3d07110bf4c0716a9fc0a415b8646e082fbf7e2b))
+
+## [1.1.0](https://github-g///compare/v1.0.0...v1.1.0) (2019-12-24)
+
+
+### Features
+
+* better tab completion ([3e47d48](https://github-g///commit/3e47d48d2142f4f8663069b9896a5bdc941cd638))
+
 ## 1.0.0 (2019-12-23)
 
 
