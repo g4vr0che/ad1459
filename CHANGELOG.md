@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github-g///compare/v1.0.0...v1.1.0) (2019-12-24)
+
+
+### Features
+
+* better tab completion ([3e47d48](https://github-g///commit/3e47d48d2142f4f8663069b9896a5bdc941cd638))
+
 ## 1.0.0 (2019-12-23)
 
 
