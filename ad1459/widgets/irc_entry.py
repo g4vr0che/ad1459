@@ -44,7 +44,6 @@ class IrcEntry(Gtk.Entry):
             users = channel.tab_complete
             self.log.debug('Completing word %s', current_word)
             for user in users:
-                print(user)
                 if user.lower().startswith(current_word.lower()):
                     if text_list.index(current_word) == 0:
                         text_list.pop(-1)

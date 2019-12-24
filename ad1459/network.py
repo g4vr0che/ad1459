@@ -218,6 +218,14 @@ class Network():
             room.tab_complete.remove(user)
         jp_message = f'{user} has {action}ed {channel}'
         self.add_message_to_room(channel, '*', jp_message)
+    
+    def remove_room_from_list(self, room):
+        room = self.app.window.get_active_room(room=room)
+        room.messages.destroy()
+        room.view.destroy()
+        room.window.destroy()
+        room.row.destroy()
+        del room
 
     
     """ METHODS CALLED FROM ASYNCIO/PYDLE """
@@ -236,6 +244,10 @@ class Network():
     def on_user_join_part(self, channel, user, action='join'):
         self.log.debug('User %s has %sed %s', user, action, channel)
         GLib.idle_add(self.join_part_user_to_room, channel, user, action)
+    
+    def on_self_part(self, channel_name):
+        self.log.debug('Confirmed %s has left %s', self.nick, channel_name)
+        GLib.idle_add(self.remove_room_from_list, channel_name)
 
 
 class NetworkRoom(Room):

@@ -17,6 +17,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
 from .widgets.headerbar import Headerbar
+from .widgets.room_row import RoomKind, room_row_sort
 from .widgets.irc_entry import IrcEntry
 from .room import Room
 from .network import Network
@@ -43,6 +44,21 @@ class AdWindow(Gtk.Window):
         )
         network_button.connect('clicked', self.on_network_button_clicked)
         header.pack_start(network_button)
+
+        btn_appmenu = Gtk.MenuButton()
+        header.pack_end(btn_appmenu)
+
+        self.appmenu = Gtk.Popover()
+        btn_appmenu.set_popover(self.appmenu)
+        am_grid = Gtk.Grid()
+        self.appmenu.add(am_grid)
+
+        part_button = Gtk.ModelButton()
+        part_button.set_label('Leave Conversation')
+        part_button.connect('clicked', self.on_part_button_clicked)
+        am_grid.attach(part_button, 0, 0, 1, 1)
+
+        self.appmenu.show_all()
 
         self.network_popup = Gtk.Popover()
         network_popup_grid = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -109,6 +125,7 @@ class AdWindow(Gtk.Window):
         networks_grid.attach(networks_window, 0, 0, 1, 1)
 
         self.networks_listbox = Gtk.ListBox()
+        self.networks_listbox.set_sort_func(room_row_sort)
         self.networks_listbox.set_selection_mode(Gtk.SelectionMode.BROWSE)
         self.networks_listbox.connect('row-selected', self.on_network_selected)
         networks_window.add(self.networks_listbox)
@@ -154,6 +171,13 @@ class AdWindow(Gtk.Window):
         self.log.debug('Window created')
 
         # self.populate_test_data()
+
+    def on_part_button_clicked(self, button, data=None):
+        """ clicked signal handler for the part button."""
+        self.log.debug('Part_button clicked')
+        channel = self.get_active_room()
+        self.appmenu.popdown()
+        self.leave_room(channel)
     
     def on_channel_button_clicked(self, button, data=None):
         """ clicked signal handler for channel button."""        
@@ -241,11 +265,27 @@ class AdWindow(Gtk.Window):
         self.log.info(f'Joining {channel_name} on {network}')
         current_network = self.get_active_network(network=network)
         current_network.join_room(channel_name)
-        self.networks_listbox.add(current_network.rooms[-1].row)
+        self.networks_listbox.prepend(current_network.rooms[-1].row)
         self.message_stack.add_named(
             current_network.rooms[-1].window, current_network.rooms[-1].name
         )
+        self.networks_listbox.invalidate_sort()
         self.show_all()
+    
+    def leave_room(self, channel):
+        """ leaves a room. 
+
+        Arguments:
+            channel (:obj:`Room`): The room object to leave.
+        """
+        self.log.debug('Leaving room %s', channel.name)
+        if channel.row.kind == RoomKind.SERVER:
+            # This appears to be a server room; we can't part those.
+            self.log.debug('Can\'t leave server rooms')
+            return False
+        elif channel.row.kind == RoomKind.CHANNEL:
+            channel.part_channel()
+        self.networks_listbox.invalidate_sort()
     
     def add_network(self, network_line):
         """ Adds a new network to the list.
@@ -284,6 +324,7 @@ class AdWindow(Gtk.Window):
         new_network.connect()
         self.networks_listbox.add(new_network.room.row)
         self.message_stack.add_named(new_network.room.window, new_network.name)
+        self.networks_listbox.invalidate_sort()
         self.show_all()
         self.set_nick(new_network.nick)
 

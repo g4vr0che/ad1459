@@ -23,8 +23,4 @@ class Headerbar(Gtk.HeaderBar):
         self.set_title('AD1459')
         self.set_has_subtitle(False)
 
-        btn_appmenu = Gtk.MenuButton()
-        self.pack_end(btn_appmenu)
-        
-        appmenu = Gtk.Popover()
         

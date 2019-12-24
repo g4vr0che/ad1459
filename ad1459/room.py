@@ -9,6 +9,7 @@
   Handling for rooms and their messages.
 """
 
+import asyncio
 import logging
 import time
 
@@ -69,6 +70,23 @@ class Room():
     @name.setter
     def name(self, name):
         self.row.room_name = name
+    
+    def part_channel(self, message='Leaving...'):
+        """ Exits the channel.
+        
+        Arguments:
+            message (str): A part message for the channel.
+        """
+        self.log.info('Leaving channel %s (%s)', self.name, message)
+        loop = asyncio.get_event_loop()
+        asyncio.run_coroutine_threadsafe(
+            self.network.client.part(
+                self.name,
+                message=message
+            ),
+            loop=loop
+        )
+
     
     def update_tab_complete(self):
         self.tab_complete = list(self.network.client.channels[self.name]['users'])
@@ -143,8 +161,12 @@ class Room():
         new_message.show_all_contents()
         self.messages.add(new_message)
         if not sender == '*':
-            self.tab_complete.remove(sender)
-            self.tab_complete.insert(0, sender)
+            try:
+                self.tab_complete.remove(sender)
+                self.tab_complete.insert(0, sender)
+                
+            except ValueError:
+                pass
 
     def populate_test_data(self):
         

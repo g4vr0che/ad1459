@@ -47,11 +47,12 @@ class Client(pydle.Client):
             self.network_.on_user_join_part(channel, user)
         await super().on_join(channel, user)
     
-    async def on_part(self, channel, user):
+    async def on_part(self, channel, user, message=None):
         self.log.debug(f'User {user} parted {channel} on {self.network_.name}')
         self.network_.on_user_join_part(channel, user, action='part')
-        await super().on_part(channel, user)
-
+        if user == self.network_.nick:
+            self.network_.on_self_part(channel)
+        await super().on_part(channel, user, message)
 
     async def on_message(self, target, source, message):
         self.network_.on_rcvd_message(target, source, message)
