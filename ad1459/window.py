@@ -19,6 +19,7 @@ from gi.repository import Gtk, Gdk
 from .widgets.headerbar import Headerbar
 from .widgets.room_row import RoomKind, room_row_sort
 from .widgets.irc_entry import IrcEntry
+from .widgets.about import AboutDialog
 from .room import Room
 from .network import Network
 
@@ -48,6 +49,8 @@ class AdWindow(Gtk.Window):
         btn_appmenu = Gtk.MenuButton()
         header.pack_end(btn_appmenu)
 
+        self.about_dialog = AboutDialog()
+
         self.appmenu = Gtk.Popover()
         btn_appmenu.set_popover(self.appmenu)
         am_grid = Gtk.Grid()
@@ -57,6 +60,11 @@ class AdWindow(Gtk.Window):
         part_button.set_label('Leave Conversation')
         part_button.connect('clicked', self.on_part_button_clicked)
         am_grid.attach(part_button, 0, 0, 1, 1)
+
+        about_button = Gtk.ModelButton()
+        about_button.set_label('About AD1459')
+        about_button.connect('clicked', self.on_about_button_clicked)
+        am_grid.attach(about_button, 0, 1, 1, 1)
 
         self.appmenu.show_all()
 
@@ -171,6 +179,11 @@ class AdWindow(Gtk.Window):
         self.log.debug('Window created')
 
         # self.populate_test_data()
+    
+    def on_about_button_clicked(self, button, data=None):
+        """ clicked signal handler for the about button."""
+        self.about_dialog.run()
+        self.about_dialog.destroy()
 
     def on_part_button_clicked(self, button, data=None):
         """ clicked signal handler for the part button."""
