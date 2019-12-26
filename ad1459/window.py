@@ -54,6 +54,7 @@ class AdWindow(Gtk.Window):
         self.appmenu = Gtk.Popover()
         btn_appmenu.set_popover(self.appmenu)
         am_grid = Gtk.Grid()
+        am_grid.props.margin = 6
         self.appmenu.add(am_grid)
 
         part_button = Gtk.ModelButton()
