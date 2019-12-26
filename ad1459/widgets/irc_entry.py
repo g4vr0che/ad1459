@@ -55,5 +55,6 @@ class IrcEntry(Gtk.Entry):
                     self.set_text(text)
                     length = len(text)
                     self.set_position(length)
+            self.grab_focus_without_selecting()
             return True
             # self.log.debug('Users: %s', nicks)
