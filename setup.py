@@ -11,11 +11,13 @@
 
 from setuptools import setup, find_packages
 
-VERSION = '1.2.0'
+version = {}
+with open('ad1459/__version__.py') as fp:
+  exec(fp.read(), version)
 
 setup(
     name='ad1459',
-    version=VERSION,
+    version=version['__version__'],
     packages=find_packages(),
     scripts=['ad1459/ad1459'],
 
