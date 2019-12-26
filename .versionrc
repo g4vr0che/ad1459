@@ -1,0 +1,8 @@
+{
+  "bumpFiles": [
+    {
+      "filename": "ad1459/__version__.py",
+      "updater": "version-updater.js"
+    }
+  ]
+}
