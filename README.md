@@ -49,3 +49,20 @@ otherwise.
 `none freenode chat.freenode.net 6666 g4vr0che`
 
 `pass My-Private-Network my.private-network.com 12345 secret_username tls hunter3`
+
+
+## TODOS
+
+Currently planned features include:
+
+* Support for receiving NOTICEs.
+* User list
+* Topic
+* Commands 
+  - Currently only the /me command is supported
+* CTCP
+* Better bouncer support
+* More intuitive connection entry
+* UI Improvements
+* Saving configuration/recent servers
+* Last message recall
