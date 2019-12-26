@@ -23,7 +23,7 @@ class Release(Command):
     user_options = [
         ('dry-run', None, 'Skip the actual release and do a dry run instead.'),
         ('prerelease', None, 'Release this version as a pre-release.'),
-        ('force-version', None, 'Force the version to update to the given value.')
+        ('force-version=', None, 'Force the version to update to the given value.')
     ]
 
     def initialize_options(self):
@@ -32,7 +32,9 @@ class Release(Command):
         self.force_version = None
     
     def finalize_options(self):
-        pass
+        if self.force_version:
+            if not isinstance(self.force_version, str):
+                raise Exception('Please specify the test version to release')
 
     def run(self):
         command = ['npx', 'standard-version@next']
@@ -42,7 +44,9 @@ class Release(Command):
             command.append('--prerelease')
         if self.force_version:
             # See https://github.com/conventional-changelog/standard-version#release-as-a-target-type-imperatively-npm-version-like
-            pass
+            command.append('--release-as')
+            command.append(self.force_version)
+        print(command)
         subprocess.run(command)
         if not self.dry_run:
             subprocess.run(
