@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.4.3](https://github-g///compare/v1.4.2...v1.4.3) (2019-12-26)
+
+
+### Bug Fixes
+
+* Add list of TODOS ([afce3ca](https://github-g///commit/afce3ca68454374d28e7a07bb5a4f61eac34bde6))
+* Remove formatting characters ([27e4537](https://github-g///commit/27e45371db554560815b78d99f865f937153cafd))
+* Update documentation ([bfc2e37](https://github-g///commit/bfc2e37073f931422d2b3ee13269af60cf026206))
+
 ### [1.4.2](https://github-g///compare/v1.4.1...v1.4.2) (2019-12-26)
 
 
