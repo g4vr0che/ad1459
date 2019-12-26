@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github-g///compare/v1.2.1...v1.3.0) (2019-12-26)
+
+
+### Features
+
+* Add release command to setup.py ([e2babbc](https://github-g///commit/e2babbc894e3c1cf1e541be5faea2e93bd43f27f))
+
 ### [1.2.1](https://github-g///compare/v1.2.0...v1.2.1) (2019-12-26)
 
 
