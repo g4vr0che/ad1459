@@ -6,21 +6,15 @@
 
 const fs = require('fs');
 
-
 module.exports.readVersion = function (contents) {
     var version_array = contents.split(" ")
     var version = version_array[2].replace(/['"]+/g, '')
-    console.log(version)
+    console.log("Current version: " + version)
     return version
 }
 
 module.exports.writeVersion = function (contents, version) {
-    var version = "__version = " + version
-    console.log(version)
-    // var version_file = fs.writeFileSync(
-    //     'ad1459/__version__.py',
-    //     version,
-    //     'utf8'       
-    // )
+    var version = "__version__ = \"" + version + "\""
+    console.log("New version: " + version)
     return version
 }
