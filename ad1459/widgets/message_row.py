@@ -92,6 +92,11 @@ class MessageRow(Gtk.ListBoxRow):
     
     @text.setter
     def text(self, text):
+        text = text.replace('\u0002', '')
+        text = text.replace('\u0003', '')
+        text = text.replace('\u000F', '')
+        text = text.replace('\u001D', '')
+        text = text.replace('\u001F', '')
         self.message_text.set_text(text)
     
     def show_all_contents(self):
