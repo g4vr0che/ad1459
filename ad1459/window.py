@@ -305,6 +305,9 @@ class AdWindow(Gtk.Window):
             return False
         elif channel.row.kind == RoomKind.CHANNEL:
             channel.part_channel()
+        elif channel.row.kind == RoomKind.DIALOG:
+            network = self.get_active_network()
+            network.remove_room_from_list(channel.name)
         self.networks_listbox.invalidate_sort()
     
     def add_network(self, network_line):
