@@ -184,11 +184,15 @@ class AdWindow(Gtk.Window):
         new_channel = self.message_entry.get_text()
         self.log.info('Joining channel: %s', new_channel)
         network = self.get_active_network()
-        loop = asyncio.get_event_loop()
-        asyncio.run_coroutine_threadsafe(
-            network.client.join(new_channel),
-            loop=loop
-        )
+        if new_channel.startswith('#'):
+            loop = asyncio.get_event_loop()
+            asyncio.run_coroutine_threadsafe(
+                network.client.join(new_channel),
+                loop=loop
+            )
+        else:
+            self.log.debug('Opening new private message with %s', new_channel)
+            self.join_channel(new_channel, network=network.name, kind='privmsg')
         self.message_entry.set_text('')
     
     def on_network_button_clicked(self, button, data=None):
@@ -256,7 +260,7 @@ class AdWindow(Gtk.Window):
         self.log.debug('Setting nick button label')
         self.nick_button.set_label(new_nick)
     
-    def join_channel(self, channel_name, network='current'):
+    def join_channel(self, channel_name, network='current', kind='channel'):
         """ Joins a channel on the current network.
         
         Arguments:
@@ -264,7 +268,10 @@ class AdWindow(Gtk.Window):
         """
         self.log.info(f'Joining {channel_name} on {network}')
         current_network = self.get_active_network(network=network)
-        current_network.join_room(channel_name)
+        channel_type = 'privmsg'
+        if channel_name.startswith('#'):
+            channel_type = 'channel'
+        current_network.join_room(channel_name, kind=channel_type)
         self.networks_listbox.prepend(current_network.rooms[-1].row)
         self.message_stack.add_named(
             current_network.rooms[-1].window, current_network.rooms[-1].name
@@ -356,6 +363,7 @@ class AdWindow(Gtk.Window):
             'mail-read-symbolic',
             Gtk.IconSize.SMALL_TOOLBAR
         )
+        self.message_entry.grab_focus()
         self.log.debug(f'New room: {row.room.name} on network {row.room.network.name}')
         self.message_stack.set_visible_child_name(new_room.name)
     

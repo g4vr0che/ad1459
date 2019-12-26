@@ -144,6 +144,8 @@ class RoomRow(Gtk.ListBoxRow):
         Gtk.ListBoxRow.__init__(self)
         self.network = network
 
+        self.set_can_focus(False)
+
         room_grid = Gtk.Grid()
         room_grid.set_column_spacing(6)
         self.add(room_grid)

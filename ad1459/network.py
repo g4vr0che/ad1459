@@ -158,7 +158,7 @@ class Network():
                     loop=loop
                 )
     
-    def join_room(self, room):
+    def join_room(self, room, kind='channel'):
         """ Join a new room/channel, or start a new private message with a user.
 
         Arguments:
@@ -166,6 +166,7 @@ class Network():
         """
         new_room = Room(self)
         new_room.name = room
+        new_room.row.kind = kind
         new_room.window.name = room
         self.rooms.append(new_room)
     
@@ -182,6 +183,7 @@ class Network():
         return self.rooms[index]
     
     def add_message_to_room(self, channel, sender, message):
+        self.log.debug('Adding %s from %s to %s', message, sender, channel)
         room = self.app.window.get_active_room(room=channel)
         css = None
         skip = False
@@ -193,6 +195,7 @@ class Network():
                 mtime = each.message_time.get_text()
                 ctime = time.ctime().split()[3]
                 if (message or f'{self.nick} {message}') == mtext and ctime == mtime:
+                    self.log.debug('Looks like our own message, skipping...')
                     skip = True
         elif self.nick in message:
             css = 'highlight'
@@ -227,6 +230,29 @@ class Network():
         room.row.destroy()
         del room
 
+    def post_private_message(self, to, sender, message):
+        """ Put a private message into the buffer.
+       
+        Arguments:
+            to (str): the user the message was sent to.
+            sender (str): the user the message was sent from.
+            message (str): The message text
+        """
+        self.log.debug('Posting private message from %s', sender)
+        if sender != self.nick:
+            try:
+                self.add_message_to_room(sender, sender, message)
+            except AttributeError:
+                self.log.debug('Adding window for PM with %s', to)
+                self.app.window.join_channel(sender, self.name, 'privmsg')
+                self.add_message_to_room(sender, sender, message)
+        else:
+            try:
+                self.add_message_to_room(to, sender, message)
+            except AttributeError:
+                self.log.debug('Adding window for PM with %s', to)
+                self.app.window.join_channel(to, self.name, 'privmsg')
+                self.add_message_to_room(to, sender, message)
     
     """ METHODS CALLED FROM ASYNCIO/PYDLE """
 
@@ -237,8 +263,10 @@ class Network():
     def on_rcvd_message(self, channel, sender, message):
         GLib.idle_add(self.add_message_to_room, channel, sender, message)
     
+    def on_rcvd_private_message(self, to, sender, message):
+        GLib.idle_add(self.post_private_message, to, sender, message)
+    
     def on_join_channel(self, channel):
-        print(f'219: joining {channel} on {self.name}')
         GLib.idle_add(self.app.window.join_channel, channel, self.name)
     
     def on_user_join_part(self, channel, user, action='join'):

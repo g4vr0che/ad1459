@@ -55,8 +55,16 @@ class Client(pydle.Client):
         await super().on_part(channel, user, message)
 
     async def on_message(self, target, source, message):
-        self.network_.on_rcvd_message(target, source, message)
+        self.log.debug('New message in %s from %s: %s', target, source, message)
+        if target.startswith("#"):
+            self.log.debug('Message appears to be sent to a channel')
+            self.network_.on_rcvd_message(target, source, message)
         await super().on_message(target, source, message)
+    
+    async def on_private_message(self, target, by, message):
+        self.log.debug('New private message to %s from %s: %s', target, by, message)
+        self.network_.on_rcvd_private_message(target, by, message)
+        await super().on_private_message(target, by, message)
     
     async def on_ctcp_action(self, by, target, contents):
         message = f'{by} {contents}'

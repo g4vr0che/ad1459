@@ -18,7 +18,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 from .widgets.message_row import MessageRow
-from .widgets.room_row import RoomRow
+from .widgets.room_row import RoomRow, RoomKind
 
 class RoomWindow(Gtk.ScrolledWindow):
 
@@ -89,7 +89,10 @@ class Room():
 
     
     def update_tab_complete(self):
-        self.tab_complete = list(self.network.client.channels[self.name]['users'])
+        if self.row.kind == RoomKind.CHANNEL:
+            self.tab_complete = list(
+                self.network.client.channels[self.name]['users']
+            )
     
     def print_info(self):
         self.log.info(f'{self.name}, {self.network}')
