@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.1](https://github-g///compare/v1.2.0...v1.2.1) (2019-12-26)
+
+
+### Bug Fixes
+
+* Add version tracking scripts ([2245838](https://github-g///commit/22458388c66f60fbd073da58b31bf5ecdc81916d))
+* Make sure version numbering is generated correctly ([6d2e00f](https://github-g///commit/6d2e00f54a65243b5f17ea322bd83e19a4e4d80b))
+* versioning is now correct ([790c14a](https://github-g///commit/790c14a65d7209fb19a61eaeeb59cf8ecd781d73))
+
 ## [1.2.0](https://github-g///compare/v1.1.1...v1.2.0) (2019-12-26)
 
 
