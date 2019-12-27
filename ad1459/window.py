@@ -114,7 +114,6 @@ class AdWindow(Gtk.Window):
         # Set up CSS
         css = (
             b'.message-row {'
-            b'  margin: 3px;'
             b'  border-radius: 6px;'
             b'  background-color: alpha(@theme_selected_bg_color, 0.1);'
             b'}'

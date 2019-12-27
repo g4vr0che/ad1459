@@ -33,6 +33,7 @@ class MessageRow(Gtk.ListBoxRow):
         self.props.selectable = False
 
         Gtk.StyleContext.add_class(self.get_style_context(), "message-row")
+        self.props.margin = 1
 
         message_grid = Gtk.Grid()
         message_grid.set_hexpand(True)
