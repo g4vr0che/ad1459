@@ -412,6 +412,8 @@ class AdWindow(Gtk.Window):
         self.message_entry.grab_focus()
         self.log.debug(f'New room: {row.room.name} on network {row.room.network.name}')
         self.message_stack.set_visible_child_name(new_room.name)
+        nick = new_room.network.nick
+        self.nick_button.set_label(nick)
     
     """ Commands parsed by the client."""
 
