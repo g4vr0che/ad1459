@@ -11,7 +11,9 @@
 
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
+
+from ad1459.formatting import Parser
 
 class MessageRow(Gtk.ListBoxRow):
     """ A ListBoxRow representing a message.
@@ -92,12 +94,25 @@ class MessageRow(Gtk.ListBoxRow):
     
     @text.setter
     def text(self, text):
-        text = text.replace('\u0002', '')
-        text = text.replace('\u0003', '')
-        text = text.replace('\u000F', '')
-        text = text.replace('\u001D', '')
-        text = text.replace('\u001F', '')
-        self.message_text.set_text(text)
+        formatting = {
+            '\u0002': 'b',
+            #'\u0003': 'color',
+            #'\u000F': 'clear',
+            '\u001D': 'i',
+            '\u001F': 'u'
+        }
+        # text = text.replace('\u0002', '') # bold
+        # text = text.replace('\u0003', '') # colour
+        # text = text.replace('\u000F', '') # cancel all
+        # text = text.replace('\u001D', '') # italic
+        # text = text.replace('\u001F', '') # underline
+        escaped_text = GLib.markup_escape_text(text, len(text.encode('utf-8')))
+        print(escaped_text)
+        parser = Parser()
+        formatted_text = parser.parse_text(escaped_text)
+        print(formatted_text)
+
+        self.message_text.set_markup(formatted_text)
     
     def show_all_contents(self):
         self.show_all()
