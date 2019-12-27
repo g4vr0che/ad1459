@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.0](https://github-g///compare/v1.5.1...v1.6.0) (2019-12-27)
+
+
+### Features
+
+* Support some IRC formatting tags ([59a80f9](https://github-g///commit/59a80f996ff5dcc8abc7f1c86b6b91dfe1e6186f))
+
 ### [1.5.1](https://github-g///compare/v1.5.0...v1.5.1) (2019-12-27)
 
 
