@@ -195,7 +195,6 @@ class Network():
 
         if css:
             self.log.debug('Message has class: .%s', css)
-        print(message)
         room.add_message(message, sender=sender, css=css)
         if self.app.window.get_active_room() != room:
             if self.nick in message:
