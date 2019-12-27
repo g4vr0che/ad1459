@@ -190,6 +190,9 @@ class Network():
             css = 'highlight'
         if sender == (self.nick):
             css = 'mine'
+        elif sender == '*':
+            css = 'server'
+
         if css:
             self.log.debug('Message has class: .%s', css)
         room.add_message(message, sender=sender, css=css)
