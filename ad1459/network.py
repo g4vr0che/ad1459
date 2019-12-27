@@ -212,7 +212,7 @@ class Network():
         elif action == 'part':
             room.tab_complete.remove(user)
         jp_message = f'{user} has {action}ed {channel}'
-        self.add_message_to_room(channel, '*', jp_message)
+        self.add_message_to_room(channel, '*', jp_message, css='server')
     
     def remove_room_from_list(self, room):
         room = self.app.window.get_active_room(room=room)
