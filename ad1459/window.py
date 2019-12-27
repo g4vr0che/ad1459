@@ -106,7 +106,7 @@ class AdWindow(Gtk.Window):
         channel_entry.connect('activate', self.on_channel_join_clicked, channel_entry)
 
         channel_join = Gtk.Button()
-        channel_join.set_label('Connect')
+        channel_join.set_label('Join')
         Gtk.StyleContext.add_class(channel_join.get_style_context(), 'suggested-action')
         channel_join.connect('clicked', self.on_channel_join_clicked, channel_entry)
         chan_popup_grid.add(channel_join)
