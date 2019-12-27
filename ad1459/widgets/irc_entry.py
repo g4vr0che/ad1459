@@ -45,12 +45,15 @@ class IrcEntry(Gtk.Entry):
             self.log.debug('Completing word %s', current_word)
             for user in users:
                 if user.lower().startswith(current_word.lower()):
-                    if text_list.index(current_word) == 0:
-                        text_list.pop(-1)
-                        text_list.append(f'{user}: ')
-                    else:
-                        text_list.pop(-1)
-                        text_list.append(f'{user} ')
+                    try:
+                        if text_list.index(current_word) == 0:
+                            text_list.pop(-1)
+                            text_list.append(f'{user}: ')
+                        else:
+                            text_list.pop(-1)
+                            text_list.append(f'{user} ')
+                    except ValueError:
+                        pass
                     text = " ".join(text_list)
                     self.set_text(text)
                     length = len(text)
