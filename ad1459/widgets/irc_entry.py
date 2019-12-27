@@ -45,11 +45,11 @@ class IrcEntry(Gtk.Entry):
             if not self.possible_completions:
                 for user in users:
                     if user.lower().startswith(current_word.lower()):
-                        self.possible_completions.append(user)
+                        self.possible_completions.insert(0, user)
             
             try:
                 completion = self.possible_completions.pop()
-                self.possible_completions.insert(0, completion)\
+                self.possible_completions.insert(0, completion)
 
                 if len(text_list) == 0:
                     completion = f'{completion}:'
