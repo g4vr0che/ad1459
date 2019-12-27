@@ -69,6 +69,8 @@ class MessageRow(Gtk.ListBoxRow):
         self.message_time.show()
         self.message_sender.show()
 
+        self.parser = Parser()
+
     @property
     def time(self):
         """str: The time the message was sent."""
@@ -107,12 +109,11 @@ class MessageRow(Gtk.ListBoxRow):
         # text = text.replace('\u001D', '') # italic
         # text = text.replace('\u001F', '') # underline
         escaped_text = GLib.markup_escape_text(text, len(text.encode('utf-8')))
-        print(escaped_text)
-        parser = Parser()
-        formatted_text = parser.parse_text(escaped_text)
-        print(formatted_text)
+        formatted_text = self.parser.parse_text(escaped_text)
+        linked_text = self.parser.hyperlinks(formatted_text)
+        print(linked_text)
 
-        self.message_text.set_markup(formatted_text)
+        self.message_text.set_markup(linked_text)
     
     def show_all_contents(self):
         self.show_all()

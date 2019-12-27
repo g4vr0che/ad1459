@@ -10,6 +10,7 @@
 """
 
 import logging
+from urllib.parse import urlparse
 
 class Parser:
 
@@ -70,6 +71,23 @@ class Parser:
 
         return f_text
     
+    def hyperlinks(self, text):
+        words = text.split()
+
+        linked_words = []
+        for word in words:
+            scheme = urlparse(word).scheme
+            if scheme == 'http' or scheme == 'https':
+                if word.endswith(')'):
+                    word = word.strip(')')
+                    paren = True
+                print(f'Found URL: {word}')
+                word = f'<a href="{word}">{word}</a>'
+                if paren:
+                    word = f'{word})'
+            linked_words.append(word)
+        return " ".join(linked_words)
+
     def fix_markedup_tags(self, text):
         mu_formatting = {
             '&#x2;': '\x02',
