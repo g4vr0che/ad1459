@@ -182,36 +182,28 @@ class Network():
         """
         return self.rooms[index]
     
-    def add_message_to_room(self, channel, sender, message):
+    def add_message_to_room(self, channel, sender, message, css=None):
         self.log.debug('Adding %s from %s to %s', message, sender, channel)
         room = self.app.window.get_active_room(room=channel)
-        css = None
-        skip = False
         
-        if sender == (self.nick or '*'):
-            messages = room.messages.get_children()
-            for each in messages:
-                mtext = each.message_text.get_text()
-                mtime = each.message_time.get_text()
-                ctime = time.ctime().split()[3]
-                if (message or f'{self.nick} {message}') == mtext and ctime == mtime:
-                    self.log.debug('Looks like our own message, skipping...')
-                    skip = True
-        elif self.nick in message:
+        if self.nick in message:
             css = 'highlight'
-        if not skip:
-            room.add_message(message, sender=sender, css=css)
-            if self.app.window.get_active_room() != room:
-                if self.nick in message:
-                    room.row.unread_indicator.set_from_icon_name(
-                        'dialog-information-symbolic',
-                        Gtk.IconSize.SMALL_TOOLBAR
-                    )
-                else:
-                    room.row.unread_indicator.set_from_icon_name(
-                        'mail-unread-symbolic',
-                        Gtk.IconSize.SMALL_TOOLBAR
-                    )
+        if sender == (self.nick):
+            css = 'mine'
+        if css:
+            self.log.debug('Message has class: .%s', css)
+        room.add_message(message, sender=sender, css=css)
+        if self.app.window.get_active_room() != room:
+            if self.nick in message:
+                room.row.unread_indicator.set_from_icon_name(
+                    'dialog-information-symbolic',
+                    Gtk.IconSize.SMALL_TOOLBAR
+                )
+            else:
+                room.row.unread_indicator.set_from_icon_name(
+                    'mail-unread-symbolic',
+                    Gtk.IconSize.SMALL_TOOLBAR
+                )
 
     def join_part_user_to_room(self, channel, user, action='join'):
         room = self.app.window.get_active_room(room=channel)
@@ -230,7 +222,7 @@ class Network():
         room.row.destroy()
         del room
 
-    def post_private_message(self, to, sender, message):
+    def post_private_message(self, to, sender, message, css=None):
         """ Put a private message into the buffer.
        
         Arguments:
@@ -241,18 +233,18 @@ class Network():
         self.log.debug('Posting private message from %s', sender)
         if sender != self.nick:
             try:
-                self.add_message_to_room(sender, sender, message)
+                self.add_message_to_room(sender, sender, message, css=css)
             except AttributeError:
                 self.log.debug('Adding window for PM with %s', to)
                 self.app.window.join_channel(sender, self.name, 'privmsg')
-                self.add_message_to_room(sender, sender, message)
+                self.add_message_to_room(sender, sender, message, css=css)
         else:
             try:
-                self.add_message_to_room(to, sender, message)
+                self.add_message_to_room(to, sender, message, css=css)
             except AttributeError:
                 self.log.debug('Adding window for PM with %s', to)
                 self.app.window.join_channel(to, self.name, 'privmsg')
-                self.add_message_to_room(to, sender, message)
+                self.add_message_to_room(to, sender, message, css=css)
     
     """ METHODS CALLED FROM ASYNCIO/PYDLE """
 
@@ -260,11 +252,11 @@ class Network():
         self.nick = new_nick
         GLib.idle_add(self.app.window.change_nick, new_nick)
 
-    def on_rcvd_message(self, channel, sender, message):
-        GLib.idle_add(self.add_message_to_room, channel, sender, message)
+    def on_rcvd_message(self, channel, sender, message, css=None):
+        GLib.idle_add(self.add_message_to_room, channel, sender, message, css)
     
-    def on_rcvd_private_message(self, to, sender, message):
-        GLib.idle_add(self.post_private_message, to, sender, message)
+    def on_rcvd_private_message(self, to, sender, message, css=None):
+        GLib.idle_add(self.post_private_message, to, sender, message, css)
     
     def on_join_channel(self, channel):
         GLib.idle_add(self.app.window.join_channel, channel, self.name)

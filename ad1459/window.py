@@ -122,7 +122,13 @@ class AdWindow(Gtk.Window):
             b'  background-color: alpha(@theme_selected_bg_color, 0.2);'
             b'}'
             b'.highlight {'
-            b'    background-color: alpha(@success_color, 0.5);'
+            b'    background-color: alpha(@success_color, 0.3);'
+            b'}'
+            b'.server {'
+            b'    background-color: transparent;'
+            b'}'
+            b'.notice {'
+            b'    background-color: alpha(@warning_color, 0.3);'
             b'}'
         )
 

@@ -78,6 +78,7 @@ class Parser:
         for word in words:
             scheme = urlparse(word).scheme
             if scheme == 'http' or scheme == 'https':
+                paren = False
                 if word.endswith(')'):
                     word = word.strip(')')
                     paren = True
