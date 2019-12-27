@@ -27,6 +27,7 @@ class IrcEntry(Gtk.Entry):
         self.set_placeholder_text(placeholder)
         self.props.show_emoji_icon = True
         self.props.max_width_chars = 5000
+        self.possible_completions = []
 
         self.connect('key-press-event', self.on_key_press_event)
     
@@ -36,28 +37,32 @@ class IrcEntry(Gtk.Entry):
             # TODO: Improve this to get the current word at the cursor
             text = self.get_text()
             text_list = text.split()
-            current_word = text_list[-1]
+            current_word = text_list.pop()
             channel = self.parent.get_active_room()
-            if not self.prematched:
-                channel.update_tab_complete()
-                self.prematched = True
             users = channel.tab_complete
             self.log.debug('Completing word %s', current_word)
-            for user in users:
-                if user.lower().startswith(current_word.lower()):
-                    try:
-                        if text_list.index(current_word) == 0:
-                            text_list.pop(-1)
-                            text_list.append(f'{user}: ')
-                        else:
-                            text_list.pop(-1)
-                            text_list.append(f'{user} ')
-                    except ValueError:
-                        pass
-                    text = " ".join(text_list)
-                    self.set_text(text)
-                    length = len(text)
-                    self.set_position(length)
+
+            if not self.possible_completions:
+                for user in users:
+                    if user.lower().startswith(current_word.lower()):
+                        self.possible_completions.append(user)
+            
+            try:
+                completion = self.possible_completions.pop()
+                self.possible_completions.insert(0, completion)\
+
+                if len(text_list) == 0:
+                    completion = f'{completion}:'
+
+                completion = f'{completion} '
+                text_list.append(completion)
+                text = ' '.join(text_list)
+                self.set_text(text)
+                length = len(text)
+                self.set_position(length)
+            except IndexError:
+                pass
             self.grab_focus_without_selecting()
             return True
-            # self.log.debug('Users: %s', nicks)
+        
+        self.possible_completions = []
