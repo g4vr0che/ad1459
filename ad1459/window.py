@@ -279,12 +279,12 @@ class AdWindow(Gtk.Window):
             if command in message_text:
                 self.commands[command](message_text, room)
                 pass
-            else:
+            elif message_text:
                 asyncio.run_coroutine_threadsafe(
                     network.client.message(room.name, message_text),
                     loop=loop
                 )
-            if not network.client.bouncer:
+            if not network.client.bouncer and message_text:
                 room.add_message(message_text, sender=network.nick, css='mine')
         self.show_all()
         entry.set_text('')
