@@ -279,6 +279,7 @@ class AdWindow(Gtk.Window):
                     network.client.message(room.name, message_text),
                     loop=loop
                 )
+            if not network.client.bouncer:
                 room.add_message(message_text, sender=network.nick, css='mine')
         self.show_all()
         entry.set_text('')
@@ -425,7 +426,8 @@ class AdWindow(Gtk.Window):
             network.client.ctcp(target.name, 'ACTION', message),
             loop=loop
         )
-        target.add_message(f'{network.nick} {message}', css='mine')
+        if not network.client.bouncer:
+            target.add_message(f'{network.nick} {message}', css='mine')
 
         
     def populate_test_data(self):

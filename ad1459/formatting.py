@@ -30,13 +30,7 @@ class Parser:
             text = text.replace(f'/{self.formatting[i][1]}', i)
         return text
 
-    def parse_text(self, text):
-        # text = text.replace('\u0002', '') # bold
-        # text = text.replace('\u0003', '') # colour
-        # text = text.replace('\u000F', '') # cancel all
-        # text = text.replace('\u001D', '') # italic
-        # text = text.replace('\u001F', '') # underline
-        
+    def parse_text(self, text):        
         # \u0002 bold
         # \u0003 colour
         # \u000F cancel all

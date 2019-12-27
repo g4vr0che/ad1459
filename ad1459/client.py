@@ -21,6 +21,7 @@ class Client(pydle.Client):
         super().__init__(nick, sasl_username=sasl_username, sasl_password=sasl_password, **kwargs)
         self.network_ = network
         self.log.debug('Created client for network %s', self.network_.name)
+        self.bouncer = False
     
     async def connect(self, hostname=None, password=None, **kwargs):
         self.log.debug('Client initiating connection to %s', hostname)
@@ -31,6 +32,12 @@ class Client(pydle.Client):
         await super().on_connect()
     
     async def on_raw(self, message):
+        # print(message.params)
+        if message.command == ('CAP' or 'cap' or 'Cap'):
+            if 'znc.in/' in " ".join(message.params):
+                self.log.debug('Server appears to be a ZNC Bouncer')
+                self.bouncer = True
+        
         await super().on_raw(message)
     
     async def on_nick_change(self, old, new):
