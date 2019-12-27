@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github-g///compare/v1.4.3...v1.5.0) (2019-12-27)
+
+
+### Features
+
+* Join channels from popover ([ebff79b](https://github-g///commit/ebff79b40c6db4aca07f83e27a07ec357f83651a))
+
+
+### Bug Fixes
+
+* Add margins to AppMenu ([f755486](https://github-g///commit/f7554869a55bd06de2b92e863521b7a5e0649979))
+
 ### [1.4.3](https://github-g///compare/v1.4.2...v1.4.3) (2019-12-26)
 
 
