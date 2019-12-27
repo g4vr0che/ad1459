@@ -20,6 +20,7 @@ from .widgets.headerbar import Headerbar
 from .widgets.room_row import RoomKind, room_row_sort
 from .widgets.irc_entry import IrcEntry
 from .widgets.about import AboutDialog
+from .formatting import Parser
 from .room import Room
 from .network import Network
 
@@ -264,7 +265,8 @@ class AdWindow(Gtk.Window):
             button (:obj:`Gtk.Button`): The send button the user clicked.
             entry (:obj:`Gtk.Entry`): The chat entry with the message.
         """
-        message_text = entry.get_text()
+        parser = Parser()
+        message_text = parser.format_text(entry.get_text())
         room = self.get_active_room(room='current')
         network = room.network
         loop = asyncio.get_event_loop()

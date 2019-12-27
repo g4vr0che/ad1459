@@ -14,15 +14,21 @@ import logging
 class Parser:
 
     formatting = {
-        '\x02': 'b',
+        '\x02': ['b', '*'],
         #'\u0003': 'color',
         #'\u000F': 'clear',
-        '\x1D': 'i',
-        '\x1F': 'u'
+        '\x1D': ['i', '_'],
+        '\x1F': ['u', '-']
     }
 
     def __init__(self):
         self.log = logging.getLogger('ad1459.formatting')
+    
+    def format_text(self, text):
+        for i in self.formatting:
+            # text = text.replace(f'/{self.formatting[i][0]}', i)
+            text = text.replace(f'/{self.formatting[i][1]}', i)
+        return text
 
     def parse_text(self, text):
         # text = text.replace('\u0002', '') # bold
@@ -46,27 +52,27 @@ class Parser:
 
                 if not char in current_tags:
                     for tag in reversed(current_tags):
-                        f_text = f'{f_text}</{self.formatting[tag]}>'
+                        f_text = f'{f_text}</{self.formatting[tag][0]}>'
 
                     current_tags.append(char)
                     print(current_tags)
                     for tag in current_tags:
-                        f_text = f'{f_text}<{self.formatting[tag]}>'
+                        f_text = f'{f_text}<{self.formatting[tag][0]}>'
 
                 else:
                     for tag in reversed(current_tags):
-                        f_text = f'{f_text}</{self.formatting[tag]}>'
+                        f_text = f'{f_text}</{self.formatting[tag][0]}>'
 
                     current_tags.pop()
                     print(current_tags)
                     for tag in current_tags:
-                        f_text = f'{f_text}<{self.formatting[tag]}>'
+                        f_text = f'{f_text}<{self.formatting[tag][0]}>'
 
             else: 
                 f_text = f'{f_text}{char}'
         
         for tag in reversed(current_tags):
-            f_text = f'{f_text}</{self.formatting[tag]}>'
+            f_text = f'{f_text}</{self.formatting[tag][0]}>'
 
         return f_text
     
