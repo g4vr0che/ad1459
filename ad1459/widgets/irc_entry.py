@@ -42,15 +42,20 @@ class IrcEntry(Gtk.Entry):
                 current_word = text_list.pop()
             except IndexError:
                 return True
-                
+
             channel = self.parent.get_active_room()
             users = channel.tab_complete
             self.log.debug('Completing word %s', current_word)
-
             if not self.possible_completions:
+                self.log.debug('Users to complete from: %s', users)
                 for user in users:
                     if user.lower().startswith(current_word.lower()):
                         self.possible_completions.insert(0, user)
+            self.log.debug(
+                'Possible completions of %s: %s', 
+                current_word,
+                self.possible_completions
+            )
             
             try:
                 completion = self.possible_completions.pop()
