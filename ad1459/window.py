@@ -49,8 +49,6 @@ class AdWindow(Gtk.Window):
         btn_appmenu = Gtk.MenuButton()
         header.pack_end(btn_appmenu)
 
-        self.about_dialog = AboutDialog()
-
         self.appmenu = Gtk.Popover()
         btn_appmenu.set_popover(self.appmenu)
         am_grid = Gtk.Grid()
@@ -201,8 +199,9 @@ class AdWindow(Gtk.Window):
     
     def on_about_button_clicked(self, button, data=None):
         """ clicked signal handler for the about button."""
-        self.about_dialog.run()
-        self.about_dialog.destroy()
+        about_dialog = AboutDialog()
+        about_dialog.run()
+        about_dialog.destroy()
 
     def on_part_button_clicked(self, button, data=None):
         """ clicked signal handler for the part button."""
