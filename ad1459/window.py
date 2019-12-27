@@ -94,6 +94,24 @@ class AdWindow(Gtk.Window):
         channel_button.connect('clicked', self.on_channel_button_clicked)
         header.pack_start(channel_button)
 
+        self.chan_popup = Gtk.Popover()
+        chan_popup_grid = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        Gtk.StyleContext.add_class(chan_popup_grid.get_style_context(), 'linked')
+        chan_popup_grid.props.margin = 6
+        self.chan_popup.add(chan_popup_grid)
+
+        channel_entry = Gtk.Entry()
+        channel_entry.set_placeholder_text('Enter a channel to join')
+        channel_entry.set_width_chars(40)
+        chan_popup_grid.add(channel_entry)
+        channel_entry.connect('activate', self.on_channel_join_clicked, channel_entry)
+
+        channel_join = Gtk.Button()
+        channel_join.set_label('Connect')
+        Gtk.StyleContext.add_class(channel_join.get_style_context(), 'suggested-action')
+        channel_join.connect('clicked', self.on_channel_join_clicked, channel_entry)
+        chan_popup_grid.add(channel_join)
+
         # Set up CSS
         css = (
             b'.message-row {'
@@ -195,8 +213,13 @@ class AdWindow(Gtk.Window):
     
     def on_channel_button_clicked(self, button, data=None):
         """ clicked signal handler for channel button."""        
-        new_channel = self.message_entry.get_text()
-        self.log.info('Joining channel: %s', new_channel)
+        self.chan_popup.set_relative_to(button)
+        self.chan_popup.show_all()
+        self.chan_popup.popup()
+    
+    def on_channel_join_clicked(self, button, entry, data=None):
+        self.log.info('Joining channel')
+        new_channel = entry.get_text()
         network = self.get_active_network()
         if new_channel.startswith('#'):
             loop = asyncio.get_event_loop()
@@ -208,7 +231,8 @@ class AdWindow(Gtk.Window):
             self.log.debug('Opening new private message with %s', new_channel)
             self.join_channel(new_channel, network=network.name, kind='privmsg')
         self.message_entry.set_text('')
-    
+        self.chan_popup.popdown()
+
     def on_network_button_clicked(self, button, data=None):
         """ clicked signal handler for network button."""
         self.network_popup.set_relative_to(button)
