@@ -43,12 +43,14 @@ class Parser:
 
         for char in text:
             if char in self.formatting:
+                print(self.formatting[char])
 
                 if not char in current_tags:
                     for tag in reversed(current_tags):
                         f_text = f'{f_text}</{self.formatting[tag][0]}>'
 
-                    current_tags.append
+                    current_tags.append(char)
+                    print(current_tags)
                     for tag in current_tags:
                         f_text = f'{f_text}<{self.formatting[tag][0]}>'
 
@@ -57,6 +59,7 @@ class Parser:
                         f_text = f'{f_text}</{self.formatting[tag][0]}>'
 
                     current_tags.pop()
+                    print(current_tags)
                     for tag in current_tags:
                         f_text = f'{f_text}<{self.formatting[tag][0]}>'
 
@@ -79,6 +82,7 @@ class Parser:
                 if word.endswith(')'):
                     word = word.strip(')')
                     paren = True
+                print(f'Found URL: {word}')
                 word = f'<a href="{word}">{word}</a>'
                 if paren:
                     word = f'{word})'

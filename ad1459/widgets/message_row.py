@@ -110,6 +110,7 @@ class MessageRow(Gtk.ListBoxRow):
         escaped_text = GLib.markup_escape_text(text, len(text.encode('utf-8')))
         formatted_text = self.parser.parse_text(escaped_text)
         linked_text = self.parser.hyperlinks(formatted_text)
+        print(linked_text)
 
         self.message_text.set_markup(linked_text)
     
