@@ -32,7 +32,6 @@ class Client(pydle.Client):
         await super().on_connect()
     
     async def on_raw(self, message):
-        # print(message.params)
         if message.command == ('CAP' or 'cap' or 'Cap'):
             if 'znc.in/' in " ".join(message.params):
                 self.log.debug('Server appears to be a ZNC Bouncer')
@@ -87,4 +86,5 @@ class Client(pydle.Client):
     
     async def on_ctcp_action(self, by, target, contents):
         message = f'\x1D{by} {contents}\x1D'
+        self.log.debug('Got action to %s: %s', target, message)
         self.network_.on_rcvd_message(target, '*', message)
