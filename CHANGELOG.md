@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.9.0](https://github-g///compare/v1.8.0...v1.9.0) (2019-12-27)
+
+
+### Features
+
+* Add notice support ([56e4b04](https://github-g///commit/56e4b049978161efc82a81920898959cb090be43))
+* Allow clicking on hyperlinks ([84750e7](https://github-g///commit/84750e754fa3382721ee9335e8831ab5917d020f))
+
 ## [1.8.0](https://github-g///compare/v1.7.0...v1.8.0) (2019-12-27)
 
 
