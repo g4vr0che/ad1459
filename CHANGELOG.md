@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.8.0](https://github-g///compare/v1.7.0...v1.8.0) (2019-12-27)
+
+
+### Features
+
+* Better ZNC support ([5fcbb88](https://github-g///commit/5fcbb885c29a65a23378bfd3a8bc28424ecd8eff))
+
 ## [1.7.0](https://github-g///compare/v1.6.0...v1.7.0) (2019-12-27)
 
 
