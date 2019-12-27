@@ -62,9 +62,17 @@ class Client(pydle.Client):
 
     async def on_message(self, target, source, message):
         self.log.debug('New message in %s from %s: %s', target, source, message)
-        if target.startswith("#"):
+        if target.startswith("#") and '\x01' not in message:
             self.log.debug('Message appears to be sent to a channel')
             self.network_.on_rcvd_message(target, source, message)
+        elif '\x01' in message:
+            self.log.debug(
+                'Caught with the wrong handler, rerouting to on_ctcp_action'
+            )
+            message = message.strip('\x01')
+            message = message.replace('ACTION', '')
+            message = message.strip()
+            await self.on_ctcp_action(source, target, message)
         await super().on_message(target, source, message)
     
     async def on_notice(self, target, by, message):
