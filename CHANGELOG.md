@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.5.1](https://github-g///compare/v1.5.0...v1.5.1) (2019-12-27)
+
+
+### Bug Fixes
+
+* about dialog could only be shown once ([4f311b1](https://github-g///commit/4f311b1065dfa3d72ed27032ad43379fbcd4774e))
+
 ## [1.5.0](https://github-g///compare/v1.4.3...v1.5.0) (2019-12-27)
 
 
