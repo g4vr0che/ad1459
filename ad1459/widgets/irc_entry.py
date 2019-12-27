@@ -37,7 +37,12 @@ class IrcEntry(Gtk.Entry):
             # TODO: Improve this to get the current word at the cursor
             text = self.get_text()
             text_list = text.split()
-            current_word = text_list.pop()
+            
+            try:
+                current_word = text_list.pop()
+            except IndexError:
+                return True
+                
             channel = self.parent.get_active_room()
             users = channel.tab_complete
             self.log.debug('Completing word %s', current_word)
