@@ -169,6 +169,7 @@ class Network():
         new_room.row.kind = kind
         new_room.window.name = room
         self.rooms.append(new_room)
+        new_room.update_tab_complete()
     
     def get_room_for_index(self, index):
         """ Get a room from the room list.
