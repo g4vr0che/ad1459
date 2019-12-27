@@ -35,7 +35,6 @@ class MessageRow(Gtk.ListBoxRow):
         Gtk.StyleContext.add_class(self.get_style_context(), "message-row")
 
         message_grid = Gtk.Grid()
-        message_grid.props.margin = 2
         message_grid.set_hexpand(True)
         message_grid.set_column_spacing(12)
         self.add(message_grid)

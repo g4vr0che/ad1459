@@ -86,5 +86,5 @@ class Client(pydle.Client):
         await super().on_private_notice(target, by, message)
     
     async def on_ctcp_action(self, by, target, contents):
-        message = f'{by} {contents}'
+        message = f'\x1D{by} {contents}\x1D'
         self.network_.on_rcvd_message(target, '*', message)
