@@ -413,7 +413,10 @@ class AdWindow(Gtk.Window):
         self.log.debug(f'New room: {row.room.name} on network {row.room.network.name}')
         self.message_stack.set_visible_child_name(new_room.name)
         nick = new_room.network.nick
+        self.log.debug('Setting nick button to %s', nick)
         self.nick_button.set_label(nick)
+        self.log.debug('Ensuring sort is correct')
+        self.networks_listbox.invalidate_sort()
     
     """ Commands parsed by the client."""
 

@@ -35,6 +35,20 @@ class RoomKind(Enum):
         }
         return strings[self.value]
 
+def sort_by_server(row1, row2):
+    if row1.network.name < row2.network.name:
+        return -1
+    
+    else:
+        return 1
+
+def sort_by_room(row1, row2):
+    if row1.room_name < row2.room_name:
+        return -1
+    
+    else:
+        return 1
+
 def room_row_sort(row1, row2, *user_data):
     """ Tells whether row1 should be before row2 or not
 
@@ -48,66 +62,56 @@ def room_row_sort(row1, row2, *user_data):
         0  if they are equal and the order doesn't matter. 
         1  if row1 should go after row2.
     """
+    
     if row1.kind == RoomKind.SERVER:
-        if row2.kind != RoomKind.SERVER:
+        if row2.kind == RoomKind.SERVER:
+            return sort_by_server(row1, row2)
+        else:
+            
             if row2.room in row1.network.rooms:
                 return -1
-            elif row1.network.name < row2.network.name:
-                return -1
+
             else:
-                return 1
-
-        elif row1.room_name < row2.room_name:
-            return -1
-
-        else:
-            return 1
+                return sort_by_server(row1, row2)
 
     elif row1.kind == RoomKind.CHANNEL:
-        if row2.kind == RoomKind.CHANNEL:
+        if row2.kind == RoomKind.SERVER:
             if row1.room in row2.network.rooms:
-                if row1.room_name < row2.room_name:
-                    return -1
-
-                else:
-                    return 1
-            elif row1.network.name < row2.network.name:
-                return -1
+                return 1
+            
             else:
-                return 1
-
-        elif row2.kind == RoomKind.SERVER:
-            if row1.room in row2.network.rooms:
-                return 1
-
-        elif row2.kind == RoomKind.DIALOG:
-            return -1
-
-    elif row1.kind == RoomKind.DIALOG:
-        if row2.kind == RoomKind.DIALOG:
-            if row1.room in row2.network.rooms:
-                if row1.room_name < row2.room_name:
-                    return -1
-
-                else:
-                    return 1
-            elif row1.network.name < row2.network.name:
-                return -1
-            else:
-                return 1
+                return sort_by_server(row1, row2)
 
         elif row2.kind == RoomKind.CHANNEL:
             if row1.room in row2.network.rooms:
-                return 1
+                return sort_by_room(row1, row2)
+            
+            else:
+                return sort_by_server(row1, row2)
 
-        elif row2.kind == RoomKind.SERVER:
+        elif row2.kind == RoomKind.DIALOG:
+            if row1.room in row2.network.rooms:
+                return -1
+            
+            else:
+                return sort_by_server(row1, row2)
+
+    elif row1.kind == RoomKind.DIALOG:
+        if row2.kind == RoomKind.SERVER or row2.kind == RoomKind.CHANNEL:
             if row1.room in row2.network.rooms:
                 return 1
 
-    else:
-        return 0
+            else:
+                
+                return sort_by_server(row1, row2)
 
-    return 0
+        if row2.kind == RoomKind.DIALOG:
+            if row1.room in row2.network.rooms:
+                return sort_by_room(row1, row2)
+            
+            else:
+                
+                return sort_by_server(row1, row2)
 
 class RoomRow(Gtk.ListBoxRow):
     """ A dedicated ListBoxRow for representing a room in the Room List.
