@@ -76,5 +76,16 @@ setup(
     author='Gaven Royer',
     author_email='gavroyer@gmail.com',
     description='An IRC Client',
-    keywords='ad1459 irc client chat gui gtk'
+    keywords='ad1459 irc client chat gui gtk',
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "Development Status :: 3 - Alpha",
+        "Environment :: X11 Applications :: Gnome",
+        "Environment :: X11 Applications :: GTK",
+        "Intended Audience :: End Users/Desktop",
+        "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
+        "Natural Language :: English",
+        "Operating System :: POSIX :: Linux",
+        "Topic :: Communications :: Chat :: Internet Relay Chat"
+    ]
 )
