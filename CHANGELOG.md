@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.10.0](https://github-g///compare/v1.9.0...v1.10.0) (2019-12-28)
+
+
+### Features
+
+* Added ability to cycle tab possible tab completions ([76bb11a](https://github-g///commit/76bb11a781b1426143f3d62b0ce766f3ebec9c03))
+
+
+### Bug Fixes
+
+* better handling of server messages ([4e71da6](https://github-g///commit/4e71da6a5ff26d174432e2f71c99ee535d465beb))
+* Better styling of message rows ([dad8e4a](https://github-g///commit/dad8e4af661e9ee8503873212c51eeecb845da7d))
+* Changes ([e067c70](https://github-g///commit/e067c706848a4c33d42b6a33b037be9d148f2b8c))
+* Distinguish messages from the server ([846fa78](https://github-g///commit/846fa7809500c9ef9d454d72c8b893d3a2e96575))
+* Don't crash tab complete when entry is empty ([dced0da](https://github-g///commit/dced0dade0f5b81b019efb602af543a2b98090f0))
+* Finish removing all of those print statements ([6ace19e](https://github-g///commit/6ace19e673d92cfda46b846b6f25616f7bcafcdd))
+* Fix duplicate mesages when not using ZNC ([2b126d7](https://github-g///commit/2b126d7f700c2db3dfcb4d215e04f26bec3229cd))
+* Fix duplicate mesages when not using ZNC ([6f11c74](https://github-g///commit/6f11c743a0c39ce331be27cbde4260c7c7a4270e))
+* Fix the order of channels ([e68be9e](https://github-g///commit/e68be9e13359cb579c2e8f4842fe125ea390a02e))
+* Keep last-spoke order, then alphabetical on tab complete ([dd3d8bc](https://github-g///commit/dd3d8bc37fa8777486c3a5b3ca133b91d62845c9))
+* Label of join-channel button was incorrect ([48a2e81](https://github-g///commit/48a2e819b22144537017db3aa41571c5c8453504))
+* Load tab completion upon entering a room ([acb4db3](https://github-g///commit/acb4db3baceb7a1d8380e0f895e8b1a90c747ca8))
+* Make actions italicized ([5269616](https://github-g///commit/5269616a862c934a9d9eddace787e3fd971d3bc9))
+* Prevent sending blank messages ([f95f9fd](https://github-g///commit/f95f9fd5426f4e87f5b7cdc2807836c606d2e873))
+* Prevent tab complete losing entry focus ([b63ba62](https://github-g///commit/b63ba626a8316a47ef19130e87b81fd89f8763f4))
+* Remove extra print()'s ([9cd9a4d](https://github-g///commit/9cd9a4de422486241f1a91c67dbc150ed50da322))
+* Remove extra print()s ([76e7ff3](https://github-g///commit/76e7ff39357fc69199e795d8387b925eb8a7d44b))
+* Revert "fix: Remove extra print()'s" ([7117926](https://github-g///commit/7117926c3a23a85f770cdef432a863fe8e2cad7e))
+* update nick button on room change (in case we're on a new network) ([1774c63](https://github-g///commit/1774c630ca606275aa246dfe50e16ef982f0b032))
+
 ## [1.9.0](https://github-g///compare/v1.8.0...v1.9.0) (2019-12-27)
 
 
