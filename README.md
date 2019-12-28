@@ -55,13 +55,11 @@ otherwise.
 
 Currently planned features include:
 
-* Support for receiving NOTICEs.
 * User list
 * Topic
 * Commands 
   - Currently only the /me command is supported
 * CTCP
-* Better bouncer support
 * More intuitive connection entry
 * UI Improvements
 * Saving configuration/recent servers
