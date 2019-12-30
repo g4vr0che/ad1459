@@ -32,106 +32,119 @@ class Network():
             messages.
     """
 
-    def __init__(self, app, name, nick, sasl_u=None, sasl_p=None):
+    def __init__(self, app):
         self.log = logging.getLogger('ad1459.network')
-        self.log.debug('Creating network for %s', name)
-        self.sasl_u = sasl_u
-        self.sasl_p = sasl_p
+        self.log.debug('Creating network')
         self.app = app
-        self.nick = nick
         self.rooms = []
-        if sasl_p:
-            self.client = Client(self.nick, self, sasl_password=sasl_p, sasl_username=sasl_u)
-        else:
-            self.client = Client(self.nick, self)
+        self.config = {
+            'name': 'New Network',
+            'auth': 'sasl',
+            'host': 'chat.freenode.net',
+            'port': 6697,
+            'tls': True,
+            'nickname': 'ad1459-user',
+            'username': 'ad1459-user',
+            'realname': 'AD1459 User',
+            'password': 'hunter2'
+        }
         
         self.room = NetworkRoom(self)
-        self.name = name
-    
-    @property
-    def nick(self):
-        """str: the user's nickname for this network."""
-        return self._nick
-    
-    @nick.setter
-    def nick(self, nick):
-        self._nick = nick
 
-    @property
-    def host(self):
-        """str: The hostname for this connection"""
-        try:
-            return self._host
-        except AttributeError:
-            return None
-    
-    @host.setter
-    def host(self, host):
-        self._host = host
-    
-    @property
-    def port(self):
-        """int: the port for this connection."""
-        try:
-            return self._port
-        except AttributeError:
-            return 6679
-    
-    @port.setter
-    def port(self, port):
-        self._port = port
-    
-    @property
-    def tls(self):
-        """bool: True if the connection uses TLS, otherwise False (default)."""
-        try:
-            return self._tls
-        except AttributeError:
-            return False
-    
-    @tls.setter
-    def tls(self, tls):
-        self._tls = tls
-    
-    @property
-    def password(self):
-        """str: any required password for this network."""
-        try:
-            return self._password
-        except AttributeError:
-            return ''
-    
-    @password.setter
-    def password(self, password):
-        self._password = password
-    
-    @property
-    def auth(self):
-        """str: The authentication method, none, sasl, or pass"""
-        try:
-            return self._auth
-        except AttributeError:
-            return 'none'
-    @auth.setter
-    def auth(self, mode):
-        self._auth = mode
-    
     @property
     def name(self):
         """str: The name of this network (and its room)."""
-        try:
-            return self.room.name
-        except AttributeError:
-            return self.host
+        return self.config['name']
     
     @name.setter
     def name(self, name):
         """This is actually tracked by the room."""
-        self.room.name = name
+        self.config['name'] = name
+    
+    @property
+    def auth(self):
+        """str: One of 'sasl', 'pass', or 'none'."""
+        return self.config['auth']
+    
+    @auth.setter
+    def auth(self, auth):
+        """Only set if it's a valid value."""
+        print(auth)
+        if auth == 'sasl' or auth == 'pass' or auth == 'none':
+            self.config['auth'] = auth
+
+    @property
+    def host(self):
+        """str: The hostname of the server to connect to."""
+        return self.config['host']
+    
+    @host.setter
+    def host(self, host):
+        self.config['host'] = host
+    
+    @property
+    def port(self):
+        return self.config['port']
+    
+    @port.setter
+    def port(self, port):
+        """ Only set a port that is within the valid range."""
+        if port > 0 and port <= 65535:
+            self.config['port'] = int(port)
+
+    @property
+    def tls(self):
+        """bool: Whether or not to use TLS"""
+        return self.config['tls']
+    
+    @tls.setter
+    def tls(self, tls):
+        self.config['tls'] = tls
+
+    @property
+    def nickname(self):
+        """str: The user's nickname"""
+        return self.config['nickname']
+    
+    @nickname.setter
+    def nickname(self, nickname):
+        self.config['nickname'] = nickname
+
+    @property
+    def username(self):
+        """str: The username to use for the connection"""
+        return self.config['username']
+    
+    @username.setter
+    def username(self, username):
+        self.config['username'] = username
+
+    @property
+    def realname(self):
+        """str: The user's real name"""
+        return self.config['realname']
+    
+    @realname.setter
+    def realname(self, realname):
+        self.config['realname'] = realname
+
+    @property
+    def password(self):
+        """str: The user's password."""
+        return self.config['password']
+    
+    @password.setter
+    def password(self, password):
+        self.config['password'] = password
+    
     
     def connect(self):
         """ Connect to the network, disconnecting first if already connected. """
-        if self.host is not "test":
+        if self.auth == 'sasl':
+            self.client = Client(self.nickname, self, sasl_password=self.password, sasl_username=self.username)
+        else:
+            self.client = Client(self.nickname, self)
+        if self.host != "test":
             loop = asyncio.get_event_loop()
             self.log.debug('Initiating connection')
             self.log.debug('Spinning up async connection')
@@ -157,6 +170,8 @@ class Network():
                     ),
                     loop=loop
                 )
+            
+            self.app.window.network_popover.reset_all_text()
     
     def join_room(self, room, kind='channel'):
         """ Join a new room/channel, or start a new private message with a user.
@@ -187,9 +202,9 @@ class Network():
         self.log.debug('Adding %s from %s to %s', message, sender, channel)
         room = self.app.window.get_active_room(room=channel)
         
-        if self.nick in message:
+        if self.nickname in message:
             css = 'highlight'
-        if sender == (self.nick):
+        if sender == (self.nickname):
             css = 'mine'
         elif sender == '*':
             css = 'server'
@@ -198,7 +213,7 @@ class Network():
             self.log.debug('Message has class: .%s', css)
         room.add_message(message, sender=sender, css=css)
         if self.app.window.get_active_room() != room:
-            if self.nick in message:
+            if self.nickname in message:
                 room.row.unread_indicator.set_from_icon_name(
                     'dialog-information-symbolic',
                     Gtk.IconSize.SMALL_TOOLBAR
@@ -235,7 +250,7 @@ class Network():
             message (str): The message text
         """
         self.log.debug('Posting private message from %s', sender)
-        if sender != self.nick:
+        if sender != self.nickname:
             try:
                 self.add_message_to_room(sender, sender, message, css=css)
             except AttributeError:
@@ -253,7 +268,7 @@ class Network():
     """ METHODS CALLED FROM ASYNCIO/PYDLE """
 
     def on_own_nick_change(self, new_nick):
-        self.nick = new_nick
+        self.nickname = new_nick
         GLib.idle_add(self.app.window.change_nick, new_nick)
 
     def on_rcvd_message(self, channel, sender, message, css=None):
@@ -270,7 +285,7 @@ class Network():
         GLib.idle_add(self.join_part_user_to_room, channel, user, action)
     
     def on_self_part(self, channel_name):
-        self.log.debug('Confirmed %s has left %s', self.nick, channel_name)
+        self.log.debug('Confirmed %s has left %s', self.nickname, channel_name)
         GLib.idle_add(self.remove_room_from_list, channel_name)
 
 
@@ -281,6 +296,7 @@ class NetworkRoom(Room):
         super().__init__(network)
         self.row.kind = 'SERVER'
         self.tab_complete = []
+        self.name = self.network.name
 
     def display_motd(self, motd):
         self.add_message(motd)

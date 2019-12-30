@@ -41,13 +41,13 @@ class Client(pydle.Client):
     
     async def on_nick_change(self, old, new):
         self.log.debug('User %s is now %s', old, new)
-        if old == self.network_.nick:
+        if old == self.network_.nickname:
             self.network_.on_own_nick_change(new)
         await super().on_nick_change(old, new)
     
     async def on_join(self, channel, user):
         self.log.debug(f'User {user} joined {channel} on {self.network_.name}')
-        if user == self.network_.nick:
+        if user == self.network_.nickname:
             self.network_.on_join_channel(channel)
         else:
             self.network_.on_user_join_part(channel, user)
@@ -56,7 +56,7 @@ class Client(pydle.Client):
     async def on_part(self, channel, user, message=None):
         self.log.debug(f'User {user} parted {channel} on {self.network_.name}')
         self.network_.on_user_join_part(channel, user, action='part')
-        if user == self.network_.nick:
+        if user == self.network_.nickname:
             self.network_.on_self_part(channel)
         await super().on_part(channel, user, message)
 

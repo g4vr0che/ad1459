@@ -16,10 +16,11 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
-from .widgets.headerbar import Headerbar
-from .widgets.room_row import RoomKind, room_row_sort
-from .widgets.irc_entry import IrcEntry
 from .widgets.about import AboutDialog
+from .widgets.headerbar import Headerbar
+from .widgets.irc_entry import IrcEntry
+from .widgets.room_row import RoomKind, room_row_sort
+from .widgets.server_popup import ServerPopover
 from .formatting import Parser
 from .room import Room
 from .network import Network
@@ -47,6 +48,16 @@ class AdWindow(Gtk.Window):
         network_button.connect('clicked', self.on_network_button_clicked)
         header.pack_start(network_button)
 
+        self.network_popover = ServerPopover()
+        self.network_popover.connect_button.connect(
+            'clicked', self.on_network_connect_clicked
+        )
+        for wid in self.network_popover.widgets:
+            wid.connect('changed', self.on_network_popup_changed)
+        self.network_popover.server_line_entry.connect(
+            'changed', self.on_network_popup_changed
+        )
+
         btn_appmenu = Gtk.MenuButton()
         header.pack_end(btn_appmenu)
 
@@ -67,24 +78,6 @@ class AdWindow(Gtk.Window):
         am_grid.attach(about_button, 0, 1, 1, 1)
 
         self.appmenu.show_all()
-
-        self.network_popup = Gtk.Popover()
-        network_popup_grid = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        Gtk.StyleContext.add_class(network_popup_grid.get_style_context(), 'linked')
-        network_popup_grid.props.margin = 6
-        self.network_popup.add(network_popup_grid)
-
-        network_entry = Gtk.Entry()
-        network_entry.set_placeholder_text('Enter a network to connect to')
-        network_entry.set_width_chars(80)
-        network_popup_grid.pack_start(network_entry, False, True, 0)
-        network_entry.connect('activate', self.on_network_connect_clicked, network_entry)
-
-        network_connect = Gtk.Button()
-        network_connect.set_label('Connect')
-        Gtk.StyleContext.add_class(network_connect.get_style_context(), 'suggested-action')
-        network_connect.connect('clicked', self.on_network_connect_clicked, network_entry)
-        network_popup_grid.pack_end(network_connect, False, True, 0)
 
         channel_button = Gtk.Button.new_from_icon_name(
             'list-add-symbolic',
@@ -128,6 +121,9 @@ class AdWindow(Gtk.Window):
             b'}'
             b'.notice {'
             b'    background-color: alpha(@warning_color, 0.3);'
+            b'}'
+            b'.connect-entry {'
+            b'    background-color: @theme_base_color;'
             b'}'
         )
 
@@ -240,16 +236,56 @@ class AdWindow(Gtk.Window):
 
     def on_network_button_clicked(self, button, data=None):
         """ clicked signal handler for network button."""
-        self.network_popup.set_relative_to(button)
-        self.network_popup.show_all()
-        self.network_popup.popup()
+        self.network_popover.set_relative_to(button)
+        self.network_popover.show_all()
+        self.network_popover.popup()
     
-    def on_network_connect_clicked(self, button, entry, data=None):
+    def on_network_popup_changed(self, widget, data=None):
+        """ changed signal handler for entries in network popover."""
+        if self.network_popover.get_all_widgets_text() != 'sasl  6697':
+            self.network_popover.connect_grid.set_sensitive(True)
+            self.network_popover.server_line_entry.set_sensitive(False)
+            self.network_popover.tls_check.set_sensitive(True)
+
+        elif self.network_popover.server_line_entry.get_text() != '':
+            self.network_popover.connect_grid.set_sensitive(False)
+            self.network_popover.server_line_entry.set_sensitive(True)
+            self.network_popover.tls_check.set_sensitive(False)
+
+        else:
+            self.network_popover.connect_grid.set_sensitive(True)
+            self.network_popover.server_line_entry.set_sensitive(True)
+            self.network_popover.tls_check.set_sensitive(True)
+    
+    def on_network_connect_clicked(self, button, data=None):
         """ clicked signal handler for the network button."""
         self.log.info('Connecting to new network')
-        self.add_network(entry.get_text())
-        entry.set_text('')
-        self.network_popup.popdown()
+        network_line = self.network_popover.server_line_entry.get_text()
+        if network_line != '':
+            network = self.parse_network_line(network_line)
+        else:
+            network = Network(self.app)
+            network.name = self.network_popover.name
+            network.auth = self.network_popover.auth
+            print(network.auth)
+            network.host = self.network_popover.server
+            network.port = self.network_popover.port
+            network.tls = self.network_popover.tls
+            network.nickname = self.network_popover.nick
+            network.username = self.network_popover.username
+            network.realname = self.network_popover.realname
+            network.password = self.network_popover.password
+        
+        self.networks.append(network)
+        network.connect()
+        self.networks_listbox.add(network.room.row)
+        self.message_stack.add_named(network.room.window, network.name)
+        self.networks_listbox.invalidate_sort()
+        self.show_all()
+        self.set_nick(network.nickname)
+        network.room.name = network.name
+
+        self.network_popover.popdown()
     
     def on_nick_button_clicked(self, button, entry):
         """ clicked signal handler for nickname button.
@@ -287,10 +323,36 @@ class AdWindow(Gtk.Window):
         self.show_all()
         entry.set_text('')
     
+    def parse_network_line(self, line):
+        """Takes a network line and parses it into individual components
+
+        The format for the network line is:
+        none|pass|sasl networkname host port username (tls) (password)
+              0              1       2    3     4       5       -1
+
+        Returns: a (dict) of key-value pairs with each key.
+        """
+        nlist = line.split()
+        network = Network(self.app)
+        network.auth = nlist[0]
+        network.name = nlist[1]
+        network.host = nlist[2]
+        network.port = int(nlist[3])
+        network.username = nlist[4]
+        network.nickname = nlist[4]
+        if nlist[5] == 'tls':
+            network.tls = True
+        else:
+            network.tls = False
+        network.password = nlist[-1]
+
+        return network
+
+    
     def change_nick(self, new_nick):
         network = self.get_active_network()
-        network.nick = new_nick
-        self.log.info('Set new nick %s on network %s', new_nick, network.nick)
+        network.nickname = new_nick
+        self.log.info('Set new nick %s on network %s', new_nick, network.name)
         loop = asyncio.get_event_loop()
         network = self.get_active_network()
         asyncio.run_coroutine_threadsafe(
@@ -379,7 +441,7 @@ class AdWindow(Gtk.Window):
         self.message_stack.add_named(new_network.room.window, new_network.name)
         self.networks_listbox.invalidate_sort()
         self.show_all()
-        self.set_nick(new_network.nick)
+        self.set_nick(new_network.nickname)
 
     def get_active_room(self, room='current'):
         """ Gets the currently active room object. """
@@ -412,7 +474,9 @@ class AdWindow(Gtk.Window):
         self.message_entry.grab_focus()
         self.log.debug(f'New room: {row.room.name} on network {row.room.network.name}')
         self.message_stack.set_visible_child_name(new_room.name)
-        nick = new_room.network.nick
+        nick = new_room.network.nickname
+        for network in self.networks:
+            network.room.name = network.name
         self.log.debug('Setting nick button to %s', nick)
         self.nick_button.set_label(nick)
         self.log.debug('Ensuring sort is correct')

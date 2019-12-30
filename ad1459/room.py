@@ -141,7 +141,7 @@ class Room():
             self.update_tab_complete()
             self.prematched = True
         new_message = MessageRow()
-        if sender == self.network.nick:
+        if sender == self.network.nickname:
             css = 'mine'
 
         if css:
