@@ -1,6 +1,47 @@
 # ad1459
 IRC Client
 
+AD1459 is an IRC client written in Python and GTK3. It aims to be a modern IRC 
+client with features that make sense for IRC today. It has an interface which 
+has been loosely inspired by Hexchat and mIRC.
+
+AD1459 is currently in _ALPHA_, and should not be considered ready for everyday 
+use. 
+
+## Current Abilities
+
+* Multiple-network support
+* Chatting over IRC.
+* Joining/Parting channels
+* Changing nick
+* Tab-completion
+
+
+## TODOS
+
+Currently planned features include:
+
+* Keyring-based 
+* Notifications
+* User list
+* Topic
+* Commands 
+  - Currently only the /me command is supported
+* CTCP
+* More intuitive connection entry
+* UI Improvements
+* Saving configuration/recent servers
+* Last message recall
+
+
+## Known Issues
+
+These are problems that have been currently identified:
+
+* Rooms on every network must have unique names
+* No server messages for quitting, nick changes, or Op-actions (kick, ban, modes)
+* Tab completion may drift out of date with actual user list
+
 ### Connecting to IRC
 
 To connect to a server/network, click on the server button (in the top left) and
@@ -49,18 +90,3 @@ otherwise.
 `none freenode chat.freenode.net 6666 g4vr0che`
 
 `pass My-Private-Network my.private-network.com 12345 secret_username tls hunter3`
-
-
-## TODOS
-
-Currently planned features include:
-
-* User list
-* Topic
-* Commands 
-  - Currently only the /me command is supported
-* CTCP
-* More intuitive connection entry
-* UI Improvements
-* Saving configuration/recent servers
-* Last message recall
