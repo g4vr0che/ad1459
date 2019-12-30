@@ -21,6 +21,7 @@ from .widgets.headerbar import Headerbar
 from .widgets.irc_entry import IrcEntry
 from .widgets.room_row import RoomKind, room_row_sort
 from .widgets.server_popup import ServerPopover
+from .widgets.server_popup import CONFIG_FILE_PATH
 from .formatting import Parser
 from .room import Room
 from .network import Network
@@ -277,6 +278,29 @@ class AdWindow(Gtk.Window):
             network.password = self.network_popover.password
         
         self.networks.append(network)
+        
+        if self.network_popover.save_check.get_active():
+            self.network_popover.config[network.name] = {}
+            self.network_popover.config[network.name]['name'] = network.name
+            self.network_popover.config[network.name]['auth'] = network.auth
+            self.network_popover.config[network.name]['host'] = network.host
+            self.network_popover.config[network.name]['port'] = str(network.port)
+            self.network_popover.config[network.name]['tls'] = str(network.tls)
+            self.network_popover.config[network.name]['nickname'] = network.nickname
+            self.network_popover.config[network.name]['username'] = network.username
+            self.network_popover.config[network.name]['realname'] = network.realname
+            with open(CONFIG_FILE_PATH, mode='w') as configfile:
+                self.network_popover.config.write(configfile)
+        else:
+            try:
+                del(self.network_popover.config[network.name])
+                with open(CONFIG_FILE_PATH, mode='w') as configfile:
+                    self.network_popover.config.write(configfile)
+                self.log.info('Deleted network %s', network.name)
+            except KeyError:
+                pass
+            self.network_popover.reset_all_text()
+        self.network_popover.init_saved_combo()
         network.connect()
         self.networks_listbox.add(network.room.row)
         self.message_stack.add_named(network.room.window, network.name)

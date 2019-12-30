@@ -9,6 +9,14 @@
   A popover for connecting to servers.
 """
 
+import configparser
+import os
+import pathlib
+
+USER_HOME_PATH = str(pathlib.Path.home())
+CONFIG_DIR_PATH = os.path.join(USER_HOME_PATH, '.config')
+CONFIG_FILE_PATH = os.path.join(CONFIG_DIR_PATH, 'ad1459.ini')
+
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
@@ -17,18 +25,32 @@ class ServerPopover(Gtk.Popover):
 
     def __init__(self):
         super().__init__()
+
+        self.config = configparser.ConfigParser()
+
+        self.config.read(CONFIG_FILE_PATH)
         
         layout_grid = Gtk.Grid()
         layout_grid.set_column_spacing(6)
         layout_grid.set_row_spacing(12)
         layout_grid.props.margin = 6
         self.add(layout_grid)
+        
+        # Saved Networks
+        self.saved_combo = Gtk.ComboBoxText()
+        self.init_saved_combo()
+        self.saved_combo.set_active(-1)
+        Gtk.StyleContext.add_class(
+            self.saved_combo.get_style_context(), 'connect-entry'
+        )
+        self.saved_combo.connect('changed', self.on_saved_combo_changed)
+        layout_grid.attach(self.saved_combo, 0, 0, 2, 1)
 
         self.connect_grid = Gtk.Grid()
         self.connect_grid.set_orientation(Gtk.Orientation.VERTICAL)
         Gtk.StyleContext.add_class(self.connect_grid.get_style_context(), 'linked')
         Gtk.StyleContext.add_class(self.connect_grid.get_style_context(), 'connect-entry')
-        layout_grid.attach(self.connect_grid, 0, 0, 2, 1)
+        layout_grid.attach(self.connect_grid, 0, 1, 2, 1)
 
         # Network Name
         self.name_entry = Gtk.Entry()
@@ -101,20 +123,19 @@ class ServerPopover(Gtk.Popover):
         self.tls_check.simple_entry = True
         self.tls_check.set_label('TLS')
         self.tls_check.set_active(True)
-        layout_grid.attach(self.tls_check, 0, 1, 1, 1)
+        layout_grid.attach(self.tls_check, 0, 2, 1, 1)
 
         # Save check
         self.save_check = Gtk.CheckButton()
         self.save_check.set_label('Save')
-        self.save_check.set_active(False)
-        self.save_check.set_sensitive(False)
-        layout_grid.attach(self.save_check, 1, 1, 1, 1)
+        self.save_check.set_active(True)
+        layout_grid.attach(self.save_check, 1, 2, 1, 1)
 
         # Server entry
         self.server_line_entry = Gtk.Entry()
         self.server_line_entry.simple_entry = False
         self.server_line_entry.set_placeholder_text('Server line')
-        layout_grid.attach(self.server_line_entry, 0, 2, 2, 1)
+        layout_grid.attach(self.server_line_entry, 0, 3, 2, 1)
 
         # Connect Button
         self.connect_button = Gtk.Button()
@@ -122,7 +143,7 @@ class ServerPopover(Gtk.Popover):
         Gtk.StyleContext.add_class(
             self.connect_button.get_style_context(), 'suggested-action'
         )
-        layout_grid.attach(self.connect_button, 0, 3, 2, 1)
+        layout_grid.attach(self.connect_button, 0, 4, 2, 1)
 
         self.widgets = [
             self.name_entry,
@@ -191,8 +212,57 @@ class ServerPopover(Gtk.Popover):
     @property 
     def server_line(self):
         return self.server_line_entry.get_text()
+    
+    def on_saved_combo_changed(self, combo, data=None):
+        """ changed signal handler for saved_combo."""
+        network = combo.get_active_text()
+
+        if network == 'New...':
+            self.reset_all_text()
+        
+        else:
+            self.config.read(CONFIG_FILE_PATH)
+            self.name_entry.set_text(
+                self.config[network]['name']
+            )
+            self.nick_entry.set_text(
+                self.config[network]['nickname']
+            )
+            self.username_entry.set_text(
+                self.config[network]['username']
+            )
+            self.realname_entry.set_text(
+                self.config[network]['realname']
+            )
+            self.server_entry.set_text(
+                self.config[network]['host']
+            )
+            self.port_entry.set_value(
+                int(self.config[network]['port'])
+            )
+            if self.config[network]['auth'] == 'sasl':
+                self.auth_combo.set_active(0)
+            elif self.config[network]['auth'] == 'pass':
+                self.auth_combo.set_active(1)
+            else:
+                self.auth_combo.set_active(2)
+            if self.config[network]['tls'] == 'True':
+                self.tls_check.set_active(True)
+            else:
+                self.tls_check.set_active(False)
+            self.save_check.set_active(True)
+
+    def init_saved_combo(self):
+        """Clears any existing items from the saved network combo and sets it 
+        up with new ones.
+        """
+        self.saved_combo.remove_all()
+        self.saved_combo.append_text('New...')
+        for network in self.config.sections():
+            self.saved_combo.append_text(network)
 
     def reset_all_text(self):
+        self.saved_combo.set_active(0)
         self.name_entry.set_text('')
         self.nick_entry.set_text('')
         self.username_entry.set_text('')
@@ -202,7 +272,7 @@ class ServerPopover(Gtk.Popover):
         self.auth_combo.set_active(0)
         self.password_entry.set_text('')
         self.tls_check.set_active(True)
-        self.save_check.set_active(False)
+        self.save_check.set_active(True)
         self.server_line_entry.set_text('')
 
     def get_all_widgets_text(self):
