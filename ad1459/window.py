@@ -291,12 +291,23 @@ class AdWindow(Gtk.Window):
             self.network_popover.config[network.name]['realname'] = network.realname
             with open(CONFIG_FILE_PATH, mode='w') as configfile:
                 self.network_popover.config.write(configfile)
+            keyring_username = f'{network.nickname}!{network.username}@{network.name}'
+            self.network_popover.keyring.set_password(
+                f'{network.name}-{network.host}',
+                keyring_username,
+                network.password
+            )
         else:
             try:
                 del(self.network_popover.config[network.name])
                 with open(CONFIG_FILE_PATH, mode='w') as configfile:
                     self.network_popover.config.write(configfile)
                 self.log.info('Deleted network %s', network.name)
+                keyring_username = f'{network.nickname}!{network.username}@{network.name}'
+                self.network_popover.keyring.delete_password(
+                    f'{network.name}-{network.host}',
+                    keyring_username
+                )
             except KeyError:
                 pass
             self.network_popover.reset_all_text()

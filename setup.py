@@ -62,7 +62,8 @@ setup(
     # Dependencies
     install_requires=[
       'pydle',
-      'pure-sasl'
+      'pure-sasl',
+      'keyring'
     ],
 
     data_files=[

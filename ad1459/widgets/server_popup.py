@@ -10,6 +10,7 @@
 """
 
 import configparser
+import keyring as Keyring
 import os
 import pathlib
 
@@ -27,6 +28,7 @@ class ServerPopover(Gtk.Popover):
         super().__init__()
 
         self.config = configparser.ConfigParser()
+        self.keyring = Keyring.get_keyring()
 
         self.config.read(CONFIG_FILE_PATH)
         
@@ -250,6 +252,17 @@ class ServerPopover(Gtk.Popover):
                 self.tls_check.set_active(True)
             else:
                 self.tls_check.set_active(False)
+            keyring_service = (
+                f'{self.config[network]["name"]}-{self.config[network]["host"]}'
+            )
+            keyring_username = (
+                f'{self.config[network]["nickname"]}'
+                f'!{self.config[network]["username"]}'
+                f'@{self.config[network]["name"]}'
+            )
+            self.password_entry.set_text(
+                self.keyring.get_password(keyring_service, keyring_username)
+            )
             self.save_check.set_active(True)
 
     def init_saved_combo(self):
