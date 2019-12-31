@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.11.0](https://github-g///compare/v1.10.1...v1.11.0) (2019-12-31)
+
+
+### Features
+
+* Add secure storage of network passwords in the keyring ([0a86283](https://github-g///commit/0a862836cf3a9130359f7f2fa4e95ad5e4455166)), closes [#4](https://github-g///issues/4)
+* Allow saving connection details. ([4a2cedf](https://github-g///commit/4a2cedfc24f5b37ddc628b4c88231ed1f0722fc2))
+* Better Connection UI ([83eb056](https://github-g///commit/83eb05623e08aa5ed293618a091f39209fe9c3c3))
+
 ### [1.10.1](https://github-g///compare/v1.10.0...v1.10.1) (2019-12-28)
 
 ## [1.10.0](https://github-g///compare/v1.9.0...v1.10.0) (2019-12-28)
