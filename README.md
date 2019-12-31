@@ -5,6 +5,8 @@ AD1459 is an IRC client written in Python and GTK3. It aims to be a modern IRC
 client with features that make sense for IRC today. It has an interface which 
 has been loosely inspired by Hexchat and mIRC.
 
+![AD1459 IRC Client](https://i.imgur.com/ybySLH3.png)
+
 AD1459 is currently in _ALPHA_, and should not be considered ready for everyday 
 use. 
 
