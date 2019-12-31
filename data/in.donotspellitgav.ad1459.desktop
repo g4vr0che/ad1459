@@ -1,10 +1,11 @@
 [Desktop Entry]
-Version=0.0.1
+Version=1.1
 Type=Application
-Exec=ad1459
-Icon=internet-chat
-StartupNotify=true
-Terminal=false
-Categories=Internet
 Name=AD1459 
+GenericName=IRC Client
 Comment=AD1459 IRC Client
+Icon=internet-chat
+Exec=ad1459
+Categories=Internet
+Terminal=false
+StartupWMClass=Ad1459
