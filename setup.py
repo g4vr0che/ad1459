@@ -14,7 +14,10 @@ import subprocess
 
 version = {}
 with open('ad1459/__version__.py') as fp:
-  exec(fp.read(), version)
+    exec(fp.read(), version)
+
+with open('README.md') as readme:
+    long_description = readme.read()
 
 class Release(Command):
     """ Generate a release and push it to git."""
@@ -77,6 +80,8 @@ setup(
     author='Gaven Royer',
     author_email='gavroyer@gmail.com',
     description='An IRC Client',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     keywords='ad1459 irc client chat gui gtk',
     classifiers=[
         "Programming Language :: Python :: 3",
