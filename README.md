@@ -15,6 +15,8 @@ use.
 * Joining/Parting channels
 * Changing nick
 * Tab-completion
+* Save and recall servers
+* Secure password storage within system keyring
 
 
 ## TODOS
@@ -30,7 +32,6 @@ Currently planned features include:
 * CTCP
 * More intuitive connection entry
 * UI Improvements
-* Saving configuration/recent servers
 * Last message recall
 
 
