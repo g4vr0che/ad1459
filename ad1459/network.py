@@ -228,10 +228,31 @@ class Network():
         room = self.app.window.get_active_room(room=channel)
         if action == 'join':
             room.tab_complete.append(user)
+            action = 'joined'
         elif action == 'part':
             room.tab_complete.remove(user)
-        jp_message = f'{user} has {action}ed {channel}'
+            action = 'left'
+        elif action == 'quit':
+            room.tab_complete.remove(user)
+            action = 'quit'
+        jp_message = f'{user} has {action} {channel}'
         self.add_message_to_room(channel, '*', jp_message, css='server')
+    
+    def quit_user(self, user, message=None):
+        for room in self.rooms:
+            if user in room.tab_complete:
+                room.tab_complete.remove(user)
+                jp_message = f'{user} has quit. ({message})'
+                self.add_message_to_room(room.name, '*', jp_message, css='server')
+    
+    def change_user_nick(self, old, new):
+        for room in self.rooms:
+            if old in room.tab_complete:
+                room.tab_complete.append(new)
+                room.tab_complete.remove(old)
+                cn_message = f'{old} is now {new}'
+                self.add_message_to_room(room.name, '*', cn_message, css='server')
+
     
     def remove_room_from_list(self, room):
         room = self.app.window.get_active_room(room=room)
@@ -284,9 +305,17 @@ class Network():
         self.log.debug('User %s has %sed %s', user, action, channel)
         GLib.idle_add(self.join_part_user_to_room, channel, user, action)
     
+    def on_user_quit(self, user, message=None):
+        self.log.debug('User %s has quit %s', user, self.name)
+        GLib.idle_add(self.quit_user, user, message)
+        
     def on_self_part(self, channel_name):
         self.log.debug('Confirmed %s has left %s', self.nickname, channel_name)
         GLib.idle_add(self.remove_room_from_list, channel_name)
+    
+    def on_user_nick_change(self, old, new):
+        self.log.debug('User %s has changed nicks', old)
+        GLib.idle_add(self.change_user_nick, old, new)
 
 
 class NetworkRoom(Room):
