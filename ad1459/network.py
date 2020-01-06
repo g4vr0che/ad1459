@@ -202,11 +202,7 @@ class Network():
     def add_message_to_room(self, channel, sender, message, css=None):
         self.log.debug('Adding %s from %s to %s', message, sender, channel)
 
-        int_name = f'{channel}'
-        int_name += f'-{self.name}'
-        int_name += f'-{self.nickname}'
-        int_name += f'!{self.username}'
-        int_name += f'@{self.host}'
+        int_name = f'{id(self)}-{channel}'
         self.log.debug('Looking for internal name %s', int_name)
 
         room = self.app.window.get_active_room(room=int_name)
@@ -244,11 +240,7 @@ class Network():
         channel_internal = f'{channel}-{self.host}-{self.nickname}'
         self.log.debug('Looking for internal name %s', channel_internal)
         
-        int_name = f'{channel}'
-        int_name += f'-{self.name}'
-        int_name += f'-{self.nickname}'
-        int_name += f'!{self.username}'
-        int_name += f'@{self.host}'
+        int_name = f'{id(self)}-{channel}'
         self.log.debug('Looking for internal name %s', int_name)
 
         room = self.app.window.get_active_room(room=int_name)
@@ -286,11 +278,7 @@ class Network():
         room_internal = f'{room}-{self.host}-{self.nickname}'
         self.log.debug('Looking for internal name %s', room_internal)
         
-        int_name = f'{room}'
-        int_name += f'-{self.name}'
-        int_name += f'-{self.nickname}'
-        int_name += f'!{self.username}'
-        int_name += f'@{self.host}'
+        int_name = f'{id(self)}-{room}'
         self.log.debug('Looking for internal name %s', int_name)
 
         room = self.app.window.get_active_room(room=int_name)

@@ -76,13 +76,7 @@ class Room():
         """ str: an internal name for this channel to help identify it more
         uniquely. See #1
         """
-        int_name = f'{self.name}'
-        int_name += f'-{self.network.name}'
-        int_name += f'-{self.network.nickname}'
-        int_name += f'!{self.network.username}'
-        int_name += f'@{self.network.host}'
-
-        return int_name
+        return f'{id(self.network)}-{self.name}'
 
     @property
     def name(self):
