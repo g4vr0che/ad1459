@@ -178,6 +178,14 @@ class Room():
         new_message.text = message
         
         new_message.show_all_contents()
+        if (css != 'mine' and 
+                self.row.kind == RoomKind.DIALOG and
+                not self.network.app.window.focused):
+            self.notification.update(
+                f'New message from {sender}',
+                message
+            )
+            self.notification.show()
         self.messages.add(new_message)
         if not sender == '*':
             try:

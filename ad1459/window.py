@@ -206,6 +206,12 @@ class AdWindow(Gtk.Window):
 
         # self.populate_test_data()
     
+    @property
+    def focused(self):
+        if self.props.is_active:
+            return True
+        return False
+    
     def on_about_button_clicked(self, button, data=None):
         """ clicked signal handler for the about button."""
         about_dialog = AboutDialog()
