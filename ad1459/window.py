@@ -420,7 +420,7 @@ class AdWindow(Gtk.Window):
         current_network.join_room(channel_name, kind=channel_type)
         self.networks_listbox.prepend(current_network.rooms[-1].row)
         self.message_stack.add_named(
-            current_network.rooms[-1].window, current_network.rooms[-1].name
+            current_network.rooms[-1].window, current_network.rooms[-1].internal_name
         )
         self.networks_listbox.invalidate_sort()
         self.show_all()
@@ -490,6 +490,7 @@ class AdWindow(Gtk.Window):
         if room == 'current':
             return self.message_stack.get_visible_child().room
         else:
+            rooms = self.message_stack.get_children
             return self.message_stack.get_child_by_name(room).room
     
     def get_active_network(self, network='current'):
@@ -514,8 +515,8 @@ class AdWindow(Gtk.Window):
         )
         new_room.notification.close()
         self.message_entry.grab_focus()
-        self.log.debug(f'New room: {row.room.name} on network {row.room.network.name}')
-        self.message_stack.set_visible_child_name(new_room.name)
+        self.log.debug(f'New room: {new_room.internal_name} on network {row.room.network.name}')
+        self.message_stack.set_visible_child_name(new_room.internal_name)
         nick = new_room.network.nickname
         for network in self.networks:
             network.room.name = network.name

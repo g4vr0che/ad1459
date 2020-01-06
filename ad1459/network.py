@@ -201,7 +201,16 @@ class Network():
     
     def add_message_to_room(self, channel, sender, message, css=None):
         self.log.debug('Adding %s from %s to %s', message, sender, channel)
-        room = self.app.window.get_active_room(room=channel)
+
+        int_name = f'{channel}'
+        int_name += f'-{self.name}'
+        int_name += f'-{self.nickname}'
+        int_name += f'!{self.username}'
+        int_name += f'@{self.host}'
+        self.log.debug('Looking for internal name %s', int_name)
+
+        room = self.app.window.get_active_room(room=int_name)
+        self.log.debug('Got room %s', room.internal_name)
         
         if self.nickname in message:
             css = 'highlight'
@@ -232,7 +241,19 @@ class Network():
                 room.notification.show()
 
     def join_part_user_to_room(self, channel, user, action='join'):
-        room = self.app.window.get_active_room(room=channel)
+        channel_internal = f'{channel}-{self.host}-{self.nickname}'
+        self.log.debug('Looking for internal name %s', channel_internal)
+        
+        int_name = f'{channel}'
+        int_name += f'-{self.name}'
+        int_name += f'-{self.nickname}'
+        int_name += f'!{self.username}'
+        int_name += f'@{self.host}'
+        self.log.debug('Looking for internal name %s', int_name)
+
+        room = self.app.window.get_active_room(room=int_name)
+        self.log.debug('Got room %s', room.internal_name)
+
         if action == 'join':
             room.tab_complete.append(user)
             action = 'joined'
@@ -262,7 +283,19 @@ class Network():
 
     
     def remove_room_from_list(self, room):
-        room = self.app.window.get_active_room(room=room)
+        room_internal = f'{room}-{self.host}-{self.nickname}'
+        self.log.debug('Looking for internal name %s', room_internal)
+        
+        int_name = f'{room}'
+        int_name += f'-{self.name}'
+        int_name += f'-{self.nickname}'
+        int_name += f'!{self.username}'
+        int_name += f'@{self.host}'
+        self.log.debug('Looking for internal name %s', int_name)
+
+        room = self.app.window.get_active_room(room=int_name)
+        self.log.debug('Got room %s', room.internal_name)
+
         room.messages.destroy()
         room.view.destroy()
         room.window.destroy()
