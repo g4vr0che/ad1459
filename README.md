@@ -20,13 +20,13 @@ even in its currently incomplete state.
 * Tab-completion
 * Save and recall servers
 * Secure password storage within system keyring
+* Notifications
 
 
 ## TODOS
 
 Currently planned features include:
 
-* Notifications
 * User list
 * Topic
 * Commands 
