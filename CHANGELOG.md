@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.12.0](https://github-g///compare/v1.11.0...v1.12.0) (2020-01-06)
+
+
+### Features
+
+* notifications for HL messages ([5e57268](https://github-g///commit/5e57268b7ed661a99de4dd4e3771e1c8070a96a4))
+
+
+### Bug Fixes
+
+* Improve desktop file handling ([6a02fee](https://github-g///commit/6a02feeeab85e96feb93c54f59f557f568f46bc3))
+* User list stays in sync ([e6e0aa9](https://github-g///commit/e6e0aa9814772bf4130b6d3ca4441fab323f9766))
+
 ## [1.11.0](https://github-g///compare/v1.10.1...v1.11.0) (2019-12-31)
 
 
