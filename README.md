@@ -8,7 +8,8 @@ has been loosely inspired by Hexchat and mIRC.
 ![AD1459 IRC Client](https://i.imgur.com/ybySLH3.png)
 
 AD1459 is currently in _ALPHA_, and should not be considered ready for everyday 
-use. 
+use. That being said, it is a relatively capable client for basic functionality 
+even in its currently incomplete state.
 
 ## Current Abilities
 
@@ -25,16 +26,16 @@ use.
 
 Currently planned features include:
 
-* Keyring-based 
 * Notifications
 * User list
 * Topic
 * Commands 
   - Currently only the /me command is supported
 * CTCP
-* More intuitive connection entry
 * UI Improvements
 * Last message recall
+* Logging
+* Compacted server messages
 
 
 ## Known Issues
@@ -42,13 +43,15 @@ Currently planned features include:
 These are problems that have been currently identified:
 
 * Rooms on every network must have unique names
-* No server messages for quitting, nick changes, or Op-actions (kick, ban, modes)
-* Tab completion may drift out of date with actual user list
+* No server messages for Op-actions (kick, ban, modes)
+* Can't set an initial nick which is different from username
+* Large buffers make the application unresponsive
 
 ### Connecting to IRC
 
 To connect to a server/network, click on the server button (in the top left) and
-enter the server details in the text entry. The format for the server is:
+enter the server details in the text entries. You can alternatively enter a 
+server as a single line of text, for which the format is:
 
 `none|sasl|pass name host port username (tls) (password)`
 

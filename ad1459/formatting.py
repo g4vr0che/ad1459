@@ -30,6 +30,29 @@ class Parser:
             # text = text.replace(f'/{self.formatting[i][0]}', i)
             text = text.replace(f'/{self.formatting[i][1]}', i)
         return text
+    
+    def sanitize_message(self, message):
+        """ Strips IRC formatting from a message to make it suitable for display
+        outside of the client, e.g. in notifications.
+
+        Arguments:
+            message (str): The message to clean up.
+
+        Returns:
+            str: The cleaned message.
+        """
+        formatting_chars = [
+            '\x02', # bold
+            '\x1D', # italics
+            '\x1F', # underline
+            '\x1E', # strikethrough
+            '\x11'
+        ]
+
+        for fchar in formatting_chars:
+            message = message.replace(fchar, '')
+        
+        return message
 
     def parse_text(self, text):        
         # \u0002 bold

@@ -164,7 +164,6 @@ class RoomRow(Gtk.ListBoxRow):
         else:
             return self._type
 
-            
     @kind.setter
     def kind(self, kind):
         """ We need to set some GTK Styling prefs when this is set. """
@@ -179,3 +178,8 @@ class RoomRow(Gtk.ListBoxRow):
         else:
             self.set_margin_top(0)
             self.set_margin_start(18)
+
+    @property
+    def icon(self):
+        """ str: The name of the icon set for this room."""
+        return self.unread_indicator.get_icon_name()[0]

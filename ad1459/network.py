@@ -17,9 +17,10 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, GLib
 
-from .client import Client
 from .widgets.room_row import RoomRow
 from .widgets.message_row import MessageRow
+from .client import Client
+from .formatting import Parser
 from .room import Room
 
 class Network():
@@ -48,7 +49,7 @@ class Network():
             'realname': 'AD1459 User',
             'password': 'hunter2'
         }
-        
+        self.parser = Parser()
         self.room = NetworkRoom(self)
 
     @property
@@ -218,11 +219,17 @@ class Network():
                     'dialog-information-symbolic',
                     Gtk.IconSize.SMALL_TOOLBAR
                 )
-            else:
+            elif room.row.icon != 'dialog-information-symbolic':
                 room.row.unread_indicator.set_from_icon_name(
                     'mail-unread-symbolic',
                     Gtk.IconSize.SMALL_TOOLBAR
                 )
+        if not self.app.window.props.is_active:
+            if self.nickname in message:
+                subject = f'{sender} mentioned you in {room.name}!'
+                clean_message = self.parser.sanitize_message(message)
+                room.notification.update(subject, clean_message)
+                room.notification.show()
 
     def join_part_user_to_room(self, channel, user, action='join'):
         room = self.app.window.get_active_room(room=channel)

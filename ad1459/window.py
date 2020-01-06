@@ -13,8 +13,14 @@ import asyncio
 import logging
 
 import gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk
+gi.require_versions(
+    {
+        'Gtk': '3.0',
+        'Gdk': '3.0',
+        'Notify': '0.7'
+    }
+)
+from gi.repository import Gtk, Gdk, Notify
 
 from .widgets.about import AboutDialog
 from .widgets.headerbar import Headerbar
@@ -506,6 +512,7 @@ class AdWindow(Gtk.Window):
             'mail-read-symbolic',
             Gtk.IconSize.SMALL_TOOLBAR
         )
+        new_room.notification.close()
         self.message_entry.grab_focus()
         self.log.debug(f'New room: {row.room.name} on network {row.room.network.name}')
         self.message_stack.set_visible_child_name(new_room.name)

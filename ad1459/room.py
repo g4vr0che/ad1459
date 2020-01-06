@@ -14,8 +14,13 @@ import logging
 import time
 
 import gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+gi.require_versions(
+    {
+        'Gtk': '3.0',
+        'Notify': '0.7'
+    }
+)
+from gi.repository import Gtk, Notify
 
 from .widgets.message_row import MessageRow
 from .widgets.room_row import RoomRow, RoomKind
@@ -38,6 +43,10 @@ class Room():
     def __init__(self, network):
         self.log = logging.getLogger('ad1459.room')
         self.network = network
+
+        # Desktop notifications
+        Notify.init('AD1459')
+        self.notification = Notify.Notification.new('new-channel', 'Init')
         
         self.window = RoomWindow(self)
         self.window.set_vexpand(True)
