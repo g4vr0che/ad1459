@@ -102,4 +102,6 @@ class Client(pydle.Client):
     async def on_ctcp_action(self, by, target, contents):
         message = f'\x1D{by} {contents}\x1D'
         self.log.debug('Got action to %s: %s', target, message)
+        if target == self.network_.nickname:
+            self.network_.on_rcvd_private_message(target, by, message)
         self.network_.on_rcvd_message(target, '*', message)
