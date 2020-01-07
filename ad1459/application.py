@@ -22,6 +22,7 @@ gi.require_versions(
 )
 from gi.repository import Gtk, Gdk, Gio
 
+from.formatting import Parser
 from .network import Network
 from .window import AdWindow
 
@@ -43,6 +44,7 @@ class Ad1459Application:
             'in.donotspellitgav.in', Gio.ApplicationFlags.FLAGS_NONE
         )
         self.app.connect('activate', self.init_application)
+        self.parser = Parser()
 
     def init_application(self):
         """ Starts up all of the application loops and peices."""
@@ -69,8 +71,13 @@ class Ad1459Application:
         window = AdWindow(self)
         window.set_default_size(1000, 600)
         window.connect('delete-event', self.remove_window)
+
+        toplevel_pane = Gtk.HPaned()
+        toplevel_pane.set_position(200)
+        content.add(toplevel_pane)
         
         return window
+
 
     def remove_window(self, window):
         """ Deletes a window and moves all of its stuff to another window.

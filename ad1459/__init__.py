@@ -50,6 +50,6 @@ irc.daemon = True
 irc.start()
 
 log.debug('Starting GTK Main Loop')
-Gtk.main()
+# Gtk.main()
 
-app.run()
+# app.run()
