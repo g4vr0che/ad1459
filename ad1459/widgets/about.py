@@ -22,7 +22,7 @@ class AboutDialog(Gtk.AboutDialog):
         super().__init__()
 
         self.set_program_name('AD1459')
-        self.set_logo_icon_name('internet-chat')
+        self.set_logo_icon_name('in.donotspellitgav.Ad1459')
         self.set_version(__version__.__version__)
         self.set_website('https://github.com/g4vr0che/ad1459')
         self.set_website_label('github.com/g4vr0che/ad1459')
