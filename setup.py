@@ -71,6 +71,13 @@ setup(
 
     data_files=[
       ('/usr/share/applications', ['data/in.donotspellitgav.ad1459.desktop']),
+      ('/isr/share/icons/hicolor/scalable/apps', [
+          'data/in.donotspellitgav.Ad1459.svg',
+          'data/in.donotspellitgav.Ad1459.Devel.svg'
+      ]),
+      ('/usr/share/icons/hicolor/symbolic/apps', [
+          'data/in.donotspellitgav.Ad1459-symbolic.svg'
+      ])
     ],
 
     # Commands
