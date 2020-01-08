@@ -516,7 +516,7 @@ class AdWindow(Gtk.Window):
         """
         new_room = row.room
         row.unread_indicator.set_from_icon_name(
-            'mail-read-symbolic',
+            'radio-symbolic',
             Gtk.IconSize.SMALL_TOOLBAR
         )
         new_room.notification.close()

@@ -221,12 +221,24 @@ class Network():
         if self.app.window.get_active_room() != room:
             if self.nickname in message:
                 room.row.unread_indicator.set_from_icon_name(
-                    'dialog-information-symbolic',
+                    'emblem-important-symbolic',
                     Gtk.IconSize.SMALL_TOOLBAR
                 )
-            elif room.row.icon != 'dialog-information-symbolic':
+            elif (
+                room.row.icon != 'emblem-important-symbolic' and
+                css != 'server'
+            ):
                 room.row.unread_indicator.set_from_icon_name(
-                    'mail-unread-symbolic',
+                    'radio-checked-symbolic',
+                    Gtk.IconSize.SMALL_TOOLBAR
+                )
+            elif (
+                room.row.icon != 'emblem-important-symbolic' and
+                room.row.icon != 'radio-checked-symbolic' and
+                css == 'server'
+            ):
+                room.row.unread_indicator.set_from_icon_name(
+                    'radio-mixed-symbolic',
                     Gtk.IconSize.SMALL_TOOLBAR
                 )
         if not self.app.window.props.is_active:
