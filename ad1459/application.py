@@ -24,9 +24,10 @@ gi.require_versions(
 )
 from gi.repository import Gtk, Gdk, Gio
 
-from.formatting import Parser
+from .formatting import Parser
 from .network import Network
 from .widgets.window import Ad1459Window
+from . import handlers
 
 USER_HOME_PATH = str(pathlib.Path.home())
 CONFIG_DIR_PATH = os.path.join(
@@ -95,6 +96,48 @@ class Ad1459Application:
         Arguments:
             window (:obj:`Ad1459Windw`): The window object to connect.
         """
+        # Hook up the IRC Entry and related buttons
+        window.irc_entry.connect(
+            'activate', 
+            handlers.on_send_button_clicked,
+            window.irc_entry.get_text(),
+            window.switcher.get_active_room(),
+            window
+        )
+        window.send_button.connect(
+            'clicked', 
+            handlers.on_send_button_clicked,
+            window.irc_entry.get_text(),
+            window.switcher.get_active_room(),
+            window
+        )
+        window.nick_button.connect(
+            'clicked',
+            handlers.on_nick_button_clicked,
+            window.irc_entry.get_text(),
+            window.switcher.get_active_room().network,
+            window
+        )
+
+        # Hook up header functions
+        window.header.close_button.connect(
+            'clicked',
+            handlers.on_appmenu_close_clicked,
+            window.switcher.get_active_room(),
+            window
+        )
+        window.header.about_button.connect(
+            'clicked',
+            handlers.on_appmenu_about_clicked,
+            window
+        )
+
+        # ServerPopup functions
+        window.header.server_popup.connect_button.connect(
+            'clicked',
+            handlers.on_server_popup_connect_clicked,
+            window
+        )
 
     def remove_window(self, window, data=None):
         """ Deletes a window and moves all of its stuff to another window.

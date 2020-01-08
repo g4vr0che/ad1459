@@ -41,7 +41,7 @@ class Network:
     """
 
     def __init__(self, app):
-        self.log = logging.getLogger('ad1459.network')
+        self.log = logging.getLogger('ad1459.nunetwork')
         self.log.debug('Creating network')
         self.app = app
         self.rooms = []
@@ -72,35 +72,40 @@ class Network:
             self.client = Client(self.nickname, self)
         
         self.client.username = self.username
-        loop = asyncio.get_event_loop()
 
         self.log.debug('Spinning up async connection to %s', self.host)
         if self.auth == 'pass':
             self.log.debug('Using password authentication')
-            self.log.debug('Client connection method: %s', self.client.connect)
             asyncio.run_coroutine_threadsafe(
                 self.client.connect(
-                    self.host,
+                    hostname=self.host,
                     port=self.port,
                     tls=self.tls,
                     password=self.password
                 ),
-                loop=loop
+                loop=asyncio.get_event_loop()
             )
 
         else:
             self.log.debug('Using SASL authentication (or none)')
             asyncio.run_coroutine_threadsafe(
                 self.client.connect(
-                    self.host,
+                    hostname=self.host,
                     port=self.port,
                     tls=self.tls
                 ),
-                loop=loop
+                loop=asyncio.get_event_loop()
             )
-        
-        self.app.window.network_popover.reset_all_text()
     
+    # Asynchronous Callbacks
+    async def on_connected(self):
+        """ Called upon connection to IRC."""
+        for win in self.app.windows:
+            popup = win.header.server_popup
+            GLib.idle_add(popup.reset_all_text)
+            GLib.idle_add(popup.layout_grid.set_sensitive, True)
+            GLib.idle_add(popup.popdown)
+
     # Data for this object.
     @property
     def name(self):
@@ -120,7 +125,6 @@ class Network:
     @auth.setter
     def auth(self, auth):
         """Only set if it's a valid value."""
-        print(auth)
         if auth == 'sasl' or auth == 'pass' or auth == 'none':
             self._config['auth'] = auth
 

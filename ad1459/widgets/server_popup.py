@@ -30,11 +30,11 @@ class ServerPopover(Gtk.Popover):
 
         self.config.read(self.config_file_path)
         
-        layout_grid = Gtk.Grid()
-        layout_grid.set_column_spacing(6)
-        layout_grid.set_row_spacing(12)
-        layout_grid.props.margin = 6
-        self.add(layout_grid)
+        self.layout_grid = Gtk.Grid()
+        self.layout_grid.set_column_spacing(6)
+        self.layout_grid.set_row_spacing(12)
+        self.layout_grid.props.margin = 6
+        self.add(self.layout_grid)
         
         # Saved Networks
         self.saved_combo = Gtk.ComboBoxText()
@@ -44,13 +44,13 @@ class ServerPopover(Gtk.Popover):
             self.saved_combo.get_style_context(), 'connect-entry'
         )
         self.saved_combo.connect('changed', self.on_saved_combo_changed)
-        layout_grid.attach(self.saved_combo, 0, 0, 2, 1)
+        self.layout_grid.attach(self.saved_combo, 0, 0, 2, 1)
 
         self.connect_grid = Gtk.Grid()
         self.connect_grid.set_orientation(Gtk.Orientation.VERTICAL)
         Gtk.StyleContext.add_class(self.connect_grid.get_style_context(), 'linked')
         Gtk.StyleContext.add_class(self.connect_grid.get_style_context(), 'connect-entry')
-        layout_grid.attach(self.connect_grid, 0, 1, 2, 1)
+        self.layout_grid.attach(self.connect_grid, 0, 1, 2, 1)
 
         # Network Name
         self.name_entry = Gtk.Entry()
@@ -123,19 +123,19 @@ class ServerPopover(Gtk.Popover):
         self.tls_check.simple_entry = True
         self.tls_check.set_label('TLS')
         self.tls_check.set_active(True)
-        layout_grid.attach(self.tls_check, 0, 2, 1, 1)
+        self.layout_grid.attach(self.tls_check, 0, 2, 1, 1)
 
         # Save check
         self.save_check = Gtk.CheckButton()
         self.save_check.set_label('Save')
         self.save_check.set_active(True)
-        layout_grid.attach(self.save_check, 1, 2, 1, 1)
+        self.layout_grid.attach(self.save_check, 1, 2, 1, 1)
 
         # Server entry
         self.server_line_entry = Gtk.Entry()
         self.server_line_entry.simple_entry = False
         self.server_line_entry.set_placeholder_text('Server line')
-        layout_grid.attach(self.server_line_entry, 0, 3, 2, 1)
+        self.layout_grid.attach(self.server_line_entry, 0, 3, 2, 1)
 
         # Connect Button
         self.connect_button = Gtk.Button()
@@ -143,7 +143,7 @@ class ServerPopover(Gtk.Popover):
         Gtk.StyleContext.add_class(
             self.connect_button.get_style_context(), 'suggested-action'
         )
-        layout_grid.attach(self.connect_button, 0, 4, 2, 1)
+        self.layout_grid.attach(self.connect_button, 0, 4, 2, 1)
 
         self.widgets = [
             self.name_entry,
@@ -187,7 +187,6 @@ class ServerPopover(Gtk.Popover):
     @property 
     def auth(self):
         auth = self.auth_combo.get_active_text()
-        print(auth)
         if auth == 'SASL Authentication':
             return 'sasl'
 
@@ -271,6 +270,27 @@ class ServerPopover(Gtk.Popover):
         self.saved_combo.append_text('New...')
         for network in self.config.sections():
             self.saved_combo.append_text(network)
+    
+    def save_details(self):
+        self.config[self.name] = {}
+        self.config[self.name]['name'] = self.name
+        self.config[self.name]['auth'] = self.auth
+        self.config[self.name]['host'] = self.server
+        self.config[self.name]['port'] = str(int(self.port))
+        self.config[self.name]['tls'] = str(self.tls)
+        self.config[self.name]['nickname'] = self.nick
+        self.config[self.name]['username'] = self.username
+        self.config[self.name]['realname'] = self.realname
+
+        with open(self.config_file_path, mode='w') as configfile:
+            self.config.write(configfile)
+        
+        keyring_username = f'{self.nick}!{self.username}@{self.name}'
+        self.keyring.set_password(
+            f'{self.name}-{self.server}',
+            keyring_username,
+            self.password
+        )
 
     def reset_all_text(self):
         self.saved_combo.set_active(0)

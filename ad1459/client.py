@@ -16,10 +16,10 @@ import time
 
 class Client(pydle.Client):
 
-    def __init__(self, nick, net, sasl_username=None, sasl_password=None, **kwargs):
+    def __init__(self, nick, network, sasl_username=None, sasl_password=None, **kwargs):
         self.log = logging.getLogger('ad1459.client')
         super().__init__(nick, sasl_username=sasl_username, sasl_password=sasl_password, **kwargs)
-        self.network_ = net
+        self.network_ = network
         self.log.debug('Created client for network %s', self.network_.name)
         self.bouncer = False
     
@@ -30,6 +30,7 @@ class Client(pydle.Client):
     async def on_connect(self):
         self.log.info('Connected to %s', self.network_.name)
         await super().on_connect()
+        await self.network_.on_connected()
     
     async def on_raw(self, message):
         if message.command == ('CAP' or 'cap' or 'Cap'):

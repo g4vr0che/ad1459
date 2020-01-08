@@ -81,4 +81,7 @@ class RoomSwitcher(Gtk.Grid):
         Returns:
             a :obj:`Room` for the currently selected row
         """
-        
+        room = self
+        room.network = ""
+        return room
+
