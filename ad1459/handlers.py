@@ -52,7 +52,7 @@ def on_server_popup_connect_clicked(button, window, data=None):
         pass
 
     else:
-        network = Network(app)
+        network = Network(app, window)
         network.name = popup.name
         network.auth = popup.auth
         network.host = popup.server

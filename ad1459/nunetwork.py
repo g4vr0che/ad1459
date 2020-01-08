@@ -40,10 +40,11 @@ class Network:
         app (:obj:`Ad1459Application`): The app we're running on.
     """
 
-    def __init__(self, app):
+    def __init__(self, app, window):
         self.log = logging.getLogger('ad1459.nunetwork')
         self.log.debug('Creating network')
         self.app = app
+        self.window = window
         self.rooms = []
         self._config = {
             'name': 'New Network',
@@ -100,11 +101,38 @@ class Network:
     # Asynchronous Callbacks
     async def on_connected(self):
         """ Called upon connection to IRC."""
-        for win in self.app.windows:
-            popup = win.header.server_popup
-            GLib.idle_add(popup.reset_all_text)
-            GLib.idle_add(popup.layout_grid.set_sensitive, True)
-            GLib.idle_add(popup.popdown)
+        self.log.info('Connected to %s', self.name)
+        popup = self.window.header.server_popup
+        GLib.idle_add(popup.reset_all_text)
+        GLib.idle_add(popup.layout_grid.set_sensitive, True)
+        GLib.idle_add(popup.popdown)
+    
+    async def on_nick_change(self, old, new):
+        self.log.debug('Nick %s changed to %s', old, new)
+    
+    async def on_join(self, channel, user):
+        self.log.debug('%s has joined %s', user, channel)
+    
+    async def on_part(self, channel, user, message=None):
+        self.log.debug('%s has left %s, (%s)', user, channel, message)
+    
+    async def on_quit(self, user, message=None):
+        self.log.debug('%s has quit! (%s)', user, message)
+    
+    async def on_message(self, target, source, message):
+        self.log.debug('%s messaged to %s: %s', source, target, message)
+
+    async def on_notice(self, target, source, message):
+        self.log.debug('%s noticed to %s: %s', source, target, message)
+    
+    async def on_private_message(self, target, source, message):
+        self.log.debug('PM to %s from %s: %s', target, source, message)
+    
+    async def on_private_notice(self, target, source, message):
+        self.log.debug('Private Notice to %s from %s: %s', target, source, message)
+    
+    async def on_ctcp_action(self, target, source, action):
+        self.log.debug('Action in %s from %s: %s %s', target, source, source, action )
 
     # Data for this object.
     @property
