@@ -22,34 +22,34 @@ from gi.repository import Gtk, Gdk, Gio
 from .window import AdWindow
         
 
-app = Gtk.Application.new(
-  'in.donotspellitgav.ad1459', Gio.ApplicationFlags.FLAGS_NONE
-)
+# app = Gtk.Application.new(
+#   'in.donotspellitgav.ad1459', Gio.ApplicationFlags.FLAGS_NONE
+# )
 
-print('Setting up logging')
-log = logging.getLogger('ad1459')
-handler = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-handler.setFormatter(formatter)
-log.addHandler(handler)
-log.setLevel(logging.DEBUG)
-log.debug('Initializing application')
+# print('Setting up logging')
+# log = logging.getLogger('ad1459')
+# handler = logging.StreamHandler()
+# formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+# handler.setFormatter(formatter)
+# log.addHandler(handler)
+# log.setLevel(logging.DEBUG)
+# log.debug('Initializing application')
 
-app.nick = "ad1459"
-app.username = 'ad1459'
-app.realname = 'AD1459 User'
+# app.nick = "ad1459"
+# app.username = 'ad1459'
+# app.realname = 'AD1459 User'
 
-app.window = AdWindow(app)
-app.window.set_default_size(1000,600)
-app.window.connect('delete-event', Gtk.main_quit)
-app.window.show_all()
+# app.window = AdWindow(app)
+# app.window.set_default_size(1000,600)
+# app.window.connect('delete-event', Gtk.main_quit)
+# app.window.show_all()
 
-log.debug('Initializing IRC thread')
-irc = threading.Thread(target=asyncio.get_event_loop().run_forever)
-irc.daemon = True
-irc.start()
+# log.debug('Initializing IRC thread')
+# irc = threading.Thread(target=asyncio.get_event_loop().run_forever)
+# irc.daemon = True
+# irc.start()
 
-log.debug('Starting GTK Main Loop')
+# log.debug('Starting GTK Main Loop')
 # Gtk.main()
 
 # app.run()

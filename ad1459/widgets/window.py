@@ -51,13 +51,6 @@ class Ad1459Window(Gtk.Window):
         switcher_grid.set_vexpand(True)
         self.main_pane.add1(switcher_grid)
 
-        self.message_stack = Gtk.Stack()
-        self.message_stack.set_hexpand(True)
-        self.message_stack.set_vexpand(True)
-        self.message_stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
-        self.message_stack.set_transition_duration(100)
-        channel_grid.attach(self.message_stack, 0, 0, 1, 1)
-
         entry_grid = Gtk.Grid()
         entry_grid.set_margin_start(6)
         entry_grid.set_margin_end(6)
@@ -89,6 +82,25 @@ class Ad1459Window(Gtk.Window):
         entry_grid.attach(self.nick_button, 0, 0, 1, 1)
         entry_grid.attach(self.irc_entry, 1, 0, 1, 1)
         entry_grid.attach(self.send_button, 2, 0, 1, 1)
+
+        self.channel_pane = Gtk.HPaned()
+        self.channel_pane.set_position(600)
+        channel_grid.attach(self.channel_pane, 0, 0, 1, 1)
+
+        self.message_stack = Gtk.Stack()
+        self.message_stack.set_hexpand(True)
+        self.message_stack.set_vexpand(True)
+        self.message_stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+        self.message_stack.set_transition_duration(100)
+        self.channel_pane.add1(self.message_stack)
+
+        self.topic_stack = Gtk.Stack()
+        self.topic_stack.set_hexpand(True)
+        self.topic_stack.set_vexpand(True)
+        self.topic_stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+        self.topic_stack.set_transition_duration(100)
+        self.channel_pane.add2(self.topic_stack)
+
 
     def on_send_button_clicked(self, widget):
         """ clicked signal handler for send button.

@@ -24,7 +24,7 @@ from gi.repository import Gtk, Gdk, Gio
 
 from.formatting import Parser
 from .network import Network
-from .window import AdWindow
+from .widgets.window import Ad1459Window
 
 class Ad1459Application:
 
@@ -68,18 +68,15 @@ class Ad1459Application:
             A Gtk.Window set up for AD1459
         """
         self.log.debug('Adding window')
-        window = AdWindow(self)
+        window = Ad1459Window(self)
         window.set_default_size(1000, 600)
         window.connect('delete-event', self.remove_window)
-
-        toplevel_pane = Gtk.HPaned()
-        toplevel_pane.set_position(200)
-        content.add(toplevel_pane)
+        window.show_all()
         
         return window
 
 
-    def remove_window(self, window):
+    def remove_window(self, window, data=None):
         """ Deletes a window and moves all of its stuff to another window.
 
         Arguments: 
@@ -91,6 +88,7 @@ class Ad1459Application:
         if len(self.windows) <= 1:
             self.log.debug('Last window destroyed, quitting.')
             Gtk.main_quit()
+            exit(0)
 
     def add_network(
             self,
