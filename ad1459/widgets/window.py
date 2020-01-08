@@ -21,7 +21,9 @@ gi.require_versions(
 from gi.repository import Gtk, Gdk
 
 from .about import AboutDialog
+from .headerbar import Headerbar
 from .irc_entry import IrcEntry
+from .room_switcher import RoomSwitcher
 from .server_popup import ServerPopover
 
 class Ad1459Window(Gtk.Window):
@@ -33,9 +35,15 @@ class Ad1459Window(Gtk.Window):
         self.log = logging.getLogger('ad1459.window')
         self.log.debug('Creating window')
 
-        super().__init__()
+        self.app = app
 
+        super().__init__()
         self.set_default_size(1000, 600)
+
+        self.about_dialog = AboutDialog()
+
+        self.header = Headerbar(self.app)
+        self.set_titlebar(self.header)
 
         self.main_pane = Gtk.HPaned()
         self.main_pane.set_position(200)
@@ -50,6 +58,9 @@ class Ad1459Window(Gtk.Window):
         switcher_grid.set_hexpand(True)
         switcher_grid.set_vexpand(True)
         self.main_pane.add1(switcher_grid)
+
+        self.switcher = RoomSwitcher(self.app)
+        switcher_grid.attach(self.switcher, 0, 0, 1, 1)
 
         entry_grid = Gtk.Grid()
         entry_grid.set_margin_start(6)
@@ -75,10 +86,6 @@ class Ad1459Window(Gtk.Window):
             self.send_button.get_style_context(), 'suggested-action'
         )
 
-        self.irc_entry.connect('activate', self.on_send_button_clicked)
-        self.send_button.connect('clicked', self.on_send_button_clicked)
-        self.nick_button.connect('clicked', self.on_nick_button_clicked)
-
         entry_grid.attach(self.nick_button, 0, 0, 1, 1)
         entry_grid.attach(self.irc_entry, 1, 0, 1, 1)
         entry_grid.attach(self.send_button, 2, 0, 1, 1)
@@ -101,12 +108,4 @@ class Ad1459Window(Gtk.Window):
         self.topic_stack.set_transition_duration(100)
         self.channel_pane.add2(self.topic_stack)
 
-
-    def on_send_button_clicked(self, widget):
-        """ clicked signal handler for send button.
-
-        Also handles the activate signal for the entry.
-        """
-    
-    def on_nick_button_clicked(self, button):
-        """ clicked signal handler for nick button."""
+        self.irc_entry.grab_focus_without_selecting()

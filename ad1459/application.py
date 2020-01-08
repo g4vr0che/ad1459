@@ -11,6 +11,8 @@
 
 import asyncio
 import logging
+import pathlib
+import os
 import threading
 
 import gi
@@ -26,6 +28,13 @@ from.formatting import Parser
 from .network import Network
 from .widgets.window import Ad1459Window
 
+USER_HOME_PATH = str(pathlib.Path.home())
+CONFIG_DIR_PATH = os.path.join(
+    USER_HOME_PATH, 
+    os.path.join('.config', 'ad1459')
+)
+CONFIG_FILE_PATH = os.path.join(CONFIG_DIR_PATH, 'servers.ini')
+
 class Ad1459Application:
 
     def __init__(self):
@@ -36,6 +45,10 @@ class Ad1459Application:
         self.log.addHandler(handler)
         self.log.setLevel(logging.DEBUG)
         self.log.debug('Initializing application')
+
+        self.user_home_path = USER_HOME_PATH
+        self.config_dir_path = CONFIG_DIR_PATH
+        self.config_file_path = CONFIG_FILE_PATH
 
         self.windows = []
         self.networks = []
@@ -71,10 +84,17 @@ class Ad1459Application:
         window = Ad1459Window(self)
         window.set_default_size(1000, 600)
         window.connect('delete-event', self.remove_window)
-        window.show_all()
+        self.connect_ui(window)
         
+        window.show_all()
         return window
 
+    def connect_ui(self, window):
+        """ Connects the UI in window to the correct signal handlers.
+
+        Arguments:
+            window (:obj:`Ad1459Windw`): The window object to connect.
+        """
 
     def remove_window(self, window, data=None):
         """ Deletes a window and moves all of its stuff to another window.

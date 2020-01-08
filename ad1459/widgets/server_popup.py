@@ -14,23 +14,21 @@ import keyring as Keyring
 import os
 import pathlib
 
-USER_HOME_PATH = str(pathlib.Path.home())
-CONFIG_DIR_PATH = os.path.join(USER_HOME_PATH, '.config')
-CONFIG_FILE_PATH = os.path.join(CONFIG_DIR_PATH, 'ad1459.ini')
-
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
 class ServerPopover(Gtk.Popover):
 
-    def __init__(self):
+    def __init__(self, config_file_path):
         super().__init__()
 
         self.config = configparser.ConfigParser()
         self.keyring = Keyring.get_keyring()
 
-        self.config.read(CONFIG_FILE_PATH)
+        self.config_file_path = config_file_path
+
+        self.config.read(self.config_file_path)
         
         layout_grid = Gtk.Grid()
         layout_grid.set_column_spacing(6)
@@ -223,7 +221,7 @@ class ServerPopover(Gtk.Popover):
             self.reset_all_text()
         
         else:
-            self.config.read(CONFIG_FILE_PATH)
+            self.config.read(self.config_file_path)
             self.name_entry.set_text(
                 self.config[network]['name']
             )
