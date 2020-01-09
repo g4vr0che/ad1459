@@ -21,7 +21,7 @@ from .widgets.room_row import RoomRow
 from .widgets.message_row import MessageRow
 from .client import Client
 from .formatting import Parser
-from .room import Room
+from .nuroom import Room
 
 class Network:
     """An IRC network to connect to and chat on.
