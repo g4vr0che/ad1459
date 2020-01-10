@@ -124,62 +124,85 @@ class RoomRow(Gtk.ListBoxRow):
         kind (RoomKind Enum): The type of room this is.
     """
 
-    def __init__(self, room, network, kind='CHANNEL'):
-        Gtk.ListBoxRow.__init__(self)
-        self.network = network
-
+    def __init__(self, room):
+        Gtk.ListBoxRow.__init__()
+        self.room = room
         self.set_can_focus(False)
 
-        room_grid = Gtk.Grid()
-        room_grid.set_column_spacing(6)
-        self.add(room_grid)
+        grid = Gtk.Grid()
+        grid.set_column_spacing(6)
+        grid.set_margin_top(3)
+        grid.set_margin_bottom(3)
+        grid.set_margin_start(3)
+        grid.set_margin_end(3)
+        self.add(grid)
 
         self.room_label = Gtk.Label()
-        room_grid.attach(self.room_label, 0, 0, 1, 1)
-        
+        self.room_label.set_text(self.room.name)
+        grid.attach(self.room_label, 0, 0, 1, 1)
+
         self.unread_indicator = Gtk.Image.new_from_icon_name(
             'radio-symbolic',
-            Gtk.IconSize.SMALL_TOOLBAR
+            Gtk.IconSize.SMALL_TOOLBAR            
         )
-        room_grid.attach(self.unread_indicator, 1, 0, 1, 1)
+        grid.attach(self.unread_indicator, 1, 0, 1, 1)
 
-        self.kind = kind
-        self.room = room
-    
-    @property
-    def room_name(self):
-        """str: The name of this room in the room list."""
-        return self.room_label.get_text()
-    
-    @room_name.setter
-    def room_name(self, name):
-        """ We just store this in the label for the room."""
-        self.room_label.set_text(name)
-    
-    @property
-    def kind(self, str=False):
-        """ RoomKind Enum: The type of room this is. """
-        if str:
-            return str(self._type)
-        else:
-            return self._type
-
-    @kind.setter
-    def kind(self, kind):
-        """ We need to set some GTK Styling prefs when this is set. """
-        self._type = RoomKind[kind.upper()]
-
-        if self._type is RoomKind.SERVER:
+        if self.room.kind is RoomKind.SERVER:
             self.set_margin_top(12) 
             self.set_margin_start(0)
-        elif self._type == RoomKind.CHANNEL: 
+        elif self.room.kind == RoomKind.CHANNEL: 
             self.set_margin_top(0)
             self.set_margin_start(12)
         else:
             self.set_margin_top(0)
             self.set_margin_start(18)
 
-    @property
-    def icon(self):
-        """ str: The name of the icon set for this room."""
-        return self.unread_indicator.get_icon_name()[0]
+
+    #     self.network = network
+
+    #     self.set_can_focus(False)
+
+    #     room_grid = Gtk.Grid()
+    #     room_grid.set_column_spacing(6)
+    #     self.add(room_grid)
+
+    #     self.room_label = Gtk.Label()
+    #     room_grid.attach(self.room_label, 0, 0, 1, 1)
+        
+    #     self.unread_indicator = Gtk.Image.new_from_icon_name(
+    #         'radio-symbolic',
+    #         Gtk.IconSize.SMALL_TOOLBAR
+    #     )
+    #     room_grid.attach(self.unread_indicator, 1, 0, 1, 1)
+
+    #     self.kind = kind
+    #     self.room = room
+    
+    # @property
+    # def room_name(self):
+    #     """str: The name of this room in the room list."""
+    #     return self.room_label.get_text()
+    
+    # @room_name.setter
+    # def room_name(self, name):
+    #     """ We just store this in the label for the room."""
+    #     self.room_label.set_text(name)
+    
+    # @property
+    # def kind(self, str=False):
+    #     """ RoomKind Enum: The type of room this is. """
+    #     if str:
+    #         return str(self._type)
+    #     else:
+    #         return self._type
+
+    # @kind.setter
+    # def kind(self, kind):
+    #     """ We need to set some GTK Styling prefs when this is set. """
+    #     self._type = RoomKind[kind.upper()]
+
+
+    # @property
+    # def icon(self):
+    #     """ str: The name of the icon set for this room."""
+    #     return self.unread_indicator.get_icon_name()[0]

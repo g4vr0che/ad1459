@@ -58,7 +58,7 @@ class Ad1459Application:
             'in.donotspellitgav.in', Gio.ApplicationFlags.FLAGS_NONE
         )
         self.app.connect('activate', self.init_application)
-        self.parser = Parser()
+        self.app.parser = Parser()
 
     def init_application(self):
         """ Starts up all of the application loops and peices."""

@@ -72,6 +72,19 @@ class MessageRow(Gtk.ListBoxRow):
         self.message_sender.show()
 
         self.parser = Parser()
+        self.kind = 'message'
+    
+    @property
+    def kind(self):
+        """str: The type of message this is, based on who sent it and 
+        its contents.
+        """
+        return self._kind
+    
+    @kind.setter
+    def kind(self, kind):
+        self._kind = kind
+        Gtk.StyleContext.add_class(self.get_style_context(), kind)
 
     @property
     def time(self):
@@ -98,18 +111,13 @@ class MessageRow(Gtk.ListBoxRow):
     
     @text.setter
     def text(self, text):
-        formatting = {
-            '\u0002': 'b',
-            #'\u0003': 'color',
-            #'\u000F': 'clear',
-            '\u001D': 'i',
-            '\u001F': 'u'
-        }
-        # text = text.replace('\u0002', '') # bold
-        # text = text.replace('\u0003', '') # colour
-        # text = text.replace('\u000F', '') # cancel all
-        # text = text.replace('\u001D', '') # italic
-        # text = text.replace('\u001F', '') # underline
+        """ We need to make some conversions depending on the type of message
+        this is.
+        """
+        if self.kind == 'action':
+            text = f'\x1D{self.sender} {text}\x1D'
+            self.sender = '*'
+            
         escaped_text = GLib.markup_escape_text(text, len(text.encode('utf-8')))
         formatted_text = self.parser.parse_text(escaped_text)
         linked_text = self.parser.hyperlinks(formatted_text)
