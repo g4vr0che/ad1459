@@ -45,7 +45,7 @@ class Room:
         self.topic_pane = TopicPane(self)
     
     # Methods
-    def add_message(self, message, sender='*', time=None, kind='message'):
+    def add_message(self, message, sender='*', kind='message', time=None):
         """ Adds a message into this room and inserts it into the buffer.
 
         Arguments:
@@ -69,6 +69,14 @@ class Room:
     def data(self):
         """dict: A dictionary with this channel's data."""
         return self.network.client.channels[self.name]
+    
+    @property
+    def users(self):
+        """list: A list of users in this room."""
+        users = []
+        for user in self.data['users']:
+            users.append(user)
+        return users
 
     @property
     def kind(self):

@@ -112,46 +112,89 @@ class Network:
         self.window.topic_stack.add_named(room.topic_pane, room.id)
         self.window.show_all()
     
+    def get_room_for_name(self, name):
+        """ Gets a room object given the name."""
+        for room in self.rooms:
+            if room.name == name:
+                return room
+    
+    def send_message(self, room, message):
+        """ Sends a message to the entity for room."""
+        asyncio.run_coroutine_threadsafe(
+            self.client.message(room.name, message),
+            loop=asyncio.get_event_loop()
+        )
+
+    
     # Asynchronous Callbacks
     async def on_connected(self):
         """ Called upon connection to IRC."""
         self.log.info('Connected to %s', self.name)
+        GLib.idle_add(self.do_connected)
+    
+    def do_connected(self):
         popup = self.window.header.server_popup
-        GLib.idle_add(popup.reset_all_text)
-        GLib.idle_add(popup.layout_grid.set_sensitive, True)
-        GLib.idle_add(popup.popdown)
+        popup.reset_all_text()
+        popup.layout_grid.set_sensitive(True)
+        popup.popdown
     
     async def on_nick_change(self, old, new):
         self.log.debug('Nick %s changed to %s', old, new)
+        GLib.idle_add(self.do_nick_change, old, new)
+    
+    def do_nick_change(self, old, new):
         if old == self.nickname:
             self.nickname = new
+        
+        for room in self.rooms:
+            if old in room.users or new in room.users:
+                room.update_users()
     
     async def on_join(self, channel, user):
         self.log.debug('%s has joined %s', user, channel)
+        GLib.idle_add(self.do_join, channel, user)
+    
+    def do_join(self, channel, user):
         if user == self.nickname:
             new_channel = Room(self.app, self, self.window, channel)
             new_channel.kind = 'channel'
             new_channel.name = channel
+            new_channel.topic_pane.update_topic()
             self.rooms.append(new_channel)
-            GLib.idle_add(self.add_room, new_channel)
+            self.add_room(new_channel)
+        
+        room = self.get_room_for_name(channel)
+        room.topic_pane.update_users()
     
     async def on_part(self, channel, user, message=None):
         self.log.debug('%s has left %s, (%s)', user, channel, message)
+        GLib.idle_add(self.do_part, channel, user, message)
+    
+    def do_part(self, channel, user, message=None):
+        room = self.get_room_for_name(channel)
+        room.topic_pane.update_users()
+        room.add_message(f'{user} has left ({message})', kind='server')
     
     async def on_quit(self, user, message=None):
         self.log.debug('%s has quit! (%s)', user, message)
+        GLib.idle_add(self.do_quit, user, message)
+    
+    def do_quit(self, user, message=None):
+        qmessage = f'{user} has quit. ({message})'
+        for room in self.rooms:
+            if user in room.users:
+                room.add_message(qmessage, kind='server')
+                room.topic_pane.update_users()
     
     async def on_message(self, target, source, message):
         self.log.debug('%s messaged to %s: %s', source, target, message)
-        for room in self.rooms:
-            if target == room.name:
-                self.log.debug('Adding message to %s', room.id)
-                GLib.idle_add(
-                    room.add_message,
-                    message,
-                    source
-                )
-                GLib.idle_add(self.window.show_all)
+        GLib.idle_add(self.do_message, target, source, message)
+    
+    def do_message(self, target, source, message):
+        room = self.get_room_for_name(target)
+        self.log.debug('Adding message to %s', room.id)
+        room.add_message(message, source)
+        self.window.show_all()
 
     async def on_notice(self, target, source, message):
         self.log.debug('%s noticed to %s: %s', source, target, message)

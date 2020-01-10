@@ -19,6 +19,8 @@ gi.require_versions(
 )
 from gi.repository import Gtk, GLib
 
+from .user_row import UserRow
+
 class TopicPane(Gtk.Grid):
     """ The contents of the topic pane, as a GtkGrid()."""
 
@@ -47,6 +49,21 @@ class TopicPane(Gtk.Grid):
         self.topic_label.set_line_wrap(True)
         self.topic_expander.add(self.topic_label)
 
+        separator = Gtk.Separator.new(Gtk.Orientation.HORIZONTAL)
+        separator.set_hexpand(True)
+        self.attach(separator, 0, 1, 1, 1)
+
+        user_window = Gtk.ScrolledWindow()
+        user_window.set_hexpand(True)
+        user_window.set_vexpand(True)
+        self.attach(user_window, 0, 2, 1, 1)
+
+        self.user_list = Gtk.ListBox()
+        self.user_list.set_hexpand(True)
+        self.user_list.set_vexpand(True)
+        self.user_list.set_sort_func(sort_users)
+        user_window.add(self.user_list)
+
         self.update_topic()
     
     def update_topic(self):
@@ -73,4 +90,24 @@ class TopicPane(Gtk.Grid):
 
         self.log.debug('%s topic set to %s', self.room.name, topic_text)
         self.exp_label.set_markup(topic_expander_label)
-        self.topic_label.set_markup(topic_text)
+        self.topic_label.set_markup(f'<small>{topic_text}</small>')
+
+    def update_users(self):
+        """Updates this room's user list."""
+        curr_users = self.user_list.get_children()
+        
+        for user in curr_users:
+            GLib.idle_add(user.destroy)
+
+        for user in self.room.data['users']:
+            new_user = UserRow(self.room)
+            new_user.nick = user
+            self.user_list.add(new_user)
+        
+        self.user_list.invalidate_sort()
+
+def sort_users(row1, row2, *user_data):
+    if row1.nick < row2.nick:
+        return -1
+    else:
+        return 1

@@ -63,6 +63,20 @@ class Ad1459Window(Gtk.Window):
         self.switcher = RoomSwitcher(self.app)
         switcher_grid.attach(self.switcher, 0, 0, 1, 1)
 
+        join_bar = Gtk.ActionBar()
+        switcher_grid.attach(join_bar, 0, 1, 1, 1)
+
+        self.join_entry = Gtk.Entry()
+        self.join_entry.set_hexpand(True)
+        self.join_entry.set_placeholder_text('Join channel')
+        self.join_entry.set_icon_from_icon_name(
+            Gtk.EntryIconPosition.SECONDARY, 'list-add-symbolic'
+        )
+        self.join_entry.set_icon_activatable(
+            Gtk.EntryIconPosition.SECONDARY, True
+        )
+        join_bar.pack_start(self.join_entry)
+
         entry_grid = Gtk.Grid()
         entry_grid.set_margin_start(6)
         entry_grid.set_margin_end(6)

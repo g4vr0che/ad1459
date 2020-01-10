@@ -24,7 +24,11 @@ def on_send_button_clicked(widget, text, room, window, data=None):
         window (:obj:`Ad1459Application`): The window we're in
     """
     log = logging.getLogger('ad1459.handlers.send_button_clicked')
-    log.debug('!')
+    room = window.message_stack.get_visible_child().room
+    network = room.network
+    message = window.irc_entry.get_text()
+    network.send_message(room, message)
+    window.irc_entry.set_text('')
 
 def on_nick_button_clicked(button, text, network, window, data=None):
     """`clicked` signal handler for the nickname button.
@@ -99,6 +103,9 @@ def on_room_selected(listbox, row, window, data=None):
     """
     log = logging.getLogger('ad1459.handlers.room_selected')
     log.debug('New row %s, id: %s', row.room.name, row.room.id)
+    row.room.topic_pane.update_users()
     row.room.topic_pane.update_topic()
+    window.show_all()
+    print(row.room.data)
     window.message_stack.set_visible_child_name(row.room.id)
     window.topic_stack.set_visible_child_name(row.room.id)

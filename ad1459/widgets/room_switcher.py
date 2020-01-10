@@ -37,20 +37,6 @@ class RoomSwitcher(Gtk.Grid):
         self.switcher.set_vexpand(True)
         self.switcher.set_sort_func(room_row_sort)
         window.add(self.switcher)
-
-        join_bar = Gtk.ActionBar()
-        self.attach(join_bar, 0, 1, 1, 1)
-
-        self.join_entry = Gtk.Entry()
-        self.join_entry.set_hexpand(True)
-        self.join_entry.set_placeholder_text('Join channel')
-        self.join_entry.set_icon_from_icon_name(
-            Gtk.EntryIconPosition.SECONDARY, 'list-add-symbolic'
-        )
-        self.join_entry.set_icon_activatable(
-            Gtk.EntryIconPosition.SECONDARY, True
-        )
-        join_bar.pack_start(self.join_entry)
     
     def add_row(self, row):
         """ Adds a row to the ListBox.
