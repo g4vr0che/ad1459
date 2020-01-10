@@ -34,7 +34,7 @@ class Room:
         self.network = network 
         self.window = window
 
-        self._kind = RoomKind.CHANNEL
+        self.kind = RoomKind.CHANNEL
 
         self.buffer = MessageBuffer(self)
         self.row = "insert row here"

@@ -36,14 +36,14 @@ class RoomKind(Enum):
         return strings[self.value]
 
 def sort_by_server(row1, row2):
-    if row1.network.name < row2.network.name:
+    if row1.room.network.name < row2.room.network.name:
         return -1
     
     else:
         return 1
 
 def sort_by_room(row1, row2):
-    if row1.room_name < row2.room_name:
+    if row1.room.name < row2.room.name:
         return -1
     
     else:
@@ -157,7 +157,11 @@ class RoomRow(Gtk.ListBoxRow):
             self.set_margin_top(0)
             self.set_margin_start(18)
 
-
+    # Data
+    @property
+    def kind(self):
+        """Easier compatibility with sort func."""
+        return self.room.kind
     #     self.network = network
 
     #     self.set_can_focus(False)
