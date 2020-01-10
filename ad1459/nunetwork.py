@@ -75,6 +75,12 @@ class Network:
         self.client.username = self.username
 
         self.log.debug('Spinning up async connection to %s', self.host)
+
+        self.server_room = Room(self.app, self, self.window, self.name)
+        self.server_room.kind = "server"
+        self.rooms.append(self.server_room)
+        self.add_room(self.server_room)
+
         if self.auth == 'pass':
             self.log.debug('Using password authentication')
             asyncio.run_coroutine_threadsafe(
@@ -97,6 +103,14 @@ class Network:
                 ),
                 loop=asyncio.get_event_loop()
             )
+
+    def add_room(self, room):
+        """Adds a room to the window for this network."""
+        self.log.debug('Adding room %s to the window', room.name)
+        self.window.switcher.add_row(room.row)
+        self.window.message_stack.add_named(room.buffer, room.id)
+        self.window.topic_stack.add_named(room.topic_pane, room.id)
+        self.window.show_all()
     
     # Asynchronous Callbacks
     async def on_connected(self):
@@ -109,9 +123,17 @@ class Network:
     
     async def on_nick_change(self, old, new):
         self.log.debug('Nick %s changed to %s', old, new)
+        if old == self.nickname:
+            self.nickname = new
     
     async def on_join(self, channel, user):
         self.log.debug('%s has joined %s', user, channel)
+        if user == self.nickname:
+            new_channel = Room(self.app, self, self.window, channel)
+            new_channel.kind = 'channel'
+            new_channel.name = channel
+            self.rooms.append(new_channel)
+            GLib.idle_add(self.add_room, new_channel)
     
     async def on_part(self, channel, user, message=None):
         self.log.debug('%s has left %s, (%s)', user, channel, message)
@@ -121,6 +143,15 @@ class Network:
     
     async def on_message(self, target, source, message):
         self.log.debug('%s messaged to %s: %s', source, target, message)
+        for room in self.rooms:
+            if target == room.name:
+                self.log.debug('Adding message to %s', room.id)
+                GLib.idle_add(
+                    room.add_message,
+                    message,
+                    source
+                )
+                GLib.idle_add(self.window.show_all)
 
     async def on_notice(self, target, source, message):
         self.log.debug('%s noticed to %s: %s', source, target, message)
@@ -143,6 +174,7 @@ class Network:
     @name.setter
     def name(self, name):
         """This is actually tracked by the room."""
+        self.log.debug('Setting name to %s', name)
         self._config['name'] = name
     
     @property
@@ -191,6 +223,7 @@ class Network:
     
     @nickname.setter
     def nickname(self, nickname):
+        self.log.debug('Setting nickname to %s', nickname)
         self._config['nickname'] = nickname
 
     @property
@@ -200,6 +233,7 @@ class Network:
     
     @username.setter
     def username(self, username):
+        self.log.debug('Setting username to %s', username)
         self._config['username'] = username
 
     @property
@@ -218,4 +252,5 @@ class Network:
     
     @password.setter
     def password(self, password):
+        self.log.debug('Setting password')
         self._config['password'] = password

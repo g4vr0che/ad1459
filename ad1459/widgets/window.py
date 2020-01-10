@@ -31,11 +31,12 @@ class Ad1459Window(Gtk.Window):
     most of the general controls for the app.
     """
 
-    def __init__(self, app):
+    def __init__(self, app, parser):
         self.log = logging.getLogger('ad1459.window')
         self.log.debug('Creating window')
 
         self.app = app
+        self.parser = parser
 
         super().__init__()
         self.set_default_size(1000, 600)

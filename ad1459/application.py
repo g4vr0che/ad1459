@@ -58,7 +58,41 @@ class Ad1459Application:
             'in.donotspellitgav.in', Gio.ApplicationFlags.FLAGS_NONE
         )
         self.app.connect('activate', self.init_application)
-        self.app.parser = Parser()
+        self.parser = Parser()
+
+                # Set up CSS
+        css = (
+            b'.message-row {'
+            b'  border-radius: 6px;'
+            b'  background-color: alpha(@theme_selected_bg_color, 0.1);'
+            b'}'
+            b'.mine {'
+            b'  background-color: alpha(@theme_selected_bg_color, 0.2);'
+            b'}'
+            b'.highlight {'
+            b'    background-color: alpha(@success_color, 0.3);'
+            b'}'
+            b'.server {'
+            b'    background-color: transparent;'
+            b'}'
+            b'.notice {'
+            b'    background-color: alpha(@warning_color, 0.3);'
+            b'}'
+            b'.connect-entry {'
+            b'    background-color: @theme_base_color;'
+            b'}'
+            b'.topic-expander {'
+            b'    font-size: 0.75em;'
+            b'}'
+        )
+
+        screen = Gdk.Screen.get_default()
+        css_provider = Gtk.CssProvider()
+        css_provider.load_from_data(css)
+        style_context = Gtk.StyleContext()
+        style_context.add_provider_for_screen(
+            screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
 
     def init_application(self):
         """ Starts up all of the application loops and peices."""
@@ -82,7 +116,7 @@ class Ad1459Application:
             A Gtk.Window set up for AD1459
         """
         self.log.debug('Adding window')
-        window = Ad1459Window(self)
+        window = Ad1459Window(self, self.parser)
         window.set_default_size(1000, 600)
         window.connect('delete-event', self.remove_window)
         self.connect_ui(window)
@@ -136,6 +170,13 @@ class Ad1459Application:
         window.header.server_popup.connect_button.connect(
             'clicked',
             handlers.on_server_popup_connect_clicked,
+            window
+        )
+
+        # Channel Switcher 
+        window.switcher.switcher.connect(
+            'row-selected',
+            handlers.on_room_selected,
             window
         )
 

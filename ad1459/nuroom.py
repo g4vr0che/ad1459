@@ -12,10 +12,11 @@
 import asyncio
 import enum
 import logging
-import time
+import time as Time
 
 from .widgets.message_buffer import MessageBuffer
 from .widgets.message_row import MessageRow
+from .widgets.room_row import RoomRow, RoomKind
 from .widgets.topic import TopicPane
 
 class Room:
@@ -29,19 +30,22 @@ class Room:
         row (:obj:`RoomRow`) The row for this room in the switcher.
     """
 
-    def __init__(self, app, network, window):
+    def __init__(self, app, network, window, name):
+        self.log = logging.getLogger('ad1459.room')
+        self.log.debug('Creating new room %s', name)
+
         self.app = app
         self.network = network 
         self.window = window
 
-        self.kind = RoomKind.CHANNEL
+        self.name = name
 
         self.buffer = MessageBuffer(self)
-        self.row = "insert row here"
+        self.row = RoomRow(self)
         self.topic_pane = TopicPane(self)
     
     # Methods
-    def add_message(self, message, sender='*', time=time.ctime(), kind='message'):
+    def add_message(self, message, sender='*', time=None, kind='message'):
         """ Adds a message into this room and inserts it into the buffer.
 
         Arguments:
@@ -50,6 +54,8 @@ class Room:
             time (str): The time the message was sent.
             kind (str): The type of message this is (default: 'message')
         """
+        if not time:
+            time = Time.ctime().split()[3]
         new_message = MessageRow()
         new_message.kind = kind
         new_message.time = time
@@ -62,7 +68,7 @@ class Room:
     @property
     def data(self):
         """dict: A dictionary with this channel's data."""
-        return self.network.channels[self.name]
+        return self.network.client.channels[self.name]
 
     @property
     def kind(self):
@@ -71,7 +77,11 @@ class Room:
     
     @kind.setter
     def kind(self, kind):
-        self._kind = RoomKind[kind.upper()]
+        self.log.debug('Setting room type for %s to %s', self.name, kind)
+        kind = kind.upper()
+        self._kind = RoomKind[kind]
+        self.row.set_margins()
+        self.log.debug('Set margins for %s room', kind)
 
     @property
     def name(self):
@@ -93,25 +103,3 @@ class Room:
         is guaranteed to be unique while the object exists.
         """
         return f'{self.name}-{id(self)}'
-
-
-class RoomKind(enum.Enum):
-    """ An enum to classify the type of room this is.
-    """
-    SERVER = 1
-    NETWORK = 1
-    CHANNEL = 2
-    ROOM = 2
-    PRIVMSG = 3
-    QUERY = 3
-    DIALOG = 3
-    WHISPER = 3
-
-    def __str__(self):
-        """ Turn this back into a string. """
-        strings = {
-            1: 'server',
-            2: 'channel',
-            3: 'dialog'
-        }
-        return strings[self.value]

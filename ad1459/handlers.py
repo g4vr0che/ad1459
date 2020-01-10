@@ -90,3 +90,15 @@ def on_appmenu_about_clicked(button, window, data=None):
     """
     log = logging.getLogger('ad1459.handlers.appmenu_about_clicked')
     log.debug('!')
+
+def on_room_selected(listbox, row, window, data=None):
+    """`row-selected` signal handler for room switcher.
+
+    Arguments:
+        window (:obj:`Gtk.Window`): The window we're part of.
+    """
+    log = logging.getLogger('ad1459.handlers.room_selected')
+    log.debug('New row %s, id: %s', row.room.name, row.room.id)
+    row.room.topic_pane.update_topic()
+    window.message_stack.set_visible_child_name(row.room.id)
+    window.topic_stack.set_visible_child_name(row.room.id)
