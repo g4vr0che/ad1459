@@ -43,8 +43,8 @@ class IrcEntry(Gtk.Entry):
             except IndexError:
                 return True
 
-            channel = self.parent.get_active_room()
-            users = channel.tab_complete
+            room = self.parent.message_stack.get_visible_child().room
+            users = room.tab_complete
             self.log.debug('Completing word %s', current_word)
             if not self.possible_completions:
                 self.log.debug('Users to complete from: %s', users)

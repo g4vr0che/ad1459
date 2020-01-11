@@ -56,27 +56,94 @@ class Room:
         """
         if not time:
             time = Time.ctime().split()[3]
+        
+        if (
+                self.network.nickname in message and 
+                kind != 'action' and
+                kind != 'server'
+        ):
+            kind = 'highlight'
+        
+        if sender == self.network.nickname and kind != 'server':
+            kind = 'mine'
+
         new_message = MessageRow()
         new_message.kind = kind
         new_message.time = time
         new_message.sender = sender
         new_message.text = message
 
+        ur_icon = self.row.unread_indicator.get_icon_name()[0]
+        current_room = self.window.message_stack.get_visible_child().room
+        
+        if current_room != self:
+            if kind != 'server':
+                if self.network.nickname in message:
+                    self.row.set_icon('emblem-important-symbolic')
+                
+                elif ur_icon != 'emblem-important-symbolic':
+                    self.row.set_icon('radio-checked-symbolic')
+            
+            elif ur_icon != 'emblem-important-symbolic':
+                self.row.set_icon('radio-mixed-symbolic')
+
         self.buffer.add_message_to_buffer(new_message)
+    
+    def update_tab_complete(self, user):
+        if user in self.tab_complete:
+            self._tab_complete.remove(user)
+            self._tab_complete.insert(0, user)
+    
+    def leave(self):
+        """ Remove this room from the UI."""
+        self.buffer.destroy()
+        self.topic_pane.destroy()
+        self.row.destroy()
+    
+    def part(self):
+        """ Sends a part from this channel."""
+        asyncio.run_coroutine_threadsafe(
+            self.network.client.part(self.name, message='Leaving...'),
+            loop=asyncio.get_event_loop()
+        )
+
 
     # Data
     @property
     def data(self):
         """dict: A dictionary with this channel's data."""
-        return self.network.client.channels[self.name]
+        try:
+            return self.network.client.channels[self.name]
+        except KeyError:
+            return {
+                'users': {self.name, self.network.nickname},
+                'topic': f'Private chat with {self.name}',
+                'topic_by': self.network.name,
+                'topic_set': Time.ctime().split()[3]
+            }
     
     @property
     def users(self):
         """list: A list of users in this room."""
         users = []
-        for user in self.data['users']:
-            users.append(user)
+        try:
+            for user in self.data['users']:
+                users.append(user)
+        except KeyError:
+            users.append(self.name)
         return users
+    
+    @property
+    def tab_complete(self):
+        try: 
+            return self._tab_complete
+        
+        except AttributeError:
+            self._tab_complete = self.users
+            return self._tab_complete
+        
+        except KeyError:
+            return [self.name]
 
     @property
     def kind(self):

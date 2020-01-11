@@ -114,13 +114,13 @@ class Ad1459Window(Gtk.Window):
         self.message_stack.set_vexpand(True)
         self.message_stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         self.message_stack.set_transition_duration(100)
-        self.channel_pane.add1(self.message_stack)
+        self.channel_pane.pack1(self.message_stack, True, True)
 
         self.topic_stack = Gtk.Stack()
         self.topic_stack.set_hexpand(True)
         self.topic_stack.set_vexpand(True)
         self.topic_stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
         self.topic_stack.set_transition_duration(100)
-        self.channel_pane.add2(self.topic_stack)
+        self.channel_pane.pack2(self.topic_stack, False, False)
 
         self.irc_entry.grab_focus_without_selecting()

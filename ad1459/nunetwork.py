@@ -20,6 +20,7 @@ from gi.repository import Gtk, GLib
 from .widgets.room_row import RoomRow
 from .widgets.message_row import MessageRow
 from .client import Client
+from .commands import Commands
 from .formatting import Parser
 from .nuroom import Room
 
@@ -39,6 +40,10 @@ class Network:
         password (str): The authentication for the password on this network.
         app (:obj:`Ad1459Application`): The app we're running on.
     """
+    cmd = Commands()
+    commands = {
+        '/me': cmd.me
+    }
 
     def __init__(self, app, window):
         self.log = logging.getLogger('ad1459.nunetwork')
@@ -78,7 +83,6 @@ class Network:
 
         self.server_room = Room(self.app, self, self.window, self.name)
         self.server_room.kind = "server"
-        self.rooms.append(self.server_room)
         self.add_room(self.server_room)
 
         if self.auth == 'pass':
@@ -103,6 +107,12 @@ class Network:
                 ),
                 loop=asyncio.get_event_loop()
             )
+    
+    def join_channel(self, channel):
+        """ Joins a room on the network."""
+        asyncio.run_coroutine_threadsafe(
+            self.client.join(channel), loop=asyncio.get_event_loop()
+        )
 
     def add_room(self, room):
         """Adds a room to the window for this network."""
@@ -111,19 +121,31 @@ class Network:
         self.window.message_stack.add_named(room.buffer, room.id)
         self.window.topic_stack.add_named(room.topic_pane, room.id)
         self.window.show_all()
+        self.window.switcher.switcher.invalidate_sort()
+        self.rooms.append(room)
     
     def get_room_for_name(self, name):
         """ Gets a room object given the name."""
         for room in self.rooms:
             if room.name == name:
                 return room
+
+        if not name.startswith('#'):
+            new_room = Room(self.app, self, self.window, name)
+            new_room.kind='query'
+            self.add_room(new_room)
+            return new_room
     
     def send_message(self, room, message):
         """ Sends a message to the entity for room."""
-        asyncio.run_coroutine_threadsafe(
-            self.client.message(room.name, message),
-            loop=asyncio.get_event_loop()
-        )
+        for command in self.commands:
+            if not message.startswith(command):
+                asyncio.run_coroutine_threadsafe(
+                    self.client.message(room.name, message),
+                    loop=asyncio.get_event_loop()
+                )
+            else:
+                self.commands[command](room, self.client, message)
 
     
     # Asynchronous Callbacks
@@ -136,7 +158,8 @@ class Network:
         popup = self.window.header.server_popup
         popup.reset_all_text()
         popup.layout_grid.set_sensitive(True)
-        popup.popdown
+        popup.popdown()
+        self.window.switcher.switcher.invalidate_sort()
     
     async def on_nick_change(self, old, new):
         self.log.debug('Nick %s changed to %s', old, new)
@@ -160,10 +183,11 @@ class Network:
             new_channel.kind = 'channel'
             new_channel.name = channel
             new_channel.topic_pane.update_topic()
-            self.rooms.append(new_channel)
             self.add_room(new_channel)
         
         room = self.get_room_for_name(channel)
+        room.add_message(f'{user} has joined', kind='server')
+        self.window.show_all()
         room.topic_pane.update_users()
     
     async def on_part(self, channel, user, message=None):
@@ -172,8 +196,15 @@ class Network:
     
     def do_part(self, channel, user, message=None):
         room = self.get_room_for_name(channel)
-        room.topic_pane.update_users()
-        room.add_message(f'{user} has left ({message})', kind='server')
+        if user == self.nickname:
+            room.leave()
+            self.rooms.remove(room)
+            self.window.switcher.switcher.invalidate_sort()
+        
+        else:
+            room.topic_pane.update_users()
+            room.add_message(f'{user} has left ({message})', kind='server')
+            self.window.show_all()
     
     async def on_quit(self, user, message=None):
         self.log.debug('%s has quit! (%s)', user, message)
@@ -191,22 +222,64 @@ class Network:
         GLib.idle_add(self.do_message, target, source, message)
     
     def do_message(self, target, source, message):
-        room = self.get_room_for_name(target)
-        self.log.debug('Adding message to %s', room.id)
-        room.add_message(message, source)
-        self.window.show_all()
+        if target.startswith('#'):
+            room = self.get_room_for_name(target)
+            self.log.debug('Adding message to %s', room.id)
+            room.add_message(message, source)
+            room.update_tab_complete(source)
+            self.window.show_all()
 
     async def on_notice(self, target, source, message):
         self.log.debug('%s noticed to %s: %s', source, target, message)
+        GLib.idle_add(self.on_notice, target, source, message)
+    
+    def do_notice(self, target, source, message):
+        room = self.get_room_for_name(target)
+        self.log.debug('Adding notice to %s', room.id)
+        room.add_message(message, source, kind='notice')
+        room.update_tab_complete(source)
+        self.window.show_all()
     
     async def on_private_message(self, target, source, message):
         self.log.debug('PM to %s from %s: %s', target, source, message)
+        GLib.idle_add(self.do_private_message, target, source, message)
+
+    def do_private_message(self, target, source, message):
+        if target == self.nickname:
+            room = self.get_room_for_name(source)
+            self.log.debug('Adding message from %s', room.id)
+        else:
+            room = self.get_room_for_name(target)
+            self.log.debug('Adding message to %s', room.id)
+        
+        room.add_message(message, source)
+        self.window.show_all()
     
     async def on_private_notice(self, target, source, message):
         self.log.debug('Private Notice to %s from %s: %s', target, source, message)
+        GLib.idle_add(self.do_private_notice, target, source, message)
+        
+    def do_private_notice(self, target, source, message):
+        room = self.get_room_for_name(source)
+        self.log.debug('Adding notice from %s', room.id)
+        room.add_message(message, source, kind='notice')
+        self.window.show_all()
     
     async def on_ctcp_action(self, target, source, action):
         self.log.debug('Action in %s from %s: %s %s', target, source, source, action )
+        GLib.idle_add(self.do_ctcp_action, target, source, action)
+        
+    def do_ctcp_action(self, target, source, action):
+        self.log.debug('Adding action from %s to %s', source, target)
+        if target.startswith('#'):
+            room = self.get_room_for_name(target)
+        elif target == self.nickname:
+            room = self.get_room_for_name(source)
+        
+        message = f'{source} {action}'
+        room.add_message(message, kind='action')
+        self.window.show_all()
+        room.update_tab_complete(source)
 
     # Data for this object.
     @property

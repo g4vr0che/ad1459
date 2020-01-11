@@ -84,7 +84,9 @@ def on_appmenu_close_clicked(button, room, window, data=None):
         window (:obj:`Ad1459Application`): The window we're in
     """
     log = logging.getLogger('ad1459.handlers.appmenu_close_clicked')
-    log.debug('!')
+    room = window.message_stack.get_visible_child().room
+    log.debug('Parting channel %s', room.id)
+    room.part()
 
 def on_appmenu_about_clicked(button, window, data=None):
     """`clicked` signal handler for the About button.
@@ -93,7 +95,7 @@ def on_appmenu_about_clicked(button, window, data=None):
         window (:obj:`Ad1459Application`): The window we're in
     """
     log = logging.getLogger('ad1459.handlers.appmenu_about_clicked')
-    log.debug('!')
+    window.about_dialog.show_all()
 
 def on_room_selected(listbox, row, window, data=None):
     """`row-selected` signal handler for room switcher.
@@ -106,6 +108,29 @@ def on_room_selected(listbox, row, window, data=None):
     row.room.topic_pane.update_users()
     row.room.topic_pane.update_topic()
     window.show_all()
-    print(row.room.data)
+    row.set_icon('radio-symbolic')
     window.message_stack.set_visible_child_name(row.room.id)
     window.topic_stack.set_visible_child_name(row.room.id)
+    window.irc_entry.grab_focus_without_selecting()
+    window.switcher.switcher.invalidate_sort()
+
+def on_join_entry_activate(entry, window, data=None):
+    """`activate` signal handler for join entry.
+
+    also handles the `icon-release` signal.
+    """
+    log = logging.getLogger('ad1459.handlers.join_entry_activate')
+    room_name = entry.get_text()
+    network = window.message_stack.get_visible_child().room.network
+    
+    if room_name.startswith('#'):
+        network.join_channel(room_name)
+    
+    else:
+        log.debug('Opening PM window with %s', room_name)
+        room = network.get_room_for_name(room_name)
+        network.add_room(room)
+    
+    entry.set_text('')
+    
+

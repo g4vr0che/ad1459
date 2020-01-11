@@ -57,7 +57,7 @@ class Client(pydle.Client):
     
     async def on_quit(self, user, message=None):
         self.log.debug(f'User {user} has quit {self.network_.name}')
-        self.network_.on_quit(user, message=message)
+        await self.network_.on_quit(user, message=message)
         await super().on_quit(user, message=message)
 
     async def on_message(self, target, source, message):

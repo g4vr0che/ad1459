@@ -161,6 +161,11 @@ class RoomRow(Gtk.ListBoxRow):
             self.set_margin_top(0)
             self.set_margin_start(18)
 
+    def set_icon(self, icon_name):
+        self.unread_indicator.set_from_icon_name(
+            icon_name, Gtk.IconSize.SMALL_TOOLBAR
+        )
+
     # Data
     @property
     def kind(self):

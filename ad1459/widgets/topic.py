@@ -99,11 +99,12 @@ class TopicPane(Gtk.Grid):
         for user in curr_users:
             GLib.idle_add(user.destroy)
 
-        for user in self.room.data['users']:
+        for user in self.room.users:
             new_user = UserRow(self.room)
             new_user.nick = user
             self.user_list.add(new_user)
         
+        self.room.window.show_all()
         self.user_list.invalidate_sort()
 
 def sort_users(row1, row2, *user_data):

@@ -179,6 +179,13 @@ class Ad1459Application:
             handlers.on_room_selected,
             window
         )
+        for signal in ['activate', 'icon-release']:
+            pass
+        window.join_entry.connect(
+            'activate',
+            handlers.on_join_entry_activate,
+            window
+        )
 
     def remove_window(self, window, data=None):
         """ Deletes a window and moves all of its stuff to another window.
