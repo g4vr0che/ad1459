@@ -124,3 +124,12 @@ class Ad1459Window(Gtk.Window):
         self.channel_pane.pack2(self.topic_stack, False, False)
 
         self.irc_entry.grab_focus_without_selecting()
+
+    # Data
+    def focused(self):
+        """bool: Whether or not the window has focus."""
+        if self.props.is_active:
+            return True
+        
+        return False
+        

@@ -107,6 +107,7 @@ def on_room_selected(listbox, row, window, data=None):
     log.debug('New row %s, id: %s', row.room.name, row.room.id)
     row.room.topic_pane.update_users()
     row.room.topic_pane.update_topic()
+    row.room.notification.close()
     window.show_all()
     row.set_icon('radio-symbolic')
     window.message_stack.set_visible_child_name(row.room.id)

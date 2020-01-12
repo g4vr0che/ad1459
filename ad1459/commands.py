@@ -27,6 +27,6 @@ class Commands:
         amessage = ' '.join(message.split()[1:])
         self.log.debug('Sending action to %s: %s', room.name, amessage)
         asyncio.run_coroutine_threadsafe(
-            client.ctcp(room.name, 'action', contents=amessage),
+            client.ctcp(room.name, 'ACTION', contents=amessage),
             loop=asyncio.get_event_loop()
         )

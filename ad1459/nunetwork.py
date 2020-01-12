@@ -49,6 +49,7 @@ class Network:
         self.log = logging.getLogger('ad1459.nunetwork')
         self.log.debug('Creating network')
         self.app = app
+        self.parser = Parser()
         self.window = window
         self.rooms = []
         self._config = {
@@ -138,14 +139,15 @@ class Network:
     
     def send_message(self, room, message):
         """ Sends a message to the entity for room."""
+        message_text = self.parser.format_text(message)
         for command in self.commands:
             if not message.startswith(command):
                 asyncio.run_coroutine_threadsafe(
-                    self.client.message(room.name, message),
+                    self.client.message(room.name, message_text),
                     loop=asyncio.get_event_loop()
                 )
             else:
-                self.commands[command](room, self.client, message)
+                self.commands[command](room, self.client, message_text)
 
     
     # Asynchronous Callbacks
@@ -218,7 +220,6 @@ class Network:
                 room.topic_pane.update_users()
     
     async def on_message(self, target, source, message):
-        self.log.debug('%s messaged to %s: %s', source, target, message)
         GLib.idle_add(self.do_message, target, source, message)
     
     def do_message(self, target, source, message):

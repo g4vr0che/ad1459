@@ -14,6 +14,10 @@ import enum
 import logging
 import time as Time
 
+import gi
+gi.require_version('Notify', '0.7')
+from gi.repository import Notify
+
 from .widgets.message_buffer import MessageBuffer
 from .widgets.message_row import MessageRow
 from .widgets.room_row import RoomRow, RoomKind
@@ -31,6 +35,7 @@ class Room:
     """
 
     def __init__(self, app, network, window, name):
+        Notify.init('AD1459')
         self.log = logging.getLogger('ad1459.room')
         self.log.debug('Creating new room %s', name)
 
@@ -40,6 +45,7 @@ class Room:
 
         self.name = name
 
+        self.notification = Notify.Notification.new('AD1459', 'Init')
         self.buffer = MessageBuffer(self)
         self.row = RoomRow(self)
         self.topic_pane = TopicPane(self)
@@ -86,6 +92,27 @@ class Room:
             
             elif ur_icon != 'emblem-important-symbolic':
                 self.row.set_icon('radio-mixed-symbolic')
+        
+        self.log.debug('Window is focused: %s', self.window.props.is_active)
+        # TODO: This can be improved
+        if not self.window.props.is_active:
+            if (
+                    new_message.kind == 'highlight' or 
+                    (self.kind == RoomKind.DIALOG and
+                    new_message.kind != 'mine')
+            ):
+                if self.kind == RoomKind.CHANNEL:
+                    self.notification.update(
+                        f'{sender} mentioned you in {self.name}',
+                        message
+                    )
+                
+                else:
+                    self.notification.update(
+                        f'New message from {sender}',
+                        message
+                    )
+                self.notification.show()
 
         self.buffer.add_message_to_buffer(new_message)
     
