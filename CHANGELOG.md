@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.13.0](https://github-g///compare/v1.12.0...v1.13.0) (2020-01-12)
+
+
+### Features
+
+* Add notifications for PM ([2ed5730](https://github-g///commit/2ed5730950e58c8b77c8aaa25aacdbb315eca9a2))
+* Improved UI, with user list and topic ([b68c694](https://github-g///commit/b68c694b5f79611723f198be59142f14296e828c))
+* Unique Application Icons ([a3f22e4](https://github-g///commit/a3f22e449462bf4cf8aa28abaaefcf1a47d6b30c))
+
+
+### Bug Fixes
+
+* Improved channel unread indicator ([df7df0b](https://github-g///commit/df7df0b748529e14a420a2d80246b6bf87a714ff))
+* Install icon to the correct place, and display it in About ([a5a464c](https://github-g///commit/a5a464cf1e5b2acd6b3911d1ec38e44d40ee88cf))
+* Previous unique names were not actually unique, and could change ([edea7dc](https://github-g///commit/edea7dcd70bc99280ab7be893d3b2877bfd4b26c))
+* rooms now have unique internal channel names ([69d5ca2](https://github-g///commit/69d5ca2cb06caa2310acb13cb53d8078f0de608c)), closes [#1](https://github-g///issues/1)
+* Use updated icon in Desktop File ([d7849ba](https://github-g///commit/d7849baef8243dfb39af34caebe30a5cf65a7d66))
+
 ## [1.12.0](https://github-g///compare/v1.11.0...v1.12.0) (2020-01-06)
 
 
