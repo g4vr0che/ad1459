@@ -25,6 +25,9 @@ class MessageBuffer(Gtk.ScrolledWindow):
         self.list_box.set_vexpand(True)
         self.list_box.set_hexpand(True)
         self.list_box.connect('size-allocate', self.scroll_to_bottom)
+
+        self.adj = self.get_vadjustment()
+        self.adj.connect('value-changed', self.on_window_scroll)
         self.add(self.list_box)
 
     def add_message_to_buffer(self, message):
