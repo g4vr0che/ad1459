@@ -36,14 +36,14 @@ class RoomKind(Enum):
         return strings[self.value]
 
 def sort_by_server(row1, row2):
-    if row1.network.name < row2.network.name:
+    if row1.room.network.name < row2.room.network.name:
         return -1
     
     else:
         return 1
 
 def sort_by_room(row1, row2):
-    if row1.room_name < row2.room_name:
+    if row1.room.name < row2.room.name:
         return -1
     
     else:
@@ -68,7 +68,7 @@ def room_row_sort(row1, row2, *user_data):
             return sort_by_server(row1, row2)
         else:
             
-            if row2.room in row1.network.rooms:
+            if row2.room in row1.room.network.rooms:
                 return -1
 
             else:
@@ -76,21 +76,21 @@ def room_row_sort(row1, row2, *user_data):
 
     elif row1.kind == RoomKind.CHANNEL:
         if row2.kind == RoomKind.SERVER:
-            if row1.room in row2.network.rooms:
+            if row1.room in row2.room.network.rooms:
                 return 1
             
             else:
                 return sort_by_server(row1, row2)
 
         elif row2.kind == RoomKind.CHANNEL:
-            if row1.room in row2.network.rooms:
+            if row1.room in row2.room.network.rooms:
                 return sort_by_room(row1, row2)
             
             else:
                 return sort_by_server(row1, row2)
 
         elif row2.kind == RoomKind.DIALOG:
-            if row1.room in row2.network.rooms:
+            if row1.room in row2.room.network.rooms:
                 return -1
             
             else:
@@ -98,7 +98,7 @@ def room_row_sort(row1, row2, *user_data):
 
     elif row1.kind == RoomKind.DIALOG:
         if row2.kind == RoomKind.SERVER or row2.kind == RoomKind.CHANNEL:
-            if row1.room in row2.network.rooms:
+            if row1.room in row2.room.network.rooms:
                 return 1
 
             else:
@@ -106,7 +106,7 @@ def room_row_sort(row1, row2, *user_data):
                 return sort_by_server(row1, row2)
 
         if row2.kind == RoomKind.DIALOG:
-            if row1.room in row2.network.rooms:
+            if row1.room in row2.room.network.rooms:
                 return sort_by_room(row1, row2)
             
             else:
@@ -124,62 +124,51 @@ class RoomRow(Gtk.ListBoxRow):
         kind (RoomKind Enum): The type of room this is.
     """
 
-    def __init__(self, room, network, kind='CHANNEL'):
-        Gtk.ListBoxRow.__init__(self)
-        self.network = network
-
+    def __init__(self, room):
+        super().__init__()
+        self.room = room
         self.set_can_focus(False)
 
-        room_grid = Gtk.Grid()
-        room_grid.set_column_spacing(6)
-        self.add(room_grid)
+        grid = Gtk.Grid()
+        grid.set_column_spacing(6)
+        grid.set_margin_top(3)
+        grid.set_margin_bottom(3)
+        grid.set_margin_start(3)
+        grid.set_margin_end(3)
+        self.add(grid)
 
         self.room_label = Gtk.Label()
-        room_grid.attach(self.room_label, 0, 0, 1, 1)
-        
+        self.room_label.set_text(self.room.name)
+        grid.attach(self.room_label, 0, 0, 1, 1)
+
         self.unread_indicator = Gtk.Image.new_from_icon_name(
             'radio-symbolic',
-            Gtk.IconSize.SMALL_TOOLBAR
+            Gtk.IconSize.SMALL_TOOLBAR            
         )
-        room_grid.attach(self.unread_indicator, 1, 0, 1, 1)
+        grid.attach(self.unread_indicator, 1, 0, 1, 1)
 
-        self.kind = kind
-        self.room = room
-    
-    @property
-    def room_name(self):
-        """str: The name of this room in the room list."""
-        return self.room_label.get_text()
-    
-    @room_name.setter
-    def room_name(self, name):
-        """ We just store this in the label for the room."""
-        self.room_label.set_text(name)
-    
-    @property
-    def kind(self, str=False):
-        """ RoomKind Enum: The type of room this is. """
-        if str:
-            return str(self._type)
-        else:
-            return self._type
-
-    @kind.setter
-    def kind(self, kind):
-        """ We need to set some GTK Styling prefs when this is set. """
-        self._type = RoomKind[kind.upper()]
-
-        if self._type is RoomKind.SERVER:
+    # Methods
+    def set_margins(self):
+        """Sets the margins on self depending on what type of room we are."""
+        print(self.room.kind)
+        if self.room.kind == RoomKind.SERVER:
             self.set_margin_top(12) 
             self.set_margin_start(0)
-        elif self._type == RoomKind.CHANNEL: 
+        elif self.room.kind == RoomKind.CHANNEL: 
             self.set_margin_top(0)
             self.set_margin_start(12)
         else:
             self.set_margin_top(0)
             self.set_margin_start(18)
 
+    def set_icon(self, icon_name):
+        self.unread_indicator.set_from_icon_name(
+            icon_name, Gtk.IconSize.SMALL_TOOLBAR
+        )
+
+    # Data
     @property
-    def icon(self):
-        """ str: The name of the icon set for this room."""
-        return self.unread_indicator.get_icon_name()[0]
+    def kind(self):
+        """Easier compatibility with sort func."""
+        return self.room.kind
+   

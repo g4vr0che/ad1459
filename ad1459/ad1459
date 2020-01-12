@@ -9,4 +9,6 @@
   This file is the main executable.
 """
 
-import ad1459
+from ad1459.application import Ad1459Application
+app = Ad1459Application()
+app.init_application()
