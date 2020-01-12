@@ -82,7 +82,7 @@ class Room:
         ur_icon = self.row.unread_indicator.get_icon_name()[0]
         current_room = self.window.message_stack.get_visible_child().room
         
-        if current_room != self:
+        if current_room != self or not self.window.focused:
             if kind != 'server':
                 if self.network.nickname in message:
                     self.row.set_icon('emblem-important-symbolic')
@@ -93,9 +93,9 @@ class Room:
             elif ur_icon != 'emblem-important-symbolic':
                 self.row.set_icon('radio-mixed-symbolic')
         
-        self.log.debug('Window is focused: %s', self.window.props.is_active)
+        self.log.debug('Window is focused: %s', self.window.focused)
         # TODO: This can be improved
-        if not self.window.props.is_active:
+        if not self.window.focused:
             if (
                     new_message.kind == 'highlight' or 
                     (self.kind == RoomKind.DIALOG and

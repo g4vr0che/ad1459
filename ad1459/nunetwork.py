@@ -135,6 +135,7 @@ class Network:
             new_room = Room(self.app, self, self.window, name)
             new_room.kind='query'
             self.add_room(new_room)
+            self.window.switcher.switcher.invalidate_sort()
             return new_room
     
     def send_message(self, room, message):
@@ -168,12 +169,13 @@ class Network:
         GLib.idle_add(self.do_nick_change, old, new)
     
     def do_nick_change(self, old, new):
-        if old == self.nickname:
+        if old == self.nickname or old == '<unregistered>':
             self.nickname = new
         
-        for room in self.rooms:
-            if old in room.users or new in room.users:
-                room.update_users()
+        else:
+            for room in self.rooms:
+                if old in room.users or new in room.users:
+                    room.update_users()
     
     async def on_join(self, channel, user):
         self.log.debug('%s has joined %s', user, channel)
@@ -186,11 +188,13 @@ class Network:
             new_channel.name = channel
             new_channel.topic_pane.update_topic()
             self.add_room(new_channel)
+            self.window.switcher.switcher.invalidate_sort()
         
-        room = self.get_room_for_name(channel)
-        room.add_message(f'{user} has joined', kind='server')
-        self.window.show_all()
-        room.topic_pane.update_users()
+        else:
+            room = self.get_room_for_name(channel)
+            room.add_message(f'{user} has joined', kind='server')
+            self.window.show_all()
+            room.topic_pane.update_users()
     
     async def on_part(self, channel, user, message=None):
         self.log.debug('%s has left %s, (%s)', user, channel, message)
@@ -232,14 +236,15 @@ class Network:
 
     async def on_notice(self, target, source, message):
         self.log.debug('%s noticed to %s: %s', source, target, message)
-        GLib.idle_add(self.on_notice, target, source, message)
+        GLib.idle_add(self.do_notice, target, source, message)
     
     def do_notice(self, target, source, message):
-        room = self.get_room_for_name(target)
-        self.log.debug('Adding notice to %s', room.id)
-        room.add_message(message, source, kind='notice')
-        room.update_tab_complete(source)
-        self.window.show_all()
+        if target.startswith('#'):
+            room = self.get_room_for_name(target)
+            self.log.debug('Adding notice to %s', room.id)
+            room.add_message(message, source, kind='notice')
+            room.update_tab_complete(source)
+            self.window.show_all()
     
     async def on_private_message(self, target, source, message):
         self.log.debug('PM to %s from %s: %s', target, source, message)

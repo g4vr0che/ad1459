@@ -12,6 +12,7 @@
 import logging
 
 from .nunetwork import Network
+from .widgets.room_row import RoomKind
 
 def on_send_button_clicked(widget, text, room, window, data=None):
     """ `clicked` signal handler for the Send button.
@@ -86,7 +87,19 @@ def on_appmenu_close_clicked(button, room, window, data=None):
     log = logging.getLogger('ad1459.handlers.appmenu_close_clicked')
     room = window.message_stack.get_visible_child().room
     log.debug('Parting channel %s', room.id)
-    room.part()
+    if room.kind == RoomKind.CHANNEL:
+        room.part()
+    elif room.kind == RoomKind.SERVER:
+        self.log.debug('Can\'t part server rooms!')
+        room.add_message(
+            'Can\'t leave server rooms!',
+            kind='server'
+        )
+    else:
+        room.network.rooms.remove(room)
+        room.leave()
+        window.switcher.switcher.invalidate_sort()
+
 
 def on_appmenu_about_clicked(button, window, data=None):
     """`clicked` signal handler for the About button.

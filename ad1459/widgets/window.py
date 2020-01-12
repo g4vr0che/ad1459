@@ -125,11 +125,19 @@ class Ad1459Window(Gtk.Window):
 
         self.irc_entry.grab_focus_without_selecting()
 
+        self.connect('window-state-event', self.on_focus_changed)
+    
+    # Internal Handlers
+    def on_focus_changed(self, window, data=None):
+        if self.focused:
+            room = self.message_stack.get_visible_child().room
+            room.row.set_icon('radio-symbolic')
+
     # Data
+    @property
     def focused(self):
         """bool: Whether or not the window has focus."""
         if self.props.is_active:
             return True
         
         return False
-        
