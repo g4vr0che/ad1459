@@ -20,25 +20,39 @@ from gi.repository import Gtk, GLib
 from .widgets.room_row import RoomRow
 from .widgets.message_row import MessageRow
 from .client import Client
+from .commands import Commands
 from .formatting import Parser
 from .room import Room
 
-class Network():
-    """ A representation of a network, with all open rooms on that network.
+class Network:
+    """An IRC network to connect to and chat on.
 
     Attributes:
-        rooms (list of :obj:`Room`): A list containing the rooms currently in 
-            use on this network.
-        network_messages (:obj:`NetworkRoom`): A room for this network's network 
-            messages.
+        rooms (list of :obj:`Room`): A list of the joined rooms on this network.
+        name (str): The user-defined name for this network.
+        auth (str): The user-authentication for this network. 'sasl', 'pass', 
+            or 'none'.
+        host (str): The hostname for the server to connect to.
+        port (int): The port number to use.
+        tls (bool): Wheter the connection uses TLS encryption.
+        nickname (str): The user's nickname on this network.
+        realname (str): The user's Real Name on this network.
+        password (str): The authentication for the password on this network.
+        app (:obj:`Ad1459Application`): The app we're running on.
     """
+    cmd = Commands()
+    commands = {
+        '/me': cmd.me
+    }
 
-    def __init__(self, app):
+    def __init__(self, app, window):
         self.log = logging.getLogger('ad1459.network')
         self.log.debug('Creating network')
         self.app = app
+        self.parser = Parser()
+        self.window = window
         self.rooms = []
-        self.config = {
+        self._config = {
             'name': 'New Network',
             'auth': 'sasl',
             'host': 'chat.freenode.net',
@@ -49,324 +63,330 @@ class Network():
             'realname': 'AD1459 User',
             'password': 'hunter2'
         }
-        self.parser = Parser()
-        self.room = NetworkRoom(self)
+        self.client = None
 
+    # Synchronous Methods for this object.
+    def connect(self):
+        """ Connect to the network, disconnecting first if already connected. """
+        if self.auth == 'sasl':
+            self.client = Client(
+                self.nickname, 
+                self, 
+                sasl_password=self.password, 
+                sasl_username=self.username
+            )
+        else:
+            self.client = Client(self.nickname, self)
+        
+        self.client.username = self.username
+
+        self.log.debug('Spinning up async connection to %s', self.host)
+
+        self.server_room = Room(self.app, self, self.window, self.name)
+        self.server_room.kind = "server"
+        self.log.debug('DEBUG NUN 87')
+        self.add_room(self.server_room)
+
+        if self.auth == 'pass':
+            self.log.debug('Using password authentication')
+            asyncio.run_coroutine_threadsafe(
+                self.client.connect(
+                    hostname=self.host,
+                    port=self.port,
+                    tls=self.tls,
+                    password=self.password
+                ),
+                loop=asyncio.get_event_loop()
+            )
+
+        else:
+            self.log.debug('Using SASL authentication (or none)')
+            asyncio.run_coroutine_threadsafe(
+                self.client.connect(
+                    hostname=self.host,
+                    port=self.port,
+                    tls=self.tls
+                ),
+                loop=asyncio.get_event_loop()
+            )
+    
+    def change_nick(self, new_nick):
+        """ Changes the user's nick."""
+        asyncio.run_coroutine_threadsafe(
+            self.client.set_nickname(new_nick),
+            loop=asyncio.get_event_loop()
+        )
+
+    def join_channel(self, channel):
+        """ Joins a room on the network."""
+        asyncio.run_coroutine_threadsafe(
+            self.client.join(channel), loop=asyncio.get_event_loop()
+        )
+
+    def add_room(self, room):
+        """Adds a room to the window for this network."""
+        self.log.debug('Adding room %s to the window', room.name)
+        self.window.switcher.add_row(room.row)
+        self.window.message_stack.add_named(room.buffer, room.id)
+        self.window.topic_stack.add_named(room.topic_pane, room.id)
+        self.window.show_all()
+        self.window.switcher.switcher.invalidate_sort()
+        self.rooms.append(room)
+    
+    def get_room_for_name(self, name):
+        """ Gets a room object given the name."""
+        for room in self.rooms:
+            if room.name == name:
+                return room
+
+        if not name.startswith('#'):
+            new_room = Room(self.app, self, self.window, name)
+            new_room.kind = 'dialog'
+            new_room.name = name
+            new_room.topic_pane.update_topic()
+            self.log.debug('DEBUG NUN 139')
+            self.add_room(new_room)
+            self.window.switcher.switcher.invalidate_sort()
+            return new_room
+    
+    def send_message(self, room, message):
+        """ Sends a message to the entity for room."""
+        message_text = self.parser.format_text(message)
+        for command in self.commands:
+            if not message.startswith(command):
+                asyncio.run_coroutine_threadsafe(
+                    self.client.message(room.name, message_text),
+                    loop=asyncio.get_event_loop()
+                )
+            else:
+                self.commands[command](room, self.client, message_text)
+
+    
+    # Asynchronous Callbacks
+    async def on_connected(self):
+        """ Called upon connection to IRC."""
+        self.log.info('Connected to %s', self.name)
+        GLib.idle_add(self.do_connected)
+    
+    def do_connected(self):
+        popup = self.window.header.server_popup
+        popup.reset_all_text()
+        popup.layout_grid.set_sensitive(True)
+        popup.popdown()
+        self.window.switcher.switcher.invalidate_sort()
+    
+    async def on_nick_change(self, old, new):
+        self.log.debug('Nick %s changed to %s', old, new)
+        GLib.idle_add(self.do_nick_change, old, new)
+    
+    def do_nick_change(self, old, new):
+        if old == self.nickname or old == '<unregistered>':
+            self.nickname = new
+            self.window.nick_button.set_label(self.nickname)
+        
+        else:
+            for room in self.rooms:
+                if old in room.users or new in room.users:
+                    room.update_users()
+    
+    async def on_join(self, channel, user):
+        self.log.debug('%s has joined %s', user, channel)
+        GLib.idle_add(self.do_join, channel, user)
+    
+    def do_join(self, channel, user):
+        if user == self.nickname:
+            new_channel = Room(self.app, self, self.window, channel)
+            new_channel.kind = 'channel'
+            new_channel.name = channel
+            new_channel.topic_pane.update_topic()
+            self.log.debug('DEBUG NUN 194')
+            self.add_room(new_channel)
+            new_channel.topic_pane.update_users()
+            self.window.switcher.switcher.invalidate_sort()
+        
+        else:
+            room = self.get_room_for_name(channel)
+            room.add_message(f'{user} has joined', kind='server')
+            self.window.show_all()
+            room.topic_pane.update_users()
+    
+    async def on_part(self, channel, user, message=None):
+        self.log.debug('%s has left %s, (%s)', user, channel, message)
+        GLib.idle_add(self.do_part, channel, user, message)
+    
+    def do_part(self, channel, user, message=None):
+        room = self.get_room_for_name(channel)
+        if user == self.nickname:
+            room.leave()
+            self.rooms.remove(room)
+            self.window.switcher.switcher.invalidate_sort()
+        
+        else:
+            room.topic_pane.update_users()
+            room.add_message(f'{user} has left ({message})', kind='server')
+            self.window.show_all()
+    
+    async def on_quit(self, user, message=None):
+        self.log.debug('%s has quit! (%s)', user, message)
+        GLib.idle_add(self.do_quit, user, message)
+    
+    def do_quit(self, user, message=None):
+        qmessage = f'{user} has quit. ({message})'
+        for room in self.rooms:
+            if user in room.users:
+                room.add_message(qmessage, kind='server')
+                room.topic_pane.update_users()
+    
+    async def on_message(self, target, source, message):
+        GLib.idle_add(self.do_message, target, source, message)
+    
+    def do_message(self, target, source, message):
+        if target.startswith('#'):
+            room = self.get_room_for_name(target)
+            self.log.debug('Adding message to %s', room.id)
+            room.add_message(message, source)
+            room.update_tab_complete(source)
+            self.window.show_all()
+
+    async def on_notice(self, target, source, message):
+        self.log.debug('%s noticed to %s: %s', source, target, message)
+        GLib.idle_add(self.do_notice, target, source, message)
+    
+    def do_notice(self, target, source, message):
+        if target.startswith('#'):
+            room = self.get_room_for_name(target)
+            self.log.debug('Adding notice to %s', room.id)
+            room.add_message(message, source, kind='notice')
+            room.update_tab_complete(source)
+            self.window.show_all()
+    
+    async def on_private_message(self, target, source, message):
+        self.log.debug('PM to %s from %s: %s', target, source, message)
+        GLib.idle_add(self.do_private_message, target, source, message)
+
+    def do_private_message(self, target, source, message):
+        if target == self.nickname:
+            room = self.get_room_for_name(source)
+            self.log.debug('Adding message from %s', room.id)
+        else:
+            room = self.get_room_for_name(target)
+            self.log.debug('Adding message to %s', room.id)
+        
+        room.add_message(message, source)
+        self.window.show_all()
+    
+    async def on_private_notice(self, target, source, message):
+        self.log.debug('Private Notice to %s from %s: %s', target, source, message)
+        GLib.idle_add(self.do_private_notice, target, source, message)
+        
+    def do_private_notice(self, target, source, message):
+        room = self.get_room_for_name(source)
+        self.log.debug('Adding notice from %s', room.id)
+        room.add_message(message, source, kind='notice')
+        self.window.show_all()
+    
+    async def on_ctcp_action(self, target, source, action):
+        self.log.debug('Action in %s from %s: %s %s', target, source, source, action )
+        GLib.idle_add(self.do_ctcp_action, target, source, action)
+        
+    def do_ctcp_action(self, target, source, action):
+        self.log.debug('Adding action from %s to %s', source, target)
+        if target.startswith('#'):
+            room = self.get_room_for_name(target)
+        elif target == self.nickname:
+            room = self.get_room_for_name(source)
+        
+        message = f'{source} {action}'
+        room.add_message(message, kind='action')
+        self.window.show_all()
+        room.update_tab_complete(source)
+
+    # Data for this object.
     @property
     def name(self):
         """str: The name of this network (and its room)."""
-        return self.config['name']
+        return self._config['name']
     
     @name.setter
     def name(self, name):
         """This is actually tracked by the room."""
-        self.config['name'] = name
+        self.log.debug('Setting name to %s', name)
+        self._config['name'] = name
     
     @property
     def auth(self):
         """str: One of 'sasl', 'pass', or 'none'."""
-        return self.config['auth']
+        return self._config['auth']
     
     @auth.setter
     def auth(self, auth):
         """Only set if it's a valid value."""
-        print(auth)
         if auth == 'sasl' or auth == 'pass' or auth == 'none':
-            self.config['auth'] = auth
+            self._config['auth'] = auth
 
     @property
     def host(self):
         """str: The hostname of the server to connect to."""
-        return self.config['host']
+        return self._config['host']
     
     @host.setter
     def host(self, host):
-        self.config['host'] = host
+        self._config['host'] = host
     
     @property
     def port(self):
-        return self.config['port']
+        return self._config['port']
     
     @port.setter
     def port(self, port):
         """ Only set a port that is within the valid range."""
         if port > 0 and port <= 65535:
-            self.config['port'] = int(port)
+            self._config['port'] = int(port)
 
     @property
     def tls(self):
         """bool: Whether or not to use TLS"""
-        return self.config['tls']
+        return self._config['tls']
     
     @tls.setter
     def tls(self, tls):
-        self.config['tls'] = tls
+        self._config['tls'] = tls
 
     @property
     def nickname(self):
         """str: The user's nickname"""
-        return self.config['nickname']
+        return self._config['nickname']
     
     @nickname.setter
     def nickname(self, nickname):
-        self.config['nickname'] = nickname
+        self.log.debug('Setting nickname to %s', nickname)
+        self._config['nickname'] = nickname
 
     @property
     def username(self):
         """str: The username to use for the connection"""
-        return self.config['username']
+        return self._config['username']
     
     @username.setter
     def username(self, username):
-        self.config['username'] = username
+        self.log.debug('Setting username to %s', username)
+        self._config['username'] = username
 
     @property
     def realname(self):
         """str: The user's real name"""
-        return self.config['realname']
+        return self._config['realname']
     
     @realname.setter
     def realname(self, realname):
-        self.config['realname'] = realname
+        self._config['realname'] = realname
 
     @property
     def password(self):
         """str: The user's password."""
-        return self.config['password']
+        return self._config['password']
     
     @password.setter
     def password(self, password):
-        self.config['password'] = password
-    
-    
-    def connect(self):
-        """ Connect to the network, disconnecting first if already connected. """
-        if self.auth == 'sasl':
-            self.client = Client(self.nickname, self, sasl_password=self.password, sasl_username=self.username)
-        else:
-            self.client = Client(self.nickname, self)
-        if self.host != "test":
-            loop = asyncio.get_event_loop()
-            self.log.debug('Initiating connection')
-            self.log.debug('Spinning up async connection')
-            if self.auth == 'pass':
-                self.log.debug('Using password authentication')
-                self.log.debug('Client connection method: %s', self.client.connect)
-                asyncio.run_coroutine_threadsafe(
-                    self.client.connect(
-                        self.host,
-                        port=self.port,
-                        tls=self.tls,
-                        password=self.password
-                    ),
-                    loop=loop
-                )
-            else:
-                self.log.debug('Using SASL authentication (or none)')
-                asyncio.run_coroutine_threadsafe(
-                    self.client.connect(
-                        self.host,
-                        port=self.port,
-                        tls=self.tls
-                    ),
-                    loop=loop
-                )
-            
-            self.app.window.network_popover.reset_all_text()
-    
-    def join_room(self, room, kind='channel'):
-        """ Join a new room/channel, or start a new private message with a user.
-
-        Arguments:
-            room (str): The name of the room/channel
-        """
-        new_room = Room(self)
-        new_room.name = room
-        new_room.row.kind = kind
-        new_room.window.name = room
-        self.rooms.append(new_room)
-        new_room.update_tab_complete()
-    
-    def get_room_for_index(self, index):
-        """ Get a room from the room list.
-
-        Arguments:
-            index (int): The index of the room to get, with 0 being the 
-                network_room
-
-        Returns:
-            :obj:`Room`: The room at the given index.
-        """
-        return self.rooms[index]
-    
-    def add_message_to_room(self, channel, sender, message, css=None):
-        self.log.debug('Adding %s from %s to %s', message, sender, channel)
-
-        int_name = f'{id(self)}-{channel}'
-        self.log.debug('Looking for internal name %s', int_name)
-
-        room = self.app.window.get_active_room(room=int_name)
-        self.log.debug('Got room %s', room.internal_name)
-        
-        if self.nickname in message:
-            css = 'highlight'
-        if sender == (self.nickname):
-            css = 'mine'
-        elif sender == '*':
-            css = 'server'
-
-        if css:
-            self.log.debug('Message has class: .%s', css)
-        room.add_message(message, sender=sender, css=css)
-        if self.app.window.get_active_room() != room:
-            if self.nickname in message:
-                room.row.unread_indicator.set_from_icon_name(
-                    'emblem-important-symbolic',
-                    Gtk.IconSize.SMALL_TOOLBAR
-                )
-            elif (
-                room.row.icon != 'emblem-important-symbolic' and
-                css != 'server'
-            ):
-                room.row.unread_indicator.set_from_icon_name(
-                    'radio-checked-symbolic',
-                    Gtk.IconSize.SMALL_TOOLBAR
-                )
-            elif (
-                room.row.icon != 'emblem-important-symbolic' and
-                room.row.icon != 'radio-checked-symbolic' and
-                css == 'server'
-            ):
-                room.row.unread_indicator.set_from_icon_name(
-                    'radio-mixed-symbolic',
-                    Gtk.IconSize.SMALL_TOOLBAR
-                )
-        if not self.app.window.props.is_active:
-            if self.nickname in message:
-                subject = f'{sender} mentioned you in {room.name}!'
-                clean_message = self.parser.sanitize_message(message)
-                room.notification.update(subject, clean_message)
-                room.notification.show()
-
-    def join_part_user_to_room(self, channel, user, action='join'):
-        channel_internal = f'{channel}-{self.host}-{self.nickname}'
-        self.log.debug('Looking for internal name %s', channel_internal)
-        
-        int_name = f'{id(self)}-{channel}'
-        self.log.debug('Looking for internal name %s', int_name)
-
-        room = self.app.window.get_active_room(room=int_name)
-        self.log.debug('Got room %s', room.internal_name)
-
-        if action == 'join':
-            room.tab_complete.append(user)
-            action = 'joined'
-        elif action == 'part':
-            room.tab_complete.remove(user)
-            action = 'left'
-        elif action == 'quit':
-            room.tab_complete.remove(user)
-            action = 'quit'
-        jp_message = f'{user} has {action} {channel}'
-        self.add_message_to_room(channel, '*', jp_message, css='server')
-    
-    def quit_user(self, user, message=None):
-        for room in self.rooms:
-            if user in room.tab_complete:
-                room.tab_complete.remove(user)
-                jp_message = f'{user} has quit. ({message})'
-                self.add_message_to_room(room.name, '*', jp_message, css='server')
-    
-    def change_user_nick(self, old, new):
-        for room in self.rooms:
-            if old in room.tab_complete:
-                room.tab_complete.append(new)
-                room.tab_complete.remove(old)
-                cn_message = f'{old} is now {new}'
-                self.add_message_to_room(room.name, '*', cn_message, css='server')
-
-    
-    def remove_room_from_list(self, room):
-        room_internal = f'{room}-{self.host}-{self.nickname}'
-        self.log.debug('Looking for internal name %s', room_internal)
-        
-        int_name = f'{id(self)}-{room}'
-        self.log.debug('Looking for internal name %s', int_name)
-
-        room = self.app.window.get_active_room(room=int_name)
-        self.log.debug('Got room %s', room.internal_name)
-
-        room.messages.destroy()
-        room.view.destroy()
-        room.window.destroy()
-        room.row.destroy()
-        del room
-
-    def post_private_message(self, to, sender, message, css=None):
-        """ Put a private message into the buffer.
-       
-        Arguments:
-            to (str): the user the message was sent to.
-            sender (str): the user the message was sent from.
-            message (str): The message text
-        """
-        self.log.debug('Posting private message from %s', sender)
-        if sender != self.nickname:
-            try:
-                self.add_message_to_room(sender, sender, message, css=css)
-            except AttributeError:
-                self.log.debug('Adding window for PM with %s', to)
-                self.app.window.join_channel(sender, self.name, 'privmsg')
-                self.add_message_to_room(sender, sender, message, css=css)
-        else:
-            try:
-                self.add_message_to_room(to, sender, message, css=css)
-            except AttributeError:
-                self.log.debug('Adding window for PM with %s', to)
-                self.app.window.join_channel(to, self.name, 'privmsg')
-                self.add_message_to_room(to, sender, message, css=css)
-    
-    """ METHODS CALLED FROM ASYNCIO/PYDLE """
-
-    def on_own_nick_change(self, new_nick):
-        self.nickname = new_nick
-        GLib.idle_add(self.app.window.change_nick, new_nick)
-
-    def on_rcvd_message(self, channel, sender, message, css=None):
-        GLib.idle_add(self.add_message_to_room, channel, sender, message, css)
-    
-    def on_rcvd_private_message(self, to, sender, message, css=None):
-        GLib.idle_add(self.post_private_message, to, sender, message, css)
-    
-    def on_join_channel(self, channel):
-        GLib.idle_add(self.app.window.join_channel, channel, self.name)
-    
-    def on_user_join_part(self, channel, user, action='join'):
-        self.log.debug('User %s has %sed %s', user, action, channel)
-        GLib.idle_add(self.join_part_user_to_room, channel, user, action)
-    
-    def on_user_quit(self, user, message=None):
-        self.log.debug('User %s has quit %s', user, self.name)
-        GLib.idle_add(self.quit_user, user, message)
-        
-    def on_self_part(self, channel_name):
-        self.log.debug('Confirmed %s has left %s', self.nickname, channel_name)
-        GLib.idle_add(self.remove_room_from_list, channel_name)
-    
-    def on_user_nick_change(self, old, new):
-        self.log.debug('User %s has changed nicks', old)
-        GLib.idle_add(self.change_user_nick, old, new)
-
-
-class NetworkRoom(Room):
-    """ A special Room class for the network message buffer/room. """
-
-    def __init__(self, network):
-        super().__init__(network)
-        self.row.kind = 'SERVER'
-        self.tab_complete = []
-        self.name = self.network.name
-
-    def display_motd(self, motd):
-        self.add_message(motd)
-    
+        self.log.debug('Setting password')
+        self._config['password'] = password

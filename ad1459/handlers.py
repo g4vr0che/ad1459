@@ -11,7 +11,7 @@
 
 import logging
 
-from .nunetwork import Network
+from .network import Network
 from .widgets.room_row import RoomKind
 from .widgets.about import AboutDialog
 
