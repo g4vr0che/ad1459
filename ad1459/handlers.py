@@ -28,7 +28,8 @@ def on_send_button_clicked(widget, text, room, window, data=None):
     room = window.message_stack.get_visible_child().room
     network = room.network
     message = window.irc_entry.get_text()
-    network.send_message(room, message)
+    if message:
+        network.send_message(room, message)
     window.irc_entry.set_text('')
 
 def on_nick_button_clicked(button, window, data=None):
