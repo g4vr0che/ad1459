@@ -27,6 +27,9 @@ class ServerPopover(Gtk.Popover):
         self.keyring = Keyring.get_keyring()
 
         self.config_file_path = config_file_path
+        pathlib.Path(os.path.dirname(self.config_file_path)).mkdir(
+            parents=True, exist_ok=True
+        )
 
         self.config.read(self.config_file_path)
         
