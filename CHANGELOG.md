@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.13.2](https://github-g///compare/v1.13.1...v1.13.2) (2020-01-13)
+
+
+### Bug Fixes
+
+* Create config dir if not present ([3599b27](https://github-g///commit/3599b2797c192ccf1800fd28ae1c7399c64b78b5))
+
 ### [1.13.1](https://github-g///compare/v1.13.0...v1.13.1) (2020-01-13)
 
 
