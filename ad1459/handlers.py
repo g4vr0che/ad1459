@@ -25,7 +25,6 @@ def on_send_button_clicked(widget, text, room, window, data=None):
         room (:obj:`Room`): The room to send `text` to.
         window (:obj:`Ad1459Application`): The window we're in
     """
-    log = logging.getLogger('ad1459.handlers.send_button_clicked')
     room = window.message_stack.get_visible_child().room
     network = room.network
     message = window.irc_entry.get_text()
@@ -40,7 +39,6 @@ def on_nick_button_clicked(button, window, data=None):
         network (:obj:`Network`): The network whose nick to set.
         window (:obj:`Ad1459Application`): The window we're in
     """
-    log = logging.getLogger('ad1459.handlers.nick_button_clicked')
     network = window.active_room.network
     new_nick = window.irc_entry.get_text()
     network.change_nick(new_nick)
@@ -52,7 +50,6 @@ def on_server_popup_connect_clicked(button, window, data=None):
     Arguments:
         window (:obj:`Ad1459Application`): The window we're in
     """
-    log = logging.getLogger('ad1459.handlers.server_popup_connect_clicked')
     popup = window.header.server_popup
     app = window.app
     network_line = popup.server_line
@@ -76,8 +73,7 @@ def on_server_popup_connect_clicked(button, window, data=None):
     
     if popup.save:
         popup.save_details()
-    
-    log.info('Connecting to %s:%s', network.host, network.port)
+
     network.connect()
     popup.layout_grid.set_sensitive(False)
 
@@ -88,13 +84,10 @@ def on_appmenu_close_clicked(button, room, window, data=None):
         room (:obj:`Room`): The Room to leave.
         window (:obj:`Ad1459Application`): The window we're in
     """
-    log = logging.getLogger('ad1459.handlers.appmenu_close_clicked')
     room = window.message_stack.get_visible_child().room
-    log.debug('Parting channel %s', room.id)
     if room.kind == RoomKind.CHANNEL:
         room.part()
     elif room.kind == RoomKind.SERVER:
-        self.log.debug('Can\'t part server rooms!')
         room.add_message(
             'Can\'t leave server rooms!',
             kind='server'
@@ -111,7 +104,6 @@ def on_appmenu_about_clicked(button, window, data=None):
     Arguments:
         window (:obj:`Ad1459Application`): The window we're in
     """
-    log = logging.getLogger('ad1459.handlers.appmenu_about_clicked')
     about_dialog = AboutDialog()
     about_dialog.run()
     about_dialog.destroy()
@@ -122,8 +114,6 @@ def on_room_selected(listbox, row, window, data=None):
     Arguments:
         window (:obj:`Gtk.Window`): The window we're part of.
     """
-    log = logging.getLogger('ad1459.handlers.room_selected')
-    log.debug('New row %s, id: %s', row.room.name, row.room.id)
     row.room.topic_pane.update_users()
     row.room.topic_pane.update_topic()
     row.room.notification.close()
@@ -140,7 +130,6 @@ def on_join_entry_activate(entry, window, data=None):
 
     also handles the `icon-release` signal.
     """
-    log = logging.getLogger('ad1459.handlers.join_entry_activate')
     room_name = entry.get_text()
     network = window.message_stack.get_visible_child().room.network
     
@@ -148,8 +137,8 @@ def on_join_entry_activate(entry, window, data=None):
         network.join_channel(room_name)
     
     else:
-        log.debug('Opening PM window with %s', room_name)
         room = network.get_room_for_name(room_name)
+
     
     entry.set_text('')
     

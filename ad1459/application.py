@@ -176,8 +176,6 @@ class Ad1459Application:
             handlers.on_room_selected,
             window
         )
-        for signal in ['activate', 'icon-release']:
-            pass
         window.join_entry.connect(
             'activate',
             handlers.on_join_entry_activate,
@@ -198,48 +196,48 @@ class Ad1459Application:
             Gtk.main_quit()
             exit(0)
 
-    def add_network(
-            self,
-            name=None,
-            auth=None,
-            host=None,
-            port=None,
-            tls=True,
-            nick=None,
-            user=None,
-            real=None,
-            pasw=None
-    ):
-        """ Adds a network object to this application.
+    # def add_network(
+    #         self,
+    #         name=None,
+    #         auth=None,
+    #         host=None,
+    #         port=None,
+    #         tls=True,
+    #         nick=None,
+    #         user=None,
+    #         real=None,
+    #         pasw=None
+    # ):
+    #     """ Adds a network object to this application.
 
-        Returns:
-            A :obj:`Network` for the new network.
-        """
-        new_network = Network(self)
+    #     Returns:
+    #         A :obj:`Network` for the new network.
+    #     """
+    #     new_network = Network(self)
         
-        if name:
-            new_network.name = name
+    #     if name:
+    #         new_network.name = name
 
-        if auth:
-            new_network.auth = auth
+    #     if auth:
+    #         new_network.auth = auth
 
-        if host:
-            new_network.host = host
+    #     if host:
+    #         new_network.host = host
 
-        if port:
-            new_network.port = port
+    #     if port:
+    #         new_network.port = port
 
-        if not tls:
-            new_network.tls = tls
+    #     if not tls:
+    #         new_network.tls = tls
 
-        if nick:
-            new_network.nickname = nick
+    #     if nick:
+    #         new_network.nickname = nick
 
-        if user:
-            new_network.username = user
+    #     if user:
+    #         new_network.username = user
 
-        if real:
-            new_network.realname = real
+    #     if real:
+    #         new_network.realname = real
 
-        if pasw:
-            new_network.password = pasw
+    #     if pasw:
+    #         new_network.password = pasw
