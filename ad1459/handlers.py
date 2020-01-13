@@ -13,6 +13,7 @@ import logging
 
 from .nunetwork import Network
 from .widgets.room_row import RoomKind
+from .widgets.about import AboutDialog
 
 def on_send_button_clicked(widget, text, room, window, data=None):
     """ `clicked` signal handler for the Send button.
@@ -31,7 +32,7 @@ def on_send_button_clicked(widget, text, room, window, data=None):
     network.send_message(room, message)
     window.irc_entry.set_text('')
 
-def on_nick_button_clicked(button, text, network, window, data=None):
+def on_nick_button_clicked(button, window, data=None):
     """`clicked` signal handler for the nickname button.
     
     Arguments:
@@ -40,7 +41,10 @@ def on_nick_button_clicked(button, text, network, window, data=None):
         window (:obj:`Ad1459Application`): The window we're in
     """
     log = logging.getLogger('ad1459.handlers.nick_button_clicked')
-    log.debug('!')
+    network = window.active_room.network
+    new_nick = window.irc_entry.get_text()
+    network.change_nick(new_nick)
+    window.irc_entry.set_text('')
 
 def on_server_popup_connect_clicked(button, window, data=None):
     """`clicked` signal handler for the Connect button in the server popup
@@ -108,7 +112,9 @@ def on_appmenu_about_clicked(button, window, data=None):
         window (:obj:`Ad1459Application`): The window we're in
     """
     log = logging.getLogger('ad1459.handlers.appmenu_about_clicked')
-    window.about_dialog.show_all()
+    about_dialog = AboutDialog()
+    about_dialog.run()
+    about_dialog.destroy()
 
 def on_room_selected(listbox, row, window, data=None):
     """`row-selected` signal handler for room switcher.
@@ -126,6 +132,7 @@ def on_room_selected(listbox, row, window, data=None):
     window.message_stack.set_visible_child_name(row.room.id)
     window.topic_stack.set_visible_child_name(row.room.id)
     window.irc_entry.grab_focus_without_selecting()
+    window.nick_button.set_label(row.room.network.nickname)
     window.switcher.switcher.invalidate_sort()
 
 def on_join_entry_activate(entry, window, data=None):
@@ -143,7 +150,6 @@ def on_join_entry_activate(entry, window, data=None):
     else:
         log.debug('Opening PM window with %s', room_name)
         room = network.get_room_for_name(room_name)
-        network.add_room(room)
     
     entry.set_text('')
     

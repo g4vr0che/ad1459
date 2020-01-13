@@ -10,8 +10,13 @@
 """
 
 import gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GLib
+gi.require_versions(
+    {
+        'Gtk': '3.0',
+        'Pango': '1.0'
+    }
+)
+from gi.repository import Gtk, GLib, Pango
 
 from ad1459.formatting import Parser
 
@@ -55,7 +60,7 @@ class MessageRow(Gtk.ListBoxRow):
         self.message_sender.props.xalign = 1
         self.message_sender.props.halign = Gtk.Align.END
         self.message_sender.props.valign = Gtk.Align.END
-        self.message_sender.props.width_request = 100
+        self.message_sender.props.width_request = 135
         self.message_sender.props.opacity = 0.8
         message_grid.attach(self.message_sender, 0, 0, 1, 1)
         self.message_text = Gtk.Label()
@@ -63,6 +68,7 @@ class MessageRow(Gtk.ListBoxRow):
         self.message_text.set_use_markup(False)
         self.message_text.props.halign = Gtk.Align.START
         self.message_text.set_line_wrap(True)
+        self.message_text.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
         self.message_text.set_hexpand(True)
         self.message_text.props.xalign = 0
         message_grid.attach(self.message_text, 2, 0, 1, 2)

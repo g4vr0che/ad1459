@@ -84,6 +84,7 @@ class Network:
 
         self.server_room = Room(self.app, self, self.window, self.name)
         self.server_room.kind = "server"
+        self.log.debug('DEBUG NUN 87')
         self.add_room(self.server_room)
 
         if self.auth == 'pass':
@@ -109,6 +110,13 @@ class Network:
                 loop=asyncio.get_event_loop()
             )
     
+    def change_nick(self, new_nick):
+        """ Changes the user's nick."""
+        asyncio.run_coroutine_threadsafe(
+            self.client.set_nickname(new_nick),
+            loop=asyncio.get_event_loop()
+        )
+
     def join_channel(self, channel):
         """ Joins a room on the network."""
         asyncio.run_coroutine_threadsafe(
@@ -133,7 +141,10 @@ class Network:
 
         if not name.startswith('#'):
             new_room = Room(self.app, self, self.window, name)
-            new_room.kind='query'
+            new_room.kind = 'dialog'
+            new_room.name = name
+            new_room.topic_pane.update_topic()
+            self.log.debug('DEBUG NUN 139')
             self.add_room(new_room)
             self.window.switcher.switcher.invalidate_sort()
             return new_room
@@ -171,6 +182,7 @@ class Network:
     def do_nick_change(self, old, new):
         if old == self.nickname or old == '<unregistered>':
             self.nickname = new
+            self.window.nick_button.set_label(self.nickname)
         
         else:
             for room in self.rooms:
@@ -187,7 +199,9 @@ class Network:
             new_channel.kind = 'channel'
             new_channel.name = channel
             new_channel.topic_pane.update_topic()
+            self.log.debug('DEBUG NUN 194')
             self.add_room(new_channel)
+            new_channel.topic_pane.update_users()
             self.window.switcher.switcher.invalidate_sort()
         
         else:

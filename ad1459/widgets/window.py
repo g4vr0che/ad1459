@@ -41,8 +41,6 @@ class Ad1459Window(Gtk.Window):
         super().__init__()
         self.set_default_size(1000, 600)
 
-        self.about_dialog = AboutDialog()
-
         self.header = Headerbar(self.app)
         self.set_titlebar(self.header)
 
@@ -125,15 +123,22 @@ class Ad1459Window(Gtk.Window):
 
         self.irc_entry.grab_focus_without_selecting()
 
-        self.connect('window-state-event', self.on_focus_changed)
+        self.connect('focus-in-event', self.on_focus_changed)
     
     # Internal Handlers
     def on_focus_changed(self, window, data=None):
         if self.focused:
             room = self.message_stack.get_visible_child().room
+            self.log.debug('Unsetting unread indicator for %s', room.name)
             room.row.set_icon('radio-symbolic')
 
     # Data
+    @property
+    def active_room(self):
+        """ Room: The currently active room."""
+        room = self.message_stack.get_visible_child().room
+        return room
+
     @property
     def focused(self):
         """bool: Whether or not the window has focus."""

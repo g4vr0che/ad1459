@@ -157,9 +157,12 @@ class RoomRow(Gtk.ListBoxRow):
         elif self.room.kind == RoomKind.CHANNEL: 
             self.set_margin_top(0)
             self.set_margin_start(12)
-        else:
+        elif self.room.kind == RoomKind.DIALOG:
             self.set_margin_top(0)
             self.set_margin_start(18)
+        else:
+            self.set_margin_top(0)
+            self.set_margin_start(0)
 
     def set_icon(self, icon_name):
         self.unread_indicator.set_from_icon_name(
