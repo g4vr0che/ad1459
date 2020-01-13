@@ -21,14 +21,14 @@ even in its currently incomplete state.
 * Save and recall servers
 * Secure password storage within system keyring
 * Notifications
+* User list
+* Topic
 
 
 ## TODOS
 
 Currently planned features include:
 
-* User list
-* Topic
 * Commands 
   - Currently only the /me command is supported
 * CTCP
