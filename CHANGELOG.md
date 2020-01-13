@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.13.1](https://github-g///compare/v1.13.0...v1.13.1) (2020-01-13)
+
+
+### Bug Fixes
+
+* Don't send empty messages ([9e5d0ce](https://github-g///commit/9e5d0ce0a46abc43bbcbeb611a369fbaa5cc1622))
+* Fire unread indicator dismissal code ([5b2c9a6](https://github-g///commit/5b2c9a6418f3e71823bd527c7f73d44e6162f39c))
+* Fix word wrapping ([c5874aa](https://github-g///commit/c5874aaea3750716e1415fb52f8a97477850b953))
+
 ## [1.13.0](https://github-g///compare/v1.12.0...v1.13.0) (2020-01-12)
 
 
