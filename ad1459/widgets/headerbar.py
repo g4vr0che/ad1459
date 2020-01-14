@@ -38,6 +38,9 @@ class Headerbar(Gtk.HeaderBar):
         self.server_popup.popdown()
         self.network_button.set_popover(self.server_popup)
 
+        self.spinner = Gtk.Spinner()
+        self.pack_start(self.spinner)
+
         self.appmenu = Gtk.Popover()
         appmenu_grid = Gtk.Grid()
         appmenu_grid.set_margin_start(6)

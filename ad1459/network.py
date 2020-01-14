@@ -172,7 +172,8 @@ class Network:
         popup = self.window.header.server_popup
         popup.reset_all_text()
         popup.layout_grid.set_sensitive(True)
-        popup.popdown()
+        self.window.header.spinner.stop()
+
         self.window.switcher.switcher.invalidate_sort()
     
     async def on_nick_change(self, old, new):

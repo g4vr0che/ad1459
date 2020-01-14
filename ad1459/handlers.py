@@ -54,6 +54,7 @@ def on_server_popup_connect_clicked(button, window, data=None):
     popup = window.header.server_popup
     app = window.app
     network_line = popup.server_line
+    window.header.spinner.start()
     
     if network_line:
         pass
@@ -76,6 +77,7 @@ def on_server_popup_connect_clicked(button, window, data=None):
         popup.save_details()
 
     network.connect()
+    popup.popdown()
     popup.layout_grid.set_sensitive(False)
 
 def on_appmenu_close_clicked(button, room, window, data=None):
