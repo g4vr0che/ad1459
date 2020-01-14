@@ -116,6 +116,7 @@ class Room:
                 self.notification.show()
 
         self.buffer.add_message_to_buffer(new_message)
+        self.window.show_all()
     
     def update_tab_complete(self, user):
         if user in self.tab_complete:

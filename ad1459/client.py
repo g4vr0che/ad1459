@@ -43,10 +43,11 @@ class Client(pydle.Client):
         # Callback.
         await self.on_disconnect(expected)
 
-        """This is our override."""
+        """This is our override.
         # Shut down event loop.
         # if expected and self.own_eventloop:
         #     self.connection.stop()
+        """
     
     async def on_raw(self, message):
         if message.command == ('CAP' or 'cap' or 'Cap'):
@@ -71,17 +72,27 @@ class Client(pydle.Client):
         await self.network_.on_part(channel, user, message=message)
         await super().on_part(channel, user, message=message)
     
+    async def on_kick(self, channel, target, by, reason=None):
+        self.log.debug('%s was kicked from %s by %s (%s)', target, channel, by, reason)
+        await self.network_.on_kick(channel, target, by, reason=reason)
+        await super().on_kick(channel, target, by, reason=reason)
+    
     async def on_quit(self, user, message=None):
         self.log.debug(f'User {user} has quit {self.network_.name}')
         await self.network_.on_quit(user, message=message)
         await super().on_quit(user, message=message)
+    
+    async def on_kill(self, target, by, reason):
+        self.log.debug('%s was killed by %s, (%s)', target, by, reason)
+        await self.network_.on_kill(target, by, reason=reason)
+        super().on_kill(target, by, reason)
 
-    async def on_message(self, target, source, message):
+    async def on_channel_message(self, target, source, message):
         self.log.debug('New message in %s from %s: %s', target, source, message)
         await self.network_.on_message(target, source, message)
         await super().on_message(target, source, message)
     
-    async def on_notice(self, target, by, message):
+    async def on_channel_notice(self, target, by, message):
         self.log.debug('Received notice to %s from %s', target, by)
         await self.network_.on_notice(target, by, message)
         await super().on_notice(target, by, message)
@@ -96,5 +107,35 @@ class Client(pydle.Client):
         await self.network_.on_private_notice(target, by, message)
         await super().on_private_notice(target, by, message)
     
+    async def on_mode_change(self, channel, modes, by):
+        self.log.debug('%s set modes %s in %s', by, modes, channel)
+        await self.network_.on_mode_change(channel, modes, by)
+        await super().on_mode_change(channel, modes, by)
+    
+    async def on_topic_change(self, channel, message, by):
+        self.log.debug('Topic in %s set to "%s" by %s', channel, message, by)
+        await self.network_.on_topic_change(channel, message, by)
+        await super().on_topic_change(channel, message, by)
+    
+    async def on_user_invite(self, target, channel, by):
+        self.log.debug('%s was invited to %s by %s', target, channel, by)
+        await self.network_.on_user_invite(target, channel, by)
+        super().on_user_invite(target, channel, by)
+
+    async def on_invite(self, channel, by):
+        self.log.debug('Invited to %s by %s', channel, by)
+        await self.network_.on_invite(channel, by)
+        await super().on_invite(channel, by)
+    
+    # CTCP Support
+
+    async def on_ctcp(self, by, target, what, contents):
+        self.log.debug('%s received CTCP %s from %s: %s', target, what, by, contents)
+        super().on_ctcp(by, target, what, contents)
+    
+    async def on_ctcp_reply(self, by, target, what, contents):
+        self.log.debug('%s received REPLY CTCP %s from %s: %s', target, what, by, contents)
+        super().on_ctcp(by, target, what, contents)
+
     async def on_ctcp_action(self, by, target, contents):
         await self.network_.on_ctcp_action(target, by, contents)

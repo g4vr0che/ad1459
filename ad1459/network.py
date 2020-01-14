@@ -194,6 +194,7 @@ class Network:
             for room in self.rooms:
                 if new in room.users:
                     room.add_message(f'{old} is now {new}', kind='server')
+                    room.window.show_all()
                     room.update_users()
     
     async def on_join(self, channel, user):
@@ -224,6 +225,9 @@ class Network:
         room = self.get_room_for_name(channel)
         if user == self.nickname:
             room.leave()
+            room.network.server_room.add_message(
+                f'You have left {room.name}', kind='server'
+            )
             self.rooms.remove(room)
             self.window.switcher.invalidate_sort()
         
@@ -232,6 +236,28 @@ class Network:
             room.add_message(f'{user} has left ({message})', kind='server')
             self.window.show_all()
     
+    async def on_kick(self, channel, target, by, reason=None):
+        GLib.idle_add(self.do_kick, channel, target, by, reason)
+    
+    def do_kick(self, channel, target, by, reason=None):
+        room = self.get_room_for_name(channel)
+        if target == self.nickname:
+            room.leave()
+            room.network.server_room.add_message(
+                f'You were kicked from {room.name} by {by}, reason: "{reason}"', 
+                kind='server'
+            )
+            room.network.server_room.row.set_icon('emblem-important-symbolic')
+            self.rooms.remove(room)
+            self.window.switcher.invalidate_sort()
+        
+        else:
+            room.update_users()
+            room.add_message(
+                f'{target} was kicked by {by}, reason: "{reason}"', kind='server'
+            )
+            self.window.show_all()
+
     async def on_quit(self, user, message=None):
         self.log.debug('%s has quit! (%s)', user, message)
         GLib.idle_add(self.do_quit, user, message)
@@ -240,6 +266,16 @@ class Network:
         qmessage = f'{user} has quit. ({message})'
         for room in self.rooms:
             if user in room.old_users:
+                room.add_message(qmessage, kind='server')
+                room.update_users()
+    
+    async def on_kill(self, target, by, reason=None):
+        GLib.idle_add(self.do_kill, target, by, reason)
+    
+    def do_kill(self, target, by, reason=None):
+        qmessage = f'{target} was killed by {by}, reason: "{reason}"'
+        for room in self.rooms:
+            if target in room.old_users:
                 room.add_message(qmessage, kind='server')
                 room.update_users()
     
@@ -291,6 +327,90 @@ class Network:
         room.add_message(message, source, kind='notice')
         self.window.show_all()
     
+    async def on_topic_change(self, channel, message, by):
+        GLib.idle_add(self.do_topic_change, channel, message, by)
+    
+    def do_topic_change(self, channel, message, by):
+        self.log.debug('Changing topic in %s', channel)
+        room = self.get_room_for_name(channel)
+        room.topic_pane.update_topic()
+        room.add_message(
+            f'{by} has changed the channel topic, "{message}"', kind='server'
+        )
+    
+    async def on_mode_change(self, channel, modes, by):
+        GLib.idle_add(self.do_mode_change, channel, modes, by)
+
+    def do_mode_change(self, channel, modes, by):
+        room = self.get_room_for_name(channel)
+        mode_codes = modes[0]
+        mode_index = 1
+        change = None
+        mode_msg = f'{by} '
+        try:
+            for code in mode_codes:
+                if code == '+':
+                    change = 'set '
+                
+                elif code == '-':
+                    change = 'removed '
+                
+                elif code == 'b':
+                    mode_msg += f'{change} a ban on {modes[mode_index]}, '
+                    mode_index += 1
+                
+                elif code == 'c':
+                    mode_msg += f'{change} colour filter, '
+                
+                elif code == 'e':
+                    mode_msg += f'{change} a ban exemption on {modes[mode_index]}, '
+                    mode_index += 1
+                
+                elif code == 'C':
+                    mode_msg += f'{change} CTCP blocking, '
+                
+                elif code == 'i':
+                    mode_msg += f'{change} invite-only, '
+
+                elif code == 'o':
+                    mode_msg += f'{change} op on {modes[mode_index]}, '
+                    mode_index += 1
+                
+                elif code == 'v':
+                    mode_msg += f'{change} voice on {modes[mode_index]}, '
+                    mode_index += 1
+                
+                elif code == 'q':
+                    mode_msg += f'{change} quiet on {modes[mode_index]}, '
+                    mode_index += 1
+                
+                elif code == 'm':
+                    mode_msg += f'{change} moderated, '
+        
+        except IndexError:
+            print('No index %s', mode_index)
+        
+        mode_msg = mode_msg.strip()
+        mode_msg = mode_msg.strip(',')
+        room.add_message(f'{mode_msg}.', kind='server')
+
+    async def on_user_invite(self, target, channel, by):
+        GLib.idle_add(self.do_user_invite, target, channel, by)
+    
+    def do_user_invite(self, target, channel, by):
+        room = self.get_room_for_name(channel)
+        room.add_message(f'{by} invited {target}', kind='server')
+
+    async def on_invite(self, channel, by):
+        GLib.idle_add(self.do_invite, channel, by)
+    
+    def do_invite(self, channel, by):
+        self.server_room.add_message(
+            f'You were invited to {channel} by {by}', kind='server'
+        )
+        self.server_room.row.set_icon('emblem-important-symbolic')
+
+
     async def on_ctcp_action(self, target, source, action):
         self.log.debug('Action in %s from %s: %s %s', target, source, source, action )
         GLib.idle_add(self.do_ctcp_action, target, source, action)
