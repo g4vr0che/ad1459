@@ -88,17 +88,19 @@ def on_appmenu_close_clicked(button, room, window, data=None):
         window (:obj:`Ad1459Application`): The window we're in
     """
     room = window.message_stack.get_visible_child().room
+    network = room.network
     if room.kind == RoomKind.CHANNEL:
         room.part()
     elif room.kind == RoomKind.SERVER:
-        room.add_message(
-            'Can\'t leave server rooms!',
-            kind='server'
-        )
+        for room in network.rooms:
+            room.leave()
+        room.network.disconnect()
+        window.app.networks.remove(network)
+        window.switcher.invalidate_sort()
     else:
         room.network.rooms.remove(room)
         room.leave()
-        window.switcher.switcher.invalidate_sort()
+        window.switcher.invalidate_sort()
 
 
 def on_appmenu_about_clicked(button, window, data=None):
@@ -117,16 +119,21 @@ def on_room_selected(listbox, row, window, data=None):
     Arguments:
         window (:obj:`Gtk.Window`): The window we're part of.
     """
-    row.room.topic_pane.update_users()
-    row.room.topic_pane.update_topic()
-    row.room.notification.close()
-    window.show_all()
-    row.set_icon('radio-symbolic')
-    window.message_stack.set_visible_child_name(row.room.id)
-    window.topic_stack.set_visible_child_name(row.room.id)
-    window.irc_entry.grab_focus_without_selecting()
-    window.nick_button.set_label(row.room.network.nickname)
-    window.switcher.switcher.invalidate_sort()
+    try:
+        row.room.update_users()
+        row.room.topic_pane.update_topic()
+        row.room.notification.close()
+        window.show_all()
+        row.set_icon('radio-symbolic')
+        window.message_stack.set_visible_child_name(row.room.id)
+        window.topic_stack.set_visible_child_name(row.room.id)
+        window.irc_entry.grab_focus_without_selecting()
+        window.nick_button.set_label(row.room.network.nickname)
+    
+    except AttributeError:
+        return
+    
+    window.switcher.invalidate_sort()
 
 def on_join_entry_activate(entry, window, data=None):
     """`activate` signal handler for join entry.

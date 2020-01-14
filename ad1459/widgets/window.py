@@ -127,7 +127,10 @@ class Ad1459Window(Gtk.Window):
     
     # Internal Handlers
     def on_focus_changed(self, window, data=None):
-        room = self.message_stack.get_visible_child().room
+        try:
+            room = self.message_stack.get_visible_child().room
+        except AttributeError:
+            return
         self.log.debug('Unsetting unread indicator for %s', room.name)
         room.row.set_icon('radio-symbolic')
 

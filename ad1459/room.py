@@ -49,6 +49,7 @@ class Room:
         self.buffer = MessageBuffer(self)
         self.row = RoomRow(self)
         self.topic_pane = TopicPane(self)
+        self.old_users = []
     
     # Methods
     def add_message(self, message, sender='*', kind='message', time=None):
@@ -121,11 +122,20 @@ class Room:
             self._tab_complete.remove(user)
             self._tab_complete.insert(0, user)
     
+    def update_users(self):
+        self.old_users = []
+        for user in self.users:
+            self.old_users.append(user)
+            
+        self.topic_pane.update_users()
+    
     def leave(self):
         """ Remove this room from the UI."""
+        self.log.debug('Removing room %s form list', self.name)
         self.buffer.destroy()
         self.topic_pane.destroy()
         self.row.destroy()
+        self.notification.close()
     
     def part(self):
         """ Sends a part from this channel."""
@@ -153,11 +163,17 @@ class Room:
     def users(self):
         """list: A list of users in this room."""
         users = []
-        try:
+
+        if self.kind == RoomKind.SERVER:
+            users.append(self.network.nickname)
+        
+        elif self.kind == RoomKind.DIALOG:
+            users.append(self.name)
+        
+        else:
             for user in self.data['users']:
                 users.append(user)
-        except KeyError:
-            users.append(self.name)
+
         return users
     
     @property

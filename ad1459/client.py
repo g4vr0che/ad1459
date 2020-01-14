@@ -32,6 +32,22 @@ class Client(pydle.Client):
         await super().on_connect()
         await self.network_.on_connected()
     
+    async def _disconnect(self, expected):
+        """ We need to override this to stop the event loop getting closed."""
+        # Shutdown connection.
+        await self.connection.disconnect()
+
+        # Reset any attributes.
+        self._reset_attributes()
+
+        # Callback.
+        await self.on_disconnect(expected)
+
+        """This is our override."""
+        # Shut down event loop.
+        # if expected and self.own_eventloop:
+        #     self.connection.stop()
+    
     async def on_raw(self, message):
         if message.command == ('CAP' or 'cap' or 'Cap'):
             if 'znc.in/' in " ".join(message.params):

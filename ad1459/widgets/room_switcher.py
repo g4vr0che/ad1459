@@ -45,7 +45,6 @@ class RoomSwitcher(Gtk.Grid):
             row (:obj:`RoomRow`): A Room Row to add to the listbox.
         """
         self.switcher.insert(row, 0)
-        self.switcher.invalidate_sort()
     
     def remove_row(self, row):
         """ Removes a row from the ListBox.
@@ -59,6 +58,10 @@ class RoomSwitcher(Gtk.Grid):
         except AttributeError:
             pass
 
+        self.switcher.invalidate_sort()
+    
+    def invalidate_sort(self):
+        """ proxy for self.switcher.invalidate_sort()"""
         self.switcher.invalidate_sort()
     
     def get_active_room(self):

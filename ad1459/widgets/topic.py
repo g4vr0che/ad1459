@@ -71,7 +71,6 @@ class TopicPane(Gtk.Grid):
         self.log.debug('Updating topic for %s', self.room.name)
 
         try:
-            self.log.debug('Raw topic: %s', self.room.data['topic'])
             topic_expander_label = '<small>Set by '
             topic_by = GLib.markup_escape_text(self.room.data['topic_by'])
             topic_expander_label += f'<i>{topic_by}</i> on '
@@ -88,7 +87,6 @@ class TopicPane(Gtk.Grid):
             self.topic_expander.set_sensitive(False)
             self.topic_expander.set_expanded(False)
 
-        self.log.debug('%s topic set to %s', self.room.name, topic_text)
         self.exp_label.set_markup(topic_expander_label)
         self.topic_label.set_markup(f'<small>{topic_text}</small>')
 
