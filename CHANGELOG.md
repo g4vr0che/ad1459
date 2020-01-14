@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.13.3](https://github-g///compare/v1.13.2...v1.13.3) (2020-01-14)
+
+
+### Bug Fixes
+
+* Add a spinner to show status when the client is connecting ([3434ba7](https://github-g///commit/3434ba7a1c1346babf8fefeb1ec1e3c06e20642e))
+* Added more handlers to the client/network classes ([f1f1434](https://github-g///commit/f1f1434cbd221a2f18656cbd6b6519c4d56f64f0))
+* Can now disconnect from networks ([136c875](https://github-g///commit/136c875e86ed1191512b6808aebea2ef20d79da4))
+
 ### [1.13.2](https://github-g///compare/v1.13.1...v1.13.2) (2020-01-13)
 
 
