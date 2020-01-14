@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.13.4](https://github-g///compare/v1.13.3...v1.13.4) (2020-01-14)
+
+
+### Bug Fixes
+
+* label the close button correctly, depending on which type of room ([af0c6be](https://github-g///commit/af0c6be6854affb0131abf5d92901ef8b409ba14))
+
 ### [1.13.3](https://github-g///compare/v1.13.2...v1.13.3) (2020-01-14)
 
 
