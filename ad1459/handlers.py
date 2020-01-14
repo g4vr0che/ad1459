@@ -129,6 +129,15 @@ def on_room_selected(listbox, row, window, data=None):
         window.topic_stack.set_visible_child_name(row.room.id)
         window.irc_entry.grab_focus_without_selecting()
         window.nick_button.set_label(row.room.network.nickname)
+        
+        if row.room.kind == RoomKind.DIALOG:
+            window.header.close_button.set_label('Close conversation')
+        
+        elif row.room.kind == RoomKind.SERVER:
+            window.header.close_button.set_label('Disconnect from server')
+        
+        elif row.room.kind == RoomKind.CHANNEL:
+            window.header.close_button.set_label('Leave channel')
     
     except AttributeError:
         return
