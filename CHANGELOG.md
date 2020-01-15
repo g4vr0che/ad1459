@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.14.0](https://github-g///compare/v1.13.4...v1.14.0) (2020-01-15)
+
+
+### Features
+
+* Subsequent server messages are combined into a single message ([2f2a65e](https://github-g///commit/2f2a65ea69b2ba90c9515d10a5b0c0d8ad82428b))
+
+
+### Bug Fixes
+
+* Tab completion fixes ([3d337a6](https://github-g///commit/3d337a6d4e249669f0fc329ffb497c365a70afa0))
+
 ### [1.13.4](https://github-g///compare/v1.13.3...v1.13.4) (2020-01-14)
 
 
