@@ -26,7 +26,7 @@ class AboutDialog(Gtk.AboutDialog):
         self.set_version(__version__.__version__)
         self.set_website('https://github.com/g4vr0che/ad1459')
         self.set_website_label('github.com/g4vr0che/ad1459')
-        self.set_copyright('Copyright ©2019 Gaven Royer et al')
+        self.set_copyright('Copyright ©2019-2020 Gaven Royer et al')
         self.set_license(__license__.__license__)
         self.set_wrap_license(True)
         self.set_authors(
