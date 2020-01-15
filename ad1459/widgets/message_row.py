@@ -91,6 +91,8 @@ class MessageRow(Gtk.ListBoxRow):
     def kind(self, kind):
         self._kind = kind
         Gtk.StyleContext.add_class(self.get_style_context(), kind)
+        if kind == 'server':
+            self.message_text.props.opacity = 0.7
 
     @property
     def time(self):

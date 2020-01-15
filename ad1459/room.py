@@ -115,8 +115,24 @@ class Room:
                         message
                     )
                 self.notification.show()
+        
+        messages = self.buffer.list_box.get_children()
+        if messages:
+            last_message = messages[-1]
+            if last_message:
+                if kind == 'server' and last_message.kind == 'server':
+                    last_message.text += f' {message}'
+                    last_message.time = time
+                
+                else:
+                    self.buffer.add_message_to_buffer(new_message)
 
-        self.buffer.add_message_to_buffer(new_message)
+            else:
+                self.buffer.add_message_to_buffer(new_message)
+        
+        else:
+            self.buffer.add_message_to_buffer(new_message)
+        
         self.window.show_all()
     
     def update_tab_complete(self, user):

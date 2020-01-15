@@ -65,6 +65,7 @@ class Ad1459Window(Gtk.Window):
         switcher_grid.attach(join_bar, 0, 1, 1, 1)
 
         self.join_entry = Gtk.Entry()
+        self.join_entry.set_width_chars(1)
         self.join_entry.set_hexpand(True)
         self.join_entry.set_placeholder_text('Join channel')
         self.join_entry.set_icon_from_icon_name(
@@ -75,12 +76,7 @@ class Ad1459Window(Gtk.Window):
         )
         join_bar.pack_start(self.join_entry)
 
-        entry_grid = Gtk.Grid()
-        entry_grid.set_margin_start(6)
-        entry_grid.set_margin_end(6)
-        entry_grid.set_margin_top(3)
-        entry_grid.set_margin_bottom(3)
-        entry_grid.set_column_spacing(6)
+        entry_grid = Gtk.ActionBar()
         channel_grid.attach(entry_grid, 0, 1, 1, 1)
         
         self.irc_entry = IrcEntry(self)
@@ -99,9 +95,9 @@ class Ad1459Window(Gtk.Window):
             self.send_button.get_style_context(), 'suggested-action'
         )
 
-        entry_grid.attach(self.nick_button, 0, 0, 1, 1)
-        entry_grid.attach(self.irc_entry, 1, 0, 1, 1)
-        entry_grid.attach(self.send_button, 2, 0, 1, 1)
+        entry_grid.pack_start(self.nick_button)
+        entry_grid.pack_start(self.irc_entry)
+        entry_grid.pack_start(self.send_button)
 
         self.channel_pane = Gtk.HPaned()
         self.channel_pane.set_position(600)
