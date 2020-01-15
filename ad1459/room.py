@@ -65,11 +65,7 @@ class Room:
         if not time:
             time = Time.ctime().split()[3]
         
-        if (
-                self.network.nickname in message and 
-                kind != 'action' and
-                kind != 'server'
-        ):
+        if (self.network.nickname in message and kind != 'server'):
             kind = 'highlight'
         
         if sender == self.network.nickname and kind != 'server':
