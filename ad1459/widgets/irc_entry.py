@@ -44,11 +44,17 @@ class IrcEntry(Gtk.Entry):
                 return True
 
             room = self.parent.message_stack.get_visible_child().room
-            users = room.tab_complete
+            complete_list = room.users
+            for user in room.tab_complete:
+                if user in complete_list[::-1]:
+                    complete_list.remove(user)
+                    complete_list.insert(0, user)
+
+            print(room.tab_complete)
             self.log.debug('Completing word %s', current_word)
             if not self.possible_completions:
-                self.log.debug('Users to complete from: %s', users)
-                for user in users:
+                self.log.debug('Users to complete from: %s', complete_list)
+                for user in complete_list:
                     if user.lower().startswith(current_word.lower()):
                         self.possible_completions.insert(0, user)
             self.log.debug(

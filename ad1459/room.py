@@ -50,6 +50,7 @@ class Room:
         self.row = RoomRow(self)
         self.topic_pane = TopicPane(self)
         self.old_users = []
+        self._tab_complete = []
     
     # Methods
     def add_message(self, message, sender='*', kind='message', time=None):
@@ -119,9 +120,10 @@ class Room:
         self.window.show_all()
     
     def update_tab_complete(self, user):
-        if user in self.tab_complete:
+        if user in self._tab_complete:
             self._tab_complete.remove(user)
-            self._tab_complete.insert(0, user)
+        
+        self._tab_complete.append(user)
     
     def update_users(self):
         self.old_users = []
@@ -179,15 +181,7 @@ class Room:
     
     @property
     def tab_complete(self):
-        try: 
-            return self._tab_complete
-        
-        except AttributeError:
-            self._tab_complete = self.users
-            return self._tab_complete
-        
-        except KeyError:
-            return [self.name]
+        return self._tab_complete
 
     @property
     def kind(self):

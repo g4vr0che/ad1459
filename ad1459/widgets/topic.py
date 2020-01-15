@@ -106,7 +106,7 @@ class TopicPane(Gtk.Grid):
         self.user_list.invalidate_sort()
 
 def sort_users(row1, row2, *user_data):
-    if row1.nick < row2.nick:
+    if row1.nick.upper() < row2.nick.upper():
         return -1
     else:
         return 1
