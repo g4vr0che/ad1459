@@ -214,7 +214,7 @@ class Network:
         
         else:
             room = self.get_room_for_name(channel)
-            room.add_message(f'{user} has joined.', kind='server')
+            room.add_message(f'{user} joined.', kind='server')
             self.window.show_all()
             room.update_users()
     
@@ -234,7 +234,7 @@ class Network:
         
         else:
             room.update_users()
-            room.add_message(f'{user} has left ({message}).', kind='server')
+            room.add_message(f'{user} left ({message}).', kind='server')
             self.window.show_all()
     
     async def on_kick(self, channel, target, by, reason=None):
@@ -255,7 +255,7 @@ class Network:
         else:
             room.update_users()
             room.add_message(
-                f'{target} was kicked by {by}, reason: "{reason}".', kind='server'
+                f'{target} kicked by {by},({reason}).', kind='server'
             )
             self.window.show_all()
 
@@ -264,7 +264,7 @@ class Network:
         GLib.idle_add(self.do_quit, user, message)
     
     def do_quit(self, user, message=None):
-        qmessage = f'{user} has quit ({message}).'
+        qmessage = f'{user} quit ({message}).'
         for room in self.rooms:
             if user in room.old_users:
                 room.add_message(qmessage, kind='server')
@@ -274,7 +274,7 @@ class Network:
         GLib.idle_add(self.do_kill, target, by, reason)
     
     def do_kill(self, target, by, reason=None):
-        qmessage = f'{target} was killed by {by}, reason: "{reason}".'
+        qmessage = f'{target} killed by {by}, ({reason}).'
         for room in self.rooms:
             if target in room.old_users:
                 room.add_message(qmessage, kind='server')
@@ -336,7 +336,7 @@ class Network:
         room = self.get_room_for_name(channel)
         room.topic_pane.update_topic()
         room.add_message(
-            f'{by} has changed the channel topic, "{message}"', kind='server'
+            f'{by} set the topic to "{message}"', kind='server'
         )
     
     async def on_mode_change(self, channel, modes, by):

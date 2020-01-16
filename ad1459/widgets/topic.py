@@ -29,6 +29,8 @@ class TopicPane(Gtk.Grid):
         self.room = room
         self.log = logging.getLogger('ad1459.topic')
         self.topic_expander = Gtk.Expander()
+        self.topic_expander.set_margin_top(6)
+        self.topic_expander.set_margin_end(3)
         self.topic_expander.set_label_fill(True)
         self.topic_expander.connect('notify::expanded', self.show_hide_topic)
         self.attach(self.topic_expander, 0, 0, 1, 1)
@@ -42,6 +44,8 @@ class TopicPane(Gtk.Grid):
         self.topic_expander.set_label_widget(self.exp_label)
 
         self.revealer = Gtk.Revealer()
+        self.revealer.set_margin_start(18)
+        self.revealer.set_margin_end(3)
         self.revealer.set_transition_type(Gtk.RevealerTransitionType.SLIDE_DOWN)
         self.attach(self.revealer, 0, 1, 1, 1)
 

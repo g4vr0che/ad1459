@@ -43,6 +43,8 @@ class MessageRow(Gtk.ListBoxRow):
 
         Gtk.StyleContext.add_class(self.get_style_context(), "message-row")
         self.props.margin = 1
+        self.set_margin_start(6)
+        self.set_margin_end(6)
 
         self.stack = Gtk.Stack()
         self.add(self.stack)
@@ -60,31 +62,31 @@ class MessageRow(Gtk.ListBoxRow):
         self.server_grid.set_margin_right(12)
         self.server_grid.set_column_spacing(12)
 
+        self.message_sender = Gtk.Label()
+        self.message_sender.set_margin_bottom(1)
+        self.message_sender.set_selectable(True)
+        self.message_sender.set_use_markup(True)
+        self.message_sender.set_halign(Gtk.Align.START)
+        self.message_sender.set_line_wrap(True)
+        self.message_sender.set_line_wrap_mode(Pango.WrapMode.CHAR)
+        self.message_sender.props.opacity = 0.8
+        self.message_grid.attach(self.message_sender, 0, 0, 1, 1)
         self.message_time = Gtk.Label()
         self.message_time.set_selectable(True)
         self.message_time.set_use_markup(True)
-        self.message_time.props.halign = Gtk.Align.END
-        self.message_time.props.valign = Gtk.Align.START
+        self.message_time.set_halign(Gtk.Align.END)
         self.message_time.props.opacity = 0.5
-        self.message_grid.attach(self.message_time, 0, 1, 1, 1)
-        self.message_sender = Gtk.Label()
-        self.message_sender.set_selectable(True)
-        self.message_sender.set_use_markup(True)
-        self.message_sender.props.xalign = 1
-        self.message_sender.props.halign = Gtk.Align.END
-        self.message_sender.props.valign = Gtk.Align.END
-        self.message_sender.props.width_request = 135
-        self.message_sender.props.opacity = 0.8
-        self.message_grid.attach(self.message_sender, 0, 0, 1, 1)
+        self.message_grid.attach(self.message_time, 1, 0, 1, 1)
         self.message_text = Gtk.Label()
         self.message_text.set_selectable(True)
         self.message_text.set_use_markup(False)
-        self.message_text.props.halign = Gtk.Align.START
+        self.message_text.set_halign(Gtk.Align.START)
         self.message_text.set_line_wrap(True)
         self.message_text.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR)
         self.message_text.set_hexpand(True)
+        self.message_text.set_margin_start(12)
         self.message_text.props.xalign = 0
-        self.message_grid.attach(self.message_text, 2, 0, 1, 2)
+        self.message_grid.attach(self.message_text, 0, 1, 2, 1)
 
         self.server_time = Gtk.Label()
         self.server_time.set_selectable(True)
@@ -135,8 +137,6 @@ class MessageRow(Gtk.ListBoxRow):
         self.server_sender.show()
         self.server_grid.show()
 
-        self.stack.set_visible_child_name('message')
-
         self.server_count = 1
         self.server_message_expander.set_label(
             f'{self.server_count} server messages'
@@ -147,7 +147,7 @@ class MessageRow(Gtk.ListBoxRow):
         self.toggled = False
     
     def update_server_message(self, text):
-        self.text += f'  {text}'
+        self.text += f'/n{text}'
         self.server_count += 1
         self.server_message_expander.set_label(
             f'{self.server_count} server messages'
@@ -189,8 +189,8 @@ class MessageRow(Gtk.ListBoxRow):
     
     @time.setter
     def time(self, time):
-        self.message_time.set_markup(f'<i>{time}</i>')
-        self.server_time.set_markup(f'<i>{time}</i>')
+        self.message_time.set_markup(f'<small><i>{time}</i></small>')
+        self.server_time.set_markup(f'<small><i>{time}</i></small>')
     
     @property
     def sender(self):
@@ -199,8 +199,8 @@ class MessageRow(Gtk.ListBoxRow):
     
     @sender.setter
     def sender(self, sender):
-        self.message_sender.set_markup(sender)
-        self.server_sender.set_markup(sender)
+        self.message_sender.set_markup(f'<small><b>{sender}</b></small>')
+        self.server_sender.set_markup(f'<small>{sender}</small>')
     
     @property
     def text(self):
@@ -212,6 +212,7 @@ class MessageRow(Gtk.ListBoxRow):
         """ We need to make some conversions depending on the type of message
         this is.
         """
+        self.log.debug('Setting text to %s', text)
         if self.kind == 'action':
             text = f'\x1D{self.sender} {text}\x1D'
             self.sender = '*'
@@ -220,8 +221,11 @@ class MessageRow(Gtk.ListBoxRow):
         formatted_text = self.parser.parse_text(escaped_text)
         linked_text = self.parser.hyperlinks(formatted_text)
 
+        server_text = self.parser.hyperlinks(text)
+
         self.message_text.set_markup(linked_text)
-        self.server_text.set_markup(linked_text)
+        print(text)
+        self.server_text.set_text(server_text.replace('/n', '\n'))
     
     def show_all_contents(self):
         self.show_all()
