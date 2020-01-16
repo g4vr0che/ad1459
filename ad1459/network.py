@@ -357,33 +357,59 @@ class Network:
                     change = 'removed '
                 
                 elif code == 'b':
-                    mode_msg += f'{change} a ban on {modes[mode_index]}, '
-                    mode_index += 1
+                    if change == 'set':
+                        mode_msg += f'banned {modes[mode_index]}, '
+                        mode_index += 1
+                    else:
+                        mode_msg += f'unbanned {modes[mode_index]}, '
+                        mode_index += 1
+
                 
                 elif code == 'c':
-                    mode_msg += f'{change} colour filter, '
+                    if change == 'set':
+                        mode_msg += 'disabled colours, '
+                    else:
+                        mode_msg += 'enabled colours, '
                 
                 elif code == 'e':
                     mode_msg += f'{change} a ban exemption on {modes[mode_index]}, '
                     mode_index += 1
                 
                 elif code == 'C':
-                    mode_msg += f'{change} CTCP blocking, '
+                    if change == 'set':
+                        mode_msg += 'disabled CTCP, '
+                    else:
+                        mode_msg += 'enabled CTCP, '
                 
                 elif code == 'i':
-                    mode_msg += f'{change} invite-only, '
+                    if change == 'set':
+                        mode_msg += f'made {channel} invite-only, '
+                    else:
+                        mode_msg += f'made {channel} open, '
 
                 elif code == 'o':
-                    mode_msg += f'{change} op on {modes[mode_index]}, '
-                    mode_index += 1
+                    if change == 'set':
+                        mode_msg += f'opped {modes[mode_index]}, '
+                        mode_index += 1
+                    else:
+                        mode_msg += f'deopped {modes[mode_index]}, '
+                        mode_index += 1
                 
                 elif code == 'v':
-                    mode_msg += f'{change} voice on {modes[mode_index]}, '
-                    mode_index += 1
+                    if change == 'set':
+                        mode_msg += f'voiced {modes[mode_index]}, '
+                        mode_index += 1
+                    else:
+                        mode_msg += f'devoiced {modes[mode_index]}, '
+                        mode_index += 1
                 
                 elif code == 'q':
-                    mode_msg += f'{change} quiet on {modes[mode_index]}, '
-                    mode_index += 1
+                    if change == 'set':
+                        mode_msg += f'muted {modes[mode_index]}, '
+                        mode_index += 1
+                    else:
+                        mode_msg += f'unmuted {modes[mode_index]}, '
+                        mode_index += 1
                 
                 elif code == 'm':
                     mode_msg += f'{change} moderated, '
