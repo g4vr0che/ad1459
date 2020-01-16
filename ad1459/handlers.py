@@ -161,13 +161,3 @@ def on_join_entry_activate(entry, window, data=None):
         room = network.get_room_for_name(room_name)
     
     entry.set_text('')
-    
-def on_user_row_activated(list_box, row, window):
-    user = row.nick
-    network = row.room.network
-    room = network.get_room_for_name(user)
-    window.message_stack.set_visible_child_name(room.id)
-    window.topic_stack.set_visible_child_name(room.id)
-    window.irc_entry.grab_focus_without_selecting()
-    window.nick_button.set_label(network.nickname)
-

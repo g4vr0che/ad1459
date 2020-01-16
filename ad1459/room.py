@@ -72,10 +72,10 @@ class Room:
             kind = 'mine'
 
         new_message = MessageRow()
-        new_message.kind = kind
         new_message.time = time
         new_message.sender = sender
         new_message.text = message
+        new_message.kind = kind
 
         ur_icon = self.row.unread_indicator.get_icon_name()[0]
         current_room = self.window.message_stack.get_visible_child().room
@@ -117,7 +117,7 @@ class Room:
             last_message = messages[-1]
             if last_message:
                 if kind == 'server' and last_message.kind == 'server':
-                    last_message.text += f' {message}'
+                    last_message.update_server_message(message)
                     last_message.time = time
                 
                 else:
