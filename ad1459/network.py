@@ -210,6 +210,7 @@ class Network:
             self.add_room(new_channel)
             new_channel.update_users()
             self.window.switcher.invalidate_sort()
+            self.window.switcher.switcher.select_row(new_channel.row)
         
         else:
             room = self.get_room_for_name(channel)

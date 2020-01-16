@@ -66,7 +66,13 @@ class TopicPane(Gtk.Grid):
         self.user_list = Gtk.ListBox()
         self.user_list.set_hexpand(True)
         self.user_list.set_vexpand(True)
+        self.user_list.set_activate_on_single_click(False)
         self.user_list.set_sort_func(sort_users)
+        self.user_list.connect(
+            'row-activated',
+            self.on_user_row_activated,
+            self.room.window
+        )
         user_window.add(self.user_list)
 
         self.update_topic()
@@ -113,6 +119,16 @@ class TopicPane(Gtk.Grid):
     # Internal Handlers
     def show_hide_topic(self, expander, data=None):
         self.revealer.props.reveal_child = expander.get_expanded()
+    
+    def on_user_row_activated(self, list_box, row, window):
+        user = row.nick
+        network = row.room.network
+        room = network.get_room_for_name(user)
+        window.message_stack.set_visible_child_name(room.id)
+        window.topic_stack.set_visible_child_name(room.id)
+        window.irc_entry.grab_focus_without_selecting()
+        window.nick_button.set_label(network.nickname)
+        window.switcher.switcher.select_row(room.row)
 
 def sort_users(row1, row2, *user_data):
     if row1.nick.upper() < row2.nick.upper():
