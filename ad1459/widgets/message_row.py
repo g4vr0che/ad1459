@@ -45,14 +45,17 @@ class MessageRow(Gtk.ListBoxRow):
         self.props.margin = 1
         self.set_margin_start(6)
         self.set_margin_end(6)
+        self.set_focus_on_click(False)
 
         self.stack = Gtk.Stack()
         self.add(self.stack)
 
         self.message_grid = Gtk.Grid()
         self.message_grid.set_hexpand(True)
-        self.message_grid.set_margin_left(12)
-        self.message_grid.set_margin_right(12)
+        self.message_grid.set_margin_top(1)
+        self.message_grid.set_margin_bottom(2)
+        self.message_grid.set_margin_start(12)
+        self.message_grid.set_margin_end(12)
         self.message_grid.set_column_spacing(12)
 
         self.server_grid = Gtk.Grid()
@@ -92,30 +95,31 @@ class MessageRow(Gtk.ListBoxRow):
         self.server_time.set_selectable(True)
         self.server_time.set_use_markup(True)
         self.server_time.set_width_chars(9)
-        self.server_time.props.halign = Gtk.Align.START
+        self.server_time.props.halign = Gtk.Align.END
         self.server_time.props.valign = Gtk.Align.START
         self.server_time.props.opacity = 0.5
-        self.server_grid.attach(self.server_time, 0, 0, 1, 1)
+        self.server_grid.attach(self.server_time, 2, 0, 1, 1)
         self.server_sender = Gtk.Label()
         self.server_sender.set_selectable(True)
         self.server_sender.set_use_markup(True)
         self.server_sender.props.xalign = 1
-        self.server_sender.props.halign = Gtk.Align.END
+        self.server_sender.props.halign = Gtk.Align.START
         self.server_sender.props.valign = Gtk.Align.START
         self.server_sender.props.opacity = 0.8
-        self.server_grid.attach(self.server_sender, 1, 0, 1, 1)
+        self.server_grid.attach(self.server_sender, 0, 0, 1, 1)
 
         self.server_message_expander = Gtk.Expander()
         self.server_message_expander.set_expanded(True)
+        self.server_message_expander.set_hexpand(True)
         self.server_message_expander.props.opacity = 0.6
         self.server_message_expander.connect('notify::expanded', self.show_hide)
-        self.server_grid.attach(self.server_message_expander, 2, 0, 1, 1)
+        self.server_grid.attach(self.server_message_expander, 1, 0, 1, 1)
         self.server_revealer = Gtk.Revealer()
         self.server_revealer.set_transition_type(
             Gtk.RevealerTransitionType.SLIDE_DOWN
         )
         self.server_revealer.props.reveal_child = True
-        self.server_grid.attach(self.server_revealer, 2, 1, 1, 1)
+        self.server_grid.attach(self.server_revealer, 0, 1, 3, 1)
         self.server_text = Gtk.Label()
         self.server_text.set_selectable(True)
         self.server_text.set_use_markup(False)
@@ -147,7 +151,7 @@ class MessageRow(Gtk.ListBoxRow):
         self.toggled = False
     
     def update_server_message(self, text):
-        self.text += f'/n{text}'
+        self.text += f'/n{text} '
         self.server_count += 1
         self.server_message_expander.set_label(
             f'{self.server_count} server messages'
@@ -219,13 +223,14 @@ class MessageRow(Gtk.ListBoxRow):
             
         escaped_text = GLib.markup_escape_text(text, len(text.encode('utf-8')))
         formatted_text = self.parser.parse_text(escaped_text)
-        linked_text = self.parser.hyperlinks(formatted_text)
+        linked_text = self.parser.hyperlinks(formatted_text.replace('/n', ' /n'))
 
-        server_text = self.parser.hyperlinks(text)
+        # server_text = self.parser.hyperlinks(text)
+        server_text = text
 
         self.message_text.set_markup(linked_text)
         print(text)
-        self.server_text.set_text(server_text.replace('/n', '\n'))
+        self.server_text.set_markup(linked_text.replace('/n', '\n'))
     
     def show_all_contents(self):
         self.show_all()

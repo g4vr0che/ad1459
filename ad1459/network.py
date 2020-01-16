@@ -347,14 +347,19 @@ class Network:
         mode_codes = modes[0]
         mode_index = 1
         change = None
+        last_code = ''
         mode_msg = f'{by} '
         try:
             for code in mode_codes:
-                if code == '+':
-                    change = 'set '
+                if code == last_code:
+                    mode_msg += f'{modes[mode_index]}, '
+                    mode_index += 1
+                
+                elif code == '+':
+                    change = 'set'
                 
                 elif code == '-':
-                    change = 'removed '
+                    change = 'removed'
                 
                 elif code == 'b':
                     if change == 'set':
@@ -413,6 +418,8 @@ class Network:
                 
                 elif code == 'm':
                     mode_msg += f'{change} moderated, '
+
+                last_code = code
         
         except IndexError:
             print('No index %s', mode_index)
