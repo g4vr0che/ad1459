@@ -30,6 +30,7 @@ class TopicPane(Gtk.Grid):
         self.log = logging.getLogger('ad1459.topic')
         self.topic_expander = Gtk.Expander()
         self.topic_expander.set_label_fill(True)
+        self.topic_expander.connect('notify::expanded', self.show_hide_topic)
         self.attach(self.topic_expander, 0, 0, 1, 1)
 
         # Set Expander Label
@@ -40,6 +41,10 @@ class TopicPane(Gtk.Grid):
         self.exp_label.set_margin_end(3)
         self.topic_expander.set_label_widget(self.exp_label)
 
+        self.revealer = Gtk.Revealer()
+        self.revealer.set_transition_type(Gtk.RevealerTransitionType.SLIDE_DOWN)
+        self.attach(self.revealer, 0, 1, 1, 1)
+
         self.topic_label = Gtk.Label()
         self.topic_label.set_margin_start(6)
         self.topic_label.set_margin_end(6)
@@ -47,16 +52,16 @@ class TopicPane(Gtk.Grid):
         self.topic_label.set_margin_bottom(6)
         self.topic_label.set_xalign(0)
         self.topic_label.set_line_wrap(True)
-        self.topic_expander.add(self.topic_label)
+        self.revealer.add(self.topic_label)
 
         separator = Gtk.Separator.new(Gtk.Orientation.HORIZONTAL)
         separator.set_hexpand(True)
-        self.attach(separator, 0, 1, 1, 1)
+        self.attach(separator, 0, 2, 1, 1)
 
         user_window = Gtk.ScrolledWindow()
         user_window.set_hexpand(True)
         user_window.set_vexpand(True)
-        self.attach(user_window, 0, 2, 1, 1)
+        self.attach(user_window, 0, 3, 1, 1)
 
         self.user_list = Gtk.ListBox()
         self.user_list.set_hexpand(True)
@@ -104,6 +109,10 @@ class TopicPane(Gtk.Grid):
         
         self.room.window.show_all()
         self.user_list.invalidate_sort()
+    
+    # Internal Handlers
+    def show_hide_topic(self, expander, data=None):
+        self.revealer.props.reveal_child = expander.get_expanded()
 
 def sort_users(row1, row2, *user_data):
     if row1.nick.upper() < row2.nick.upper():
