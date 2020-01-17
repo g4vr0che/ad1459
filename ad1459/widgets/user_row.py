@@ -14,6 +14,13 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 class UserRow(Gtk.ListBoxRow):
+    """ A row for a user in the user list.
+
+    The attributes for this class are stored in the label widget for this row.
+
+    Attributes:
+        nick (str): This user's nickname.
+    """
 
     def __init__(self, room):
         super().__init__()

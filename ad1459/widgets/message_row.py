@@ -29,6 +29,11 @@ class MessageRow(Gtk.ListBoxRow):
     drawn within these rows, as this obviates the need to store extra variables
     in memory.
 
+    We use two copies of the message text, timestamp, and sender. This is to
+    display the message differently depending on if this was a server message or
+    a normal message. Server messages are combined into one long message, and 
+    be collapsed to save space.
+
     Attributes:
         time (str): The time the message was sent.
         sender (str): The user/network who sent the message. "*" by default.
@@ -39,17 +44,19 @@ class MessageRow(Gtk.ListBoxRow):
         Gtk.ListBoxRow.__init__(self)
         self.log = logging.getLogger('ad1459.message-row')
 
+        # We don't want these to be selectable in the list
         self.props.selectable = False
-
         Gtk.StyleContext.add_class(self.get_style_context(), "message-row")
         self.props.margin = 1
         self.set_margin_start(6)
         self.set_margin_end(6)
         self.set_focus_on_click(False)
 
+        # We use the stack to display server/message rows with a single widget
         self.stack = Gtk.Stack()
         self.add(self.stack)
 
+        # This is the layout for normal messages
         self.message_grid = Gtk.Grid()
         self.message_grid.set_hexpand(True)
         self.message_grid.set_margin_top(1)
@@ -58,6 +65,7 @@ class MessageRow(Gtk.ListBoxRow):
         self.message_grid.set_margin_end(12)
         self.message_grid.set_column_spacing(12)
 
+        # This is the layout for server messages.
         self.server_grid = Gtk.Grid()
         self.server_grid.set_hexpand(True)
         self.server_grid.set_valign(Gtk.Align.CENTER)
@@ -65,6 +73,7 @@ class MessageRow(Gtk.ListBoxRow):
         self.server_grid.set_margin_right(12)
         self.server_grid.set_column_spacing(12)
 
+        # The sender for normal messages
         self.message_sender = Gtk.Label()
         self.message_sender.set_margin_bottom(1)
         self.message_sender.set_selectable(True)
@@ -74,12 +83,16 @@ class MessageRow(Gtk.ListBoxRow):
         self.message_sender.set_line_wrap_mode(Pango.WrapMode.CHAR)
         self.message_sender.props.opacity = 0.8
         self.message_grid.attach(self.message_sender, 0, 0, 1, 1)
+        
+        # The timestamp for normal messages
         self.message_time = Gtk.Label()
         self.message_time.set_selectable(True)
         self.message_time.set_use_markup(True)
         self.message_time.set_halign(Gtk.Align.END)
         self.message_time.props.opacity = 0.5
         self.message_grid.attach(self.message_time, 1, 0, 1, 1)
+        
+        # The text for normal messages
         self.message_text = Gtk.Label()
         self.message_text.set_selectable(True)
         self.message_text.set_use_markup(False)
@@ -91,14 +104,7 @@ class MessageRow(Gtk.ListBoxRow):
         self.message_text.props.xalign = 0
         self.message_grid.attach(self.message_text, 0, 1, 2, 1)
 
-        self.server_time = Gtk.Label()
-        self.server_time.set_selectable(True)
-        self.server_time.set_use_markup(True)
-        self.server_time.set_width_chars(9)
-        self.server_time.props.halign = Gtk.Align.END
-        self.server_time.props.valign = Gtk.Align.START
-        self.server_time.props.opacity = 0.5
-        self.server_grid.attach(self.server_time, 2, 0, 1, 1)
+        # The sender for server messages
         self.server_sender = Gtk.Label()
         self.server_sender.set_selectable(True)
         self.server_sender.set_use_markup(True)
@@ -108,6 +114,17 @@ class MessageRow(Gtk.ListBoxRow):
         self.server_sender.props.opacity = 0.8
         self.server_grid.attach(self.server_sender, 0, 0, 1, 1)
 
+        # The timestamp for server messages
+        self.server_time = Gtk.Label()
+        self.server_time.set_selectable(True)
+        self.server_time.set_use_markup(True)
+        self.server_time.set_width_chars(9)
+        self.server_time.props.halign = Gtk.Align.END
+        self.server_time.props.valign = Gtk.Align.START
+        self.server_time.props.opacity = 0.5
+        self.server_grid.attach(self.server_time, 2, 0, 1, 1)
+
+        # We need expander + revealer to animate the message contents.
         self.server_message_expander = Gtk.Expander()
         self.server_message_expander.set_expanded(True)
         self.server_message_expander.set_hexpand(True)
@@ -120,6 +137,8 @@ class MessageRow(Gtk.ListBoxRow):
         )
         self.server_revealer.props.reveal_child = True
         self.server_grid.attach(self.server_revealer, 0, 1, 3, 1)
+
+        # The text for server messages
         self.server_text = Gtk.Label()
         self.server_text.set_selectable(True)
         self.server_text.set_use_markup(False)
@@ -131,16 +150,17 @@ class MessageRow(Gtk.ListBoxRow):
         self.server_text.props.opacity = 0.7
         self.server_revealer.add(self.server_text)
 
+        # Show everything
         self.message_text.show()
         self.message_time.show()
         self.message_sender.show()
         self.message_grid.show()
-
         self.server_text.show()
         self.server_time.show()
         self.server_sender.show()
         self.server_grid.show()
 
+        # Keep track of server messages (this is ignored for normal messages)
         self.server_count = 1
         self.server_message_expander.set_label(
             f'{self.server_count} server messages'
@@ -148,9 +168,21 @@ class MessageRow(Gtk.ListBoxRow):
 
         self.parser = Parser()
         self.kind = 'message'
+
+        # Keep track of whether the user toggles the expander
         self.toggled = False
     
     def update_server_message(self, text):
+        """ Adds text to a server message.
+
+        We set the updated text (placing it on a newline) and increment the 
+        count of the messages. 
+
+        Arguments:
+            text (str): The line to add to the server message.
+        """
+        # We use '/n' because our parsing later on filters out newlines.
+        # It will ignore '/n', so we use that and replace it before setting.
         self.text += f'/n{text} '
         self.server_count += 1
         self.server_message_expander.set_label(
@@ -161,7 +193,13 @@ class MessageRow(Gtk.ListBoxRow):
     
     # Internal Handlers
     def show_hide(self, expander, data=None):
+        """ handler for the expander-revealer above. 
+        
+        When the expander is toggled, we set the revealer property to the same
+        as the expander's property.
+        """
         self.server_revealer.props.reveal_child = expander.get_expanded()
+        # User toggled manually, remember that.
         self.toggled = True
     
     @property
@@ -217,19 +255,17 @@ class MessageRow(Gtk.ListBoxRow):
         this is.
         """
         self.log.debug('Setting text to %s', text)
+        # Action message formatting
         if self.kind == 'action':
-            text = f'\x1D{self.sender} {text}\x1D'
-            self.sender = '*'
-            
+            text = f'\x1D{text}\x1D'
+        
+        # This is our message parsing for formatting and such.
         escaped_text = GLib.markup_escape_text(text, len(text.encode('utf-8')))
         formatted_text = self.parser.parse_text(escaped_text)
         linked_text = self.parser.hyperlinks(formatted_text.replace('/n', ' /n'))
 
-        # server_text = self.parser.hyperlinks(text)
-        server_text = text
-
+        # Set both of the labels to the same text.
         self.message_text.set_markup(linked_text)
-        print(text)
         self.server_text.set_markup(linked_text.replace('/n', '\n'))
     
     def show_all_contents(self):

@@ -67,8 +67,13 @@ class Network:
 
     # Synchronous Methods for this object.
     def connect(self):
-        """ Connect to the network, disconnecting first if already connected. """
-        if self.auth == 'sasl':
+        """ Connect to the network."""
+        if self.client:
+            if self.client.connected:
+                self.log.info('Disconnecting from %s', self.host)
+                self.disconnect()
+
+        elif self.auth == 'sasl':
             self.client = Client(
                 self.nickname, 
                 self, 
@@ -78,14 +83,13 @@ class Network:
         else:
             self.client = Client(self.nickname, self)
         
-        self.client.username = self.username
-
         self.log.debug('Spinning up async connection to %s', self.host)
-
+        self.client.username = self.username
         self.server_room = Room(self.app, self, self.window, self.name)
         self.server_room.kind = "server"
         self.add_room(self.server_room)
 
+        # Actually do the connection
         if self.auth == 'pass':
             self.log.debug('Using password authentication')
             asyncio.run_coroutine_threadsafe(
@@ -118,20 +122,32 @@ class Network:
         )
     
     def change_nick(self, new_nick):
-        """ Changes the user's nick."""
+        """ Changes the user's nick.
+        
+        Arguments:
+            new_nick (str): The new nickname to use.
+        """
         asyncio.run_coroutine_threadsafe(
             self.client.set_nickname(new_nick),
             loop=asyncio.get_event_loop()
         )
 
     def join_channel(self, channel):
-        """ Joins a room on the network."""
+        """ Joins a room on the network.
+        
+        Arguments:
+            channel (str): The name of the channel to join.
+        """
         asyncio.run_coroutine_threadsafe(
             self.client.join(channel), loop=asyncio.get_event_loop()
         )
 
     def add_room(self, room):
-        """Adds a room to the window for this network."""
+        """Adds a room to this network and adds it to the UI.
+        
+        Arguments:
+            room (:obj:`Room`): The room object to add
+        """
         self.log.debug('Adding room %s to the window', room.name)
         self.window.switcher.add_row(room.row)
         self.window.message_stack.add_named(room.buffer, room.id)
@@ -141,7 +157,11 @@ class Network:
         self.rooms.append(room)
     
     def get_room_for_name(self, name):
-        """ Gets a room object given the name."""
+        """ Gets a room object given the name.
+        
+        Arguments:
+            name (str): The name of the room to join
+        """
         for room in self.rooms:
             if room.name == name:
                 return room
@@ -156,7 +176,13 @@ class Network:
             return new_room
     
     def send_message(self, room, message):
-        """ Sends a message to the entity for room."""
+        """ Sends a message/PRIVMSG to a channel/user.
+        
+        Arguments:
+            room (:obj:`Room`): The room to send the message to. This is a 
+                PM room or a channel.
+            message (str): The message to send
+        """
         message_text = self.parser.format_text(message)
         for command in self.commands:
             if not message.startswith(command):

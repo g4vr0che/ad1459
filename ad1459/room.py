@@ -71,15 +71,19 @@ class Room:
         if sender == self.network.nickname and kind != 'server':
             kind = 'mine'
 
+        # Create the new message
         new_message = MessageRow()
         new_message.time = time
         new_message.sender = sender
         new_message.text = message
         new_message.kind = kind
 
+        # Get the same of the unread Icon
         ur_icon = self.row.unread_indicator.get_icon_name()[0]
         current_room = self.window.message_stack.get_visible_child().room
         
+        # TODO: All of this is rather messy
+        # This sets the unread indicator for the channel
         if current_room != self or not self.window.focused:
             if kind != 'server':
                 if self.network.nickname in message:
@@ -91,8 +95,8 @@ class Room:
             elif ur_icon != 'emblem-important-symbolic':
                 self.row.set_icon('radio-mixed-symbolic')
         
-        self.log.debug('Window is focused: %s', self.window.focused)
         # TODO: This can be improved
+        # This shows the notification
         if not self.window.focused:
             if (
                     new_message.kind == 'highlight' or 
@@ -112,6 +116,7 @@ class Room:
                     )
                 self.notification.show()
         
+        # This posts the message, in either the last server message or a new one
         messages = self.buffer.list_box.get_children()
         if messages:
             last_message = messages[-1]
@@ -121,9 +126,11 @@ class Room:
                     last_message.time = time
                 
                 else:
+                    last_message.server_message_expander.set_expanded(False)
                     self.buffer.add_message_to_buffer(new_message)
 
             else:
+                last_message.server_message_expander.set_expanded(False)
                 self.buffer.add_message_to_buffer(new_message)
         
         else:
@@ -132,12 +139,18 @@ class Room:
         self.window.show_all()
     
     def update_tab_complete(self, user):
+        """Add/move a user to the end of the tab-complete list
+
+        Arguments:
+            user (str): the nick of the user to move.
+        """
         if user in self._tab_complete:
             self._tab_complete.remove(user)
         
         self._tab_complete.append(user)
     
     def update_users(self):
+        """ Updates the user list in the UI."""
         self.old_users = []
         for user in self.users:
             self.old_users.append(user)
@@ -153,12 +166,15 @@ class Room:
         self.notification.close()
     
     def part(self):
-        """ Sends a part from this channel."""
+        """ Sends a part from this channel.
+        
+        Note that we don't remove the room until we receive the PART message
+        from the server.
+        """
         asyncio.run_coroutine_threadsafe(
             self.network.client.part(self.name, message='Leaving...'),
             loop=asyncio.get_event_loop()
         )
-
 
     # Data
     @property

@@ -11,4 +11,6 @@
 
 from ad1459.application import Ad1459Application
 app = Ad1459Application()
-app.init_application()
+
+if __name__ == '__main__':
+    app.init_application()

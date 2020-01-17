@@ -22,6 +22,11 @@ from gi.repository import Gtk, Gdk
 from .room_row import room_row_sort
 
 class RoomSwitcher(Gtk.Grid):
+    """ The room switcher sidebar content in the main window. 
+
+    This contains room rows for all of the currently open rooms, and allows the
+    user to click on them to switch to a different room.
+    """
 
     def __init__(self, app):
         super().__init__()

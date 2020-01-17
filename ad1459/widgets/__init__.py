@@ -6,5 +6,5 @@
   License, v. 2.0. If a copy of the MPL was not distributed with this
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-  This is the widget module.
+  This is the widget module. This file should be blank.
 """

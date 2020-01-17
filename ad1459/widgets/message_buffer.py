@@ -16,6 +16,13 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 class MessageBuffer(Gtk.ScrolledWindow):
+    """ A buffer to display messages.
+
+    This should be added as a child of a Gtk.Stack in the main window.
+    
+    Attributes:
+        room (`Room`): The room this buffer belongs to.
+    """
 
     def __init__(self, room):
         super().__init__()
@@ -39,7 +46,11 @@ class MessageBuffer(Gtk.ScrolledWindow):
             self.scroll_to_bottom(self.list_box)
     
     def on_window_scroll(self, widget, data=None):
-        """value-changed signal handler for the window adjustment."""
+        """value-changed signal handler for the window adjustment.
+        
+        This is used to detect when the user scrolls up, so that we can 
+        disconnect the `scroll_to_bottom` handler when we get a new message.
+        """
         adj = self.get_vadjustment()
         max_value = adj.get_upper() - adj.get_page_size()
 

@@ -22,7 +22,7 @@ from gi.repository import Gtk, GLib
 from .user_row import UserRow
 
 class TopicPane(Gtk.Grid):
-    """ The contents of the topic pane, as a GtkGrid()."""
+    """ The right-sidebar of the UI, containing the topic and the User List."""
 
     def __init__(self, room):
         super().__init__()
@@ -122,9 +122,17 @@ class TopicPane(Gtk.Grid):
     
     # Internal Handlers
     def show_hide_topic(self, expander, data=None):
+        """ Shows or hides the topic.
+
+        This is synced to the `expanded` property of `expander`.
+        """
         self.revealer.props.reveal_child = expander.get_expanded()
     
     def on_user_row_activated(self, list_box, row, window):
+        """ `row-activated` handler for the list bow. 
+
+        This opens a PM room with the selected user.
+        """
         user = row.nick
         network = row.room.network
         room = network.get_room_for_name(user)
@@ -135,6 +143,7 @@ class TopicPane(Gtk.Grid):
         window.switcher.switcher.select_row(room.row)
 
 def sort_users(row1, row2, *user_data):
+    """ Sorts the users alphabetically by nick."""
     if row1.nick.upper() < row2.nick.upper():
         return -1
     else:

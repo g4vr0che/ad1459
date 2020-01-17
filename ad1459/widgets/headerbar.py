@@ -16,7 +16,16 @@ from gi.repository import Gtk
 from .server_popup import ServerPopover
 
 class Headerbar(Gtk.HeaderBar):
-    """ The headerbar we use."""
+    """ The headerbar we use.
+    
+    Attributes:
+        network_button (`Gtk.MenuButton`): The server popup button.
+        server_popup (`ServerPopover`): The server popup itself.
+        spinner (`Gtk.Spinner`): The network status spinner.
+        appmenu (`Gtk.Popover`): The Application Menu.
+        close_button (`Gtk.ModelButton`): The part/disconnect button.
+        about_button (`Gtk.ModelBUtton`): The About button
+    """
 
     def __init__(self, app):
         super().__init__()

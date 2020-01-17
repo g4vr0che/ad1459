@@ -16,8 +16,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 class RoomKind(Enum):
-    """ An enum to classify the type of room this is.
-    """
+    """ An enum to classify the type of room this is."""
     SERVER = 1
     CHANNEL = 2
     ROOM = 2
@@ -36,6 +35,7 @@ class RoomKind(Enum):
         return strings[self.value]
 
 def sort_by_server(row1, row2):
+    """Sorts the rows alphabetically by their network name."""
     if row1.room.network.name < row2.room.network.name:
         return -1
     
@@ -43,6 +43,7 @@ def sort_by_server(row1, row2):
         return 1
 
 def sort_by_room(row1, row2):
+    """ Sorts the rows alphabetically by room name."""
     if row1.room.name < row2.room.name:
         return -1
     
@@ -115,9 +116,6 @@ def room_row_sort(row1, row2, *user_data):
 
 class RoomRow(Gtk.ListBoxRow):
     """ A dedicated ListBoxRow for representing a room in the Room List.
-
-    Arguments:
-        kind (:obj:`RoomKind`): The type of room this is.
     
     Attributes:
         room_name (str): The name of this room.

@@ -13,6 +13,11 @@ import logging
 from urllib.parse import urlparse
 
 class Parser:
+    """ This is a text formatting helper class.
+
+    It aids with IRC formatting as well as providing Pango markup to the 
+    interface for label widgets.
+    """
 
     formatting = {
         '\x02': ['b', '*'],

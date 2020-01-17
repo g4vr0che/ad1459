@@ -15,6 +15,10 @@ import pydle
 import time
 
 class Client(pydle.Client):
+    """ This is the actual IRC Client. 
+
+    Most of this functionality is provided by Pydle.
+    """
 
     def __init__(self, nick, network, sasl_username=None, sasl_password=None, **kwargs):
         self.log = logging.getLogger('ad1459.client')

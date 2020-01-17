@@ -16,6 +16,11 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
 class IrcEntry(Gtk.Entry):
+    """ An entry specifically tailored to entering IRC messages. 
+    
+    Includes tab-complete features.
+    """
+
     
     def __init__(self, parent, placeholder='Enter a message'):
         self.log = logging.getLogger('ad1459.ircentry')

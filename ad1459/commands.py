@@ -13,6 +13,11 @@ import asyncio
 import logging
 
 class Commands:
+    """ Commands for IRC.
+
+    Each method in this class is a command to run. It should complete the 
+    action required by the command.
+    """
     log = logging.getLogger('ad1459.commands')
     def me(self, room, client, message):
         """ /me command

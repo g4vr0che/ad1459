@@ -19,6 +19,28 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
 class ServerPopover(Gtk.Popover):
+    """ A popover for connecting to a server.
+
+    This hooks into our server details storage to look up saved configurations.
+    It also allows for connecting to new networks or modifying existing ones. It
+    will eventually also allow deleting networks from the list of saved networks.
+
+    This class uses the text of its entries as a data store for the below 
+    attributes.
+
+    Attributes:
+        name (str): The name of the server.
+        nick (str): The nickname to use on this network.
+        username (str): The username/ident to give to the user.
+        realname (str): The realname to display in WHOIS.
+        server (str): The server for this connection.
+        port (int): The port on `server` to connect to.
+        auth (str): The authentication to use. One of `pass`, `sasl`, or `none`.
+        password (str): The password to supply for authentication, if required.
+        tls (bool): Whether this connection uses TLS.
+        save (bool): Whether to save this connection.
+        server_line (str): A condensed line to enter the connection in one-shot.
+    """
 
     def __init__(self, config_file_path):
         super().__init__()
@@ -157,114 +179,7 @@ class ServerPopover(Gtk.Popover):
             self.password_entry
         ]
 
-    @property 
-    def name(self):
-        return self.name_entry.get_text()
-
-    @property 
-    def nick(self):
-        return self.nick_entry.get_text()
-
-    @property 
-    def username(self):
-        if self.username_entry.get_text() != '':
-            return self.username_entry.get_text()
-        else:
-            return self.nick
-
-    @property 
-    def realname(self):
-        if self.realname_entry.get_text() != '':
-            return self.realname_entry.get_text()
-        else:
-            return self.nick
-
-    @property 
-    def server(self):
-        return self.server_entry.get_text()
-
-    @property 
-    def port(self):
-        return self.port_entry.get_value()
-
-    @property 
-    def auth(self):
-        auth = self.auth_combo.get_active_text()
-        if auth == 'SASL Authentication':
-            return 'sasl'
-
-        elif auth == 'Server Password':
-            return 'pass'
-
-        else:
-            return 'none'
-
-    @property 
-    def password(self):
-        return self.password_entry.get_text()
-
-    @property 
-    def tls(self):
-        return self.tls_check.get_active()
-
-    @property 
-    def save(self):
-        return self.save_check.get_active()
-
-    @property 
-    def server_line(self):
-        return self.server_line_entry.get_text()
-    
-    def on_saved_combo_changed(self, combo, data=None):
-        """ changed signal handler for saved_combo."""
-        network = combo.get_active_text()
-
-        if network == 'New...':
-            self.reset_all_text()
-        
-        else:
-            self.config.read(self.config_file_path)
-            self.name_entry.set_text(
-                self.config[network]['name']
-            )
-            self.nick_entry.set_text(
-                self.config[network]['nickname']
-            )
-            self.username_entry.set_text(
-                self.config[network]['username']
-            )
-            self.realname_entry.set_text(
-                self.config[network]['realname']
-            )
-            self.server_entry.set_text(
-                self.config[network]['host']
-            )
-            self.port_entry.set_value(
-                int(self.config[network]['port'])
-            )
-            if self.config[network]['auth'] == 'sasl':
-                self.auth_combo.set_active(0)
-            elif self.config[network]['auth'] == 'pass':
-                self.auth_combo.set_active(1)
-            else:
-                self.auth_combo.set_active(2)
-            if self.config[network]['tls'] == 'True':
-                self.tls_check.set_active(True)
-            else:
-                self.tls_check.set_active(False)
-            keyring_service = (
-                f'{self.config[network]["name"]}-{self.config[network]["host"]}'
-            )
-            keyring_username = (
-                f'{self.config[network]["nickname"]}'
-                f'!{self.config[network]["username"]}'
-                f'@{self.config[network]["name"]}'
-            )
-            self.password_entry.set_text(
-                self.keyring.get_password(keyring_service, keyring_username)
-            )
-            self.save_check.set_active(True)
-
+    # Methods
     def init_saved_combo(self):
         """Clears any existing items from the saved network combo and sets it 
         up with new ones.
@@ -331,3 +246,113 @@ class ServerPopover(Gtk.Popover):
         line = f'{line} {self.password_entry.get_text()}'
         
         return line.strip()
+
+    # Internal Handlers
+    def on_saved_combo_changed(self, combo, data=None):
+        """ changed signal handler for saved_combo."""
+        network = combo.get_active_text()
+
+        if network == 'New...':
+            self.reset_all_text()
+        
+        else:
+            self.config.read(self.config_file_path)
+            self.name_entry.set_text(
+                self.config[network]['name']
+            )
+            self.nick_entry.set_text(
+                self.config[network]['nickname']
+            )
+            self.username_entry.set_text(
+                self.config[network]['username']
+            )
+            self.realname_entry.set_text(
+                self.config[network]['realname']
+            )
+            self.server_entry.set_text(
+                self.config[network]['host']
+            )
+            self.port_entry.set_value(
+                int(self.config[network]['port'])
+            )
+            if self.config[network]['auth'] == 'sasl':
+                self.auth_combo.set_active(0)
+            elif self.config[network]['auth'] == 'pass':
+                self.auth_combo.set_active(1)
+            else:
+                self.auth_combo.set_active(2)
+            if self.config[network]['tls'] == 'True':
+                self.tls_check.set_active(True)
+            else:
+                self.tls_check.set_active(False)
+            keyring_service = (
+                f'{self.config[network]["name"]}-{self.config[network]["host"]}'
+            )
+            keyring_username = (
+                f'{self.config[network]["nickname"]}'
+                f'!{self.config[network]["username"]}'
+                f'@{self.config[network]["name"]}'
+            )
+            self.password_entry.set_text(
+                self.keyring.get_password(keyring_service, keyring_username)
+            )
+            self.save_check.set_active(True)
+
+    # Data
+    @property 
+    def name(self):
+        return self.name_entry.get_text()
+
+    @property 
+    def nick(self):
+        return self.nick_entry.get_text()
+
+    @property 
+    def username(self):
+        if self.username_entry.get_text() != '':
+            return self.username_entry.get_text()
+        else:
+            return self.nick
+
+    @property 
+    def realname(self):
+        if self.realname_entry.get_text() != '':
+            return self.realname_entry.get_text()
+        else:
+            return self.nick
+
+    @property 
+    def server(self):
+        return self.server_entry.get_text()
+
+    @property 
+    def port(self):
+        return self.port_entry.get_value()
+
+    @property 
+    def auth(self):
+        auth = self.auth_combo.get_active_text()
+        if auth == 'SASL Authentication':
+            return 'sasl'
+
+        elif auth == 'Server Password':
+            return 'pass'
+
+        else:
+            return 'none'
+
+    @property 
+    def password(self):
+        return self.password_entry.get_text()
+
+    @property 
+    def tls(self):
+        return self.tls_check.get_active()
+
+    @property 
+    def save(self):
+        return self.save_check.get_active()
+
+    @property 
+    def server_line(self):
+        return self.server_line_entry.get_text()

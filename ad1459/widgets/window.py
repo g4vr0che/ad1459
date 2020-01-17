@@ -27,8 +27,14 @@ from .room_switcher import RoomSwitcher
 from .server_popup import ServerPopover
 
 class Ad1459Window(Gtk.Window):
-    """ This is a window for AD1459. It contains the overall layout as well as
-    most of the general controls for the app.
+    """ This is a window for AD1459. 
+    
+    This contains the overall layout as well as most of the general controls for
+    the app.
+
+    Attributes:
+        active_room (:obj:`Room`): The currently active room.
+        focused (bool): Whether the window is currently focused or not.
     """
 
     def __init__(self, app, parser):
@@ -123,6 +129,8 @@ class Ad1459Window(Gtk.Window):
     
     # Internal Handlers
     def on_focus_changed(self, window, data=None):
+        """ Unset the unread indicator for the current room when we gain focus.
+        """
         try:
             room = self.message_stack.get_visible_child().room
         except AttributeError:
