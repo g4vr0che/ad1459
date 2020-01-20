@@ -38,9 +38,22 @@ def on_send_button_clicked(widget, text, room, window, data=None):
     room = window.message_stack.get_visible_child().room
     network = room.network
     message = window.irc_entry.get_text()
+
+    # We want to avoid sending empty messages
     if message:
         network.send_message(room, message)
+
     window.irc_entry.set_text('')
+    room.unsent_text = ''
+    room.recents.append(message)
+    window.recents.append(message)
+
+    # Keep the recent sent messages to a reasonable size.
+    while len(room.recents) > 50:
+        room.recents.pop(0)
+    while len(window.recents) > 50:
+        room.recents.pop(0)
+    
 
 def on_nick_button_clicked(button, window, data=None):
     """`clicked` signal handler for the nickname button.
@@ -114,7 +127,6 @@ def on_appmenu_close_clicked(button, room, window, data=None):
     
     window.switcher.switcher.select_row(network.server_room.row)
 
-
 def on_appmenu_about_clicked(button, window, data=None):
     """`clicked` signal handler for the About button.
     
@@ -131,28 +143,31 @@ def on_room_selected(listbox, row, window, data=None):
     Arguments:
         window (:obj:`Gtk.Window`): The window we're part of.
     """
-    try:
-        row.room.update_users()
-        row.room.topic_pane.update_topic()
-        row.room.notification.close()
-        window.show_all()
-        row.set_icon('radio-symbolic')
-        window.message_stack.set_visible_child_name(row.room.id)
-        window.topic_stack.set_visible_child_name(row.room.id)
-        window.irc_entry.grab_focus_without_selecting()
-        window.nick_button.set_label(row.room.network.nickname)
-        
-        if row.room.kind == RoomKind.DIALOG:
-            window.header.close_button.set_label('Close conversation')
-        
-        elif row.room.kind == RoomKind.SERVER:
-            window.header.close_button.set_label('Disconnect from server')
-        
-        elif row.room.kind == RoomKind.CHANNEL:
-            window.header.close_button.set_label('Leave channel')
+    # try:
+    row.room.update_users()
+    row.room.topic_pane.update_topic()
+    row.room.notification.close()
+    window.show_all()
+    row.set_icon('radio-symbolic')
+    window.message_stack.set_visible_child_name(row.room.id)
+    window.topic_stack.set_visible_child_name(row.room.id)
+    window.irc_entry.grab_focus_without_selecting()
+    window.nick_button.set_label(row.room.network.nickname)
+    window.irc_entry.set_text(row.room.unsent_text)
+    length = len(row.room.unsent_text)
+    window.irc_entry.set_position(length)
     
-    except AttributeError:
-        return
+    if row.room.kind == RoomKind.DIALOG:
+        window.header.close_button.set_label('Close conversation')
+    
+    elif row.room.kind == RoomKind.SERVER:
+        window.header.close_button.set_label('Disconnect from server')
+    
+    elif row.room.kind == RoomKind.CHANNEL:
+        window.header.close_button.set_label('Leave channel')
+    
+    # except AttributeError:
+        # return
     
     window.switcher.invalidate_sort()
 

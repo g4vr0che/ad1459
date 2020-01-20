@@ -135,6 +135,8 @@ class Ad1459Window(Gtk.Window):
 
         self.irc_entry.grab_focus_without_selecting()
 
+        self.recents = []
+
         self.connect('focus-in-event', self.on_focus_changed)
     
     # Internal Handlers

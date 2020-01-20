@@ -61,6 +61,8 @@ class Room:
         self.topic_pane = TopicPane(self)
         self.old_users = []
         self._tab_complete = []
+        self.unsent_text = ''
+        self.recents = []
     
     # Methods
     def add_message(self, message, sender='*', kind='message', time=None):

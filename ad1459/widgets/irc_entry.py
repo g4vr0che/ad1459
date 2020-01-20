@@ -32,22 +32,116 @@ class IrcEntry(Gtk.Entry):
     """
 
     
-    def __init__(self, parent, placeholder='Enter a message'):
+    def __init__(self, window, placeholder='Enter a message'):
         self.log = logging.getLogger('ad1459.ircentry')
         super().__init__()
 
         self.prematched = False
-        self.parent = parent
+        self.window = window
         self.set_hexpand(True)
         self.set_placeholder_text(placeholder)
         self.props.show_emoji_icon = True
         self.props.max_width_chars = 5000
         self.possible_completions = []
+        self.possible_recents = []
+        self.recents_mode = ''
 
         self.connect('key-press-event', self.on_key_press_event)
+        self.connect('notify::text', self.on_text_changed)
+    
+    def set_text_updown(self, msglist, index):
+        """ Sets the text in the entry on up/down.
+
+        Arguments:
+            msglist (list): The list of messages to use.
+            index (int): The index of the desired message in the list.
+        """
+        message = msglist[index]
+        self.log.debug('Index: %s, Buffer: %s', msglist, index)
+        self.set_text(message)
+        self.set_position(len(message))
+    
+    def clamp_index(self, value, largest): 
+        """ Clamps the value to between 0 and largest.
+        
+        Arguments:
+            value (int): The value we need clamped.
+            largest (int): The highest we accept.
+        """
+        return sorted((0, value, largest - 1))[1]
+    
+    def on_text_changed(self, entry, data=None):
+        """ Update the text in the channel entry buffer."""
+        room = self.window.active_room
+        text = self.get_text()
+        room.unsent_text = self.get_text()
     
     def on_key_press_event(self, entry, event):
-        if event.keyval == Gdk.keyval_from_name('Tab'):
+        room = self.window.message_stack.get_visible_child().room
+
+        keys = Gdk.Keymap.get_default()
+        mods = keys.get_modifier_state()
+
+        self.log.debug('Keyval: %s', Gdk.keyval_name(event.keyval))
+        self.log.debug('Modifiers: %s', mods)
+        self.log.debug('Completion debugging:')
+        self.log.debug('window recents: %s', self.window.recents)
+        self.log.debug('room recents: %s', room.recents)
+        self.log.debug('recents_mode: %s', self.recents_mode)
+        self.log.debug('possible_completions: %s', self.possible_completions)
+
+        if event.keyval == Gdk.keyval_from_name('Up'):
+            if mods == 16:
+                if self.recents_mode != 'room':
+                    self.recents_mode = 'room'
+                    self.possible_recents = room.recents.copy()
+                    self.possible_recents.append(self.get_text())
+                    self.index = len(self.possible_recents) - 1
+
+                self.index -= 1
+                self.index = self.clamp_index(self.index, len(self.possible_recents))
+                self.set_text_updown(self.possible_recents, self.index)
+                return True
+            
+            elif mods == 20:
+                if self.recents_mode != 'window':
+                    self.recents_mode = 'window'
+                    self.possible_recents = self.window.recents.copy()
+                    self.possible_recents.append(self.get_text())
+                    self.index = len(self.possible_recents) - 1
+
+                self.index -= 1
+                self.index = self.clamp_index(self.index, len(self.possible_recents))
+                self.set_text_updown(self.possible_recents, self.index)
+                return True
+        
+        elif event.keyval == Gdk.keyval_from_name('Down'):
+            if mods == 16:
+                if self.recents_mode != 'room':
+                    self.recents_mode = 'room'
+                    self.possible_recents = room.recents.copy()
+                    self.possible_recents.append(self.get_text())
+                    self.index = len(self.possible_recents) - 1
+
+                self.index += 1
+                self.index = self.clamp_index(self.index, len(self.possible_recents))
+                self.set_text_updown(self.possible_recents, self.index)
+                return True
+            
+            elif mods == 20:
+                if self.recents_mode != 'window':
+                    self.recents_mode = 'window'
+                    self.possible_recents = self.window.recents.copy()
+                    self.possible_recents.append(self.get_text())
+                    self.index = len(self.possible_recents) - 1
+
+                self.index += 1
+                self.index = self.clamp_index(self.index, len(self.possible_recents))
+                self.set_text_updown(self.possible_recents, self.index)
+                return True
+
+        # Tab completion
+        elif event.keyval == Gdk.keyval_from_name('Tab'):
             # We should currently get the most recent word
             # TODO: Improve this to get the current word at the cursor
             text = self.get_text()
@@ -58,7 +152,6 @@ class IrcEntry(Gtk.Entry):
             except IndexError:
                 return True
 
-            room = self.parent.message_stack.get_visible_child().room
             complete_list = room.users
             for user in room.tab_complete:
                 if user in complete_list[::-1]:
@@ -97,3 +190,6 @@ class IrcEntry(Gtk.Entry):
             return True
         
         self.possible_completions = []
+        self.possible_recents = []
+        self.recents_mode = ''
+        self.index = 0

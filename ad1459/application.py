@@ -151,6 +151,7 @@ class Ad1459Application:
         window.send_button.connect(
             'clicked', 
             handlers.on_send_button_clicked,
+            window.irc_entry.get_text(),
             window.switcher.get_active_room(),
             window
         )
