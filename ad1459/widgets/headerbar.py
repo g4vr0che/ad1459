@@ -72,9 +72,14 @@ class Headerbar(Gtk.HeaderBar):
         self.close_button.set_label('Close conversation')
         appmenu_grid.attach(self.close_button, 0, 0, 1, 1)
 
+        self.keys_button = Gtk.ModelButton()
+        self.keys_button.set_label('Keyboard shortcuts')
+        self.keys_button.props.action_name = 'win.show-help-overlay'
+        appmenu_grid.attach(self.keys_button, 0, 1, 1, 1)
+
         self.about_button = Gtk.ModelButton()
         self.about_button.set_label('About AD1459')
-        appmenu_grid.attach(self.about_button, 0, 1, 1, 1)
+        appmenu_grid.attach(self.about_button, 0, 2, 1, 1)
 
         self.appmenu.show_all()
         self.appmenu.popdown()
@@ -87,3 +92,4 @@ class Headerbar(Gtk.HeaderBar):
         appmenu_button.set_image(appmenu_image)
         appmenu_button.set_popover(self.appmenu)
         self.pack_end(appmenu_button)
+

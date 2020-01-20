@@ -68,6 +68,7 @@ class Ad1459Application:
             'in.donotspellitgav.in', Gio.ApplicationFlags.FLAGS_NONE
         )
         self.app.connect('activate', self.init_application)
+        self.app.parser = Parser()
         self.parser = Parser()
 
                 # Set up CSS
@@ -126,7 +127,8 @@ class Ad1459Application:
             A Gtk.Window set up for AD1459
         """
         self.log.debug('Adding window')
-        window = Ad1459Window(self, self.parser)
+        window = Ad1459Window(self)
+        window.props.application = self.app
         window.set_default_size(1000, 600)
         window.connect('delete-event', self.remove_window)
         self.connect_ui(window)
@@ -168,6 +170,11 @@ class Ad1459Application:
             window.switcher.get_active_room(),
             window
         )
+        # window.header.keys_button.connect(
+        #     'clicked',
+        #     handlers.on_appmenu_keys_clicked,
+        #     window
+        # )
         window.header.about_button.connect(
             'clicked',
             handlers.on_appmenu_about_clicked,

@@ -30,13 +30,14 @@ gi.require_versions(
 )
 from gi.repository import Gtk, Gdk
 
+from .. import formatting
 from .about import AboutDialog
 from .headerbar import Headerbar
 from .irc_entry import IrcEntry
 from .room_switcher import RoomSwitcher
 from .server_popup import ServerPopover
 
-class Ad1459Window(Gtk.Window):
+class Ad1459Window(Gtk.ApplicationWindow):
     """ This is a window for AD1459. 
     
     This contains the overall layout as well as most of the general controls for
@@ -47,18 +48,20 @@ class Ad1459Window(Gtk.Window):
         focused (bool): Whether the window is currently focused or not.
     """
 
-    def __init__(self, app, parser):
+    def __init__(self, app):
         self.log = logging.getLogger('ad1459.window')
         self.log.debug('Creating window')
 
         self.app = app
-        self.parser = parser
+        self.parser = formatting.Parser()
 
         super().__init__()
         self.set_default_size(1000, 600)
 
         self.header = Headerbar(self.app)
         self.set_titlebar(self.header)
+
+        self.add_help_overlay()
 
         self.main_pane = Gtk.HPaned()
         self.main_pane.set_position(200)
@@ -138,6 +141,40 @@ class Ad1459Window(Gtk.Window):
         self.recents = []
 
         self.connect('focus-in-event', self.on_focus_changed)
+    
+    # Methods
+    def add_help_overlay(self):
+        keys_window = Gtk.ShortcutsWindow()
+        main_section = Gtk.ShortcutsSection()
+        main_section.props.section_name = 'AD1459 Shortcuts'
+        keys_window.add(main_section)
+        
+        entry_group = Gtk.ShortcutsGroup()
+        entry_group.props.title = 'Entry Shortcuts'
+        main_section.add(entry_group)
+        
+        tab_shortcut = Gtk.ShortcutsShortcut()
+        tab_shortcut.props.accelerator = 'Tab'
+        tab_shortcut.props.title = (
+            'Auto-complete nicknames'
+        )
+        entry_group.add(tab_shortcut)
+        
+        room_recent_shortcut = Gtk.ShortcutsShortcut()
+        room_recent_shortcut.props.accelerator = 'Up Down'
+        room_recent_shortcut.props.title = (
+            'Move through the recently sent messages for the current channel'
+        )
+        entry_group.add(room_recent_shortcut)
+        
+        win_recent_shortcut = Gtk.ShortcutsShortcut()
+        win_recent_shortcut.props.accelerator= '<ctl>Up <clt>Down'
+        win_recent_shortcut.props.title = (
+            'Move through the recently sent messages from all channels'
+        )
+        entry_group.add(win_recent_shortcut)
+
+        self.set_help_overlay(keys_window)
     
     # Internal Handlers
     def on_focus_changed(self, window, data=None):

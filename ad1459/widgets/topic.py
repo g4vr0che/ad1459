@@ -30,6 +30,7 @@ gi.require_versions(
 from gi.repository import Gtk, GLib
 
 from .user_row import UserRow
+from .room_row import RoomKind
 
 class TopicPane(Gtk.Grid):
     """ The right-sidebar of the UI, containing the topic and the User List."""
@@ -126,6 +127,21 @@ class TopicPane(Gtk.Grid):
             new_user = UserRow(self.room)
             new_user.nick = user
             self.user_list.add(new_user)
+            modes = []
+            
+            if user in self.room.mutes:
+                modes.append('q')
+            
+            if user in self.room.voices:
+                modes.append('v')
+
+            if user in self.room.ops:
+                modes.append('o')
+            
+            new_user.modes = modes
+            
+            if user == 'Miga':
+                self.log.debug('Miga mdoes: %s', new_user.modes)
         
         self.room.window.show_all()
         self.user_list.invalidate_sort()
@@ -153,7 +169,53 @@ class TopicPane(Gtk.Grid):
         window.switcher.switcher.select_row(room.row)
 
 def sort_users(row1, row2, *user_data):
+    """ Sorts the users for the user list.
+
+    Arguments:
+        row1: The first user row to compare
+        row2: The second user row to compare
+    
+    Returns:
+        -1 if row1 should go above row2
+        1 if row1 should go below row2
+    """
+    if row1.mute:
+        if row2.mute:
+            return sort_users_alpha(row1, row2)
+        
+        else:
+            return 1
+    
+    if row1.voice:
+        if row2.voice:
+            return sort_users_alpha(row1, row2)
+        
+        elif row2.op:
+            return 1
+        
+        else:
+            return -1
+    
+    if row1.op:
+        if row2.op:
+            return sort_users_alpha(row1, row2)
+        
+        else:
+            return -1
+    
+    if row1.nomodes:
+        if row2.nomodes:
+            return sort_users_alpha(row1, row2)
+        
+        elif row2.mute:
+            return -1
+        
+        else:
+            return 1
+
+def sort_users_alpha(row1, row2):
     """ Sorts the users alphabetically by nick."""
+
     if row1.nick.upper() < row2.nick.upper():
         return -1
     else:

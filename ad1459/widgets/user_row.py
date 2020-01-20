@@ -52,6 +52,8 @@ class UserRow(Gtk.ListBoxRow):
 
         self.user_label = Gtk.Label()
         grid.attach(self.user_label, 1, 0, 1, 1)
+
+        self._modes = []
     
     # Data
     @property
@@ -63,4 +65,54 @@ class UserRow(Gtk.ListBoxRow):
     def nick(self, nick):
         self.user_label.set_text(nick)
 
+    @property
+    def modes(self):
+        """:list: of str: The current user modes for this user"""
+        return self._modes
+    
+    @modes.setter
+    def modes(self, modes):
+        self._modes = modes
+        self.status_image.set_opacity(0)
+
+        if 'q' in self._modes:
+            self.status_image.set_from_icon_name(
+                'view-conceal-symbolic',
+                Gtk.IconSize.SMALL_TOOLBAR
+            )
+            self.status_image.set_opacity(0.5)
         
+        if 'v' in self._modes:
+            self.status_image.set_from_icon_name(
+                'media-record-symbolic',
+                Gtk.IconSize.SMALL_TOOLBAR
+            )
+            self.status_image.set_opacity(1)
+
+        if 'o' in self._modes:
+            self.status_image.set_from_icon_name(
+                'starred-symbolic',
+                Gtk.IconSize.SMALL_TOOLBAR
+            )
+            self.status_image.set_opacity(1)
+    
+    @property
+    def op(self):
+        """bool: True if user is chanop."""
+        if 'o' in self.modes:
+            return True
+        
+    @property
+    def voice(self):
+        if 'v' in self.modes and not 'o' in self.modes:
+            return True
+    
+    @property
+    def mute(self):
+        if 'q' in self.modes and not 'o' in self.modes and not 'v' in self.modes:
+            return True
+    
+    @property
+    def nomodes(self):
+        if not 'q' in self.modes and not 'o' in self.modes and not 'v' in self.modes:
+            return True

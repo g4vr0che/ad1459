@@ -220,6 +220,43 @@ class Room:
         return users
     
     @property
+    def ops(self):
+        """:list: of str: The list of chanops in this room."""
+        if self.kind == RoomKind.CHANNEL:
+            try:
+                return self.data['modes']['o']
+            
+            except KeyError:
+                return []
+        else:
+            return []
+
+    
+    @property
+    def voices(self):
+        if self.kind == RoomKind.CHANNEL:
+            try:
+                return self.data['modes']['v']
+
+            except KeyError:
+                return []
+        else:
+            return []
+
+    
+    @property
+    def mutes(self):
+        if self.kind == RoomKind.CHANNEL:
+            try: 
+                return self.data['modes']['q']
+
+            except KeyError:
+                return []
+        else:
+            return []
+
+    
+    @property
     def tab_complete(self):
         return self._tab_complete
 
