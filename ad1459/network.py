@@ -463,6 +463,7 @@ class Network:
         mode_msg = mode_msg.strip()
         mode_msg = mode_msg.strip(',')
         room.add_message(f'{mode_msg}.', kind='server')
+        room.update_users()
 
     async def on_user_invite(self, target, channel, by):
         GLib.idle_add(self.do_user_invite, target, channel, by)
