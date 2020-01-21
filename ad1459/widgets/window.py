@@ -185,7 +185,7 @@ class Ad1459Window(Gtk.ApplicationWindow):
         except AttributeError:
             return
         self.log.debug('Unsetting unread indicator for %s', room.name)
-        room.row.set_icon('radio-symbolic')
+        room.row.icon = 'none'
 
     # Data
     @property

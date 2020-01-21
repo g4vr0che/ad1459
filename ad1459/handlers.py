@@ -148,7 +148,7 @@ def on_room_selected(listbox, row, window, data=None):
     row.room.topic_pane.update_topic()
     row.room.notification.close()
     window.show_all()
-    row.set_icon('radio-symbolic')
+    row.icon = 'none'
     window.message_stack.set_visible_child_name(row.room.id)
     window.topic_stack.set_visible_child_name(row.room.id)
     window.irc_entry.grab_focus_without_selecting()

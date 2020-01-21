@@ -30,7 +30,7 @@ from gi.repository import Notify
 
 from .widgets.message_buffer import MessageBuffer
 from .widgets.message_row import MessageRow
-from .widgets.room_row import RoomRow, RoomKind
+from .widgets.room_row import RoomRow, RoomKind, RoomIcon
 from .widgets.topic import TopicPane
 
 class Room:
@@ -91,21 +91,12 @@ class Room:
         new_message.kind = kind
 
         # Get the same of the unread Icon
-        ur_icon = self.row.unread_indicator.get_icon_name()[0]
         current_room = self.window.message_stack.get_visible_child().room
         
-        # TODO: All of this is rather messy
         # This sets the unread indicator for the channel
-        if current_room != self or not self.window.focused:
-            if kind != 'server':
-                if self.network.nickname in message:
-                    self.row.set_icon('emblem-important-symbolic')
-                
-                elif ur_icon != 'emblem-important-symbolic':
-                    self.row.set_icon('radio-checked-symbolic')
-            
-            elif ur_icon != 'emblem-important-symbolic':
-                self.row.set_icon('radio-mixed-symbolic')
+        if self.window.active_room != self or not self.window.focused:
+            if self.row.icon.value <= RoomIcon[kind.upper()].value:
+                self.row.icon = kind
         
         # TODO: This can be improved
         # This shows the notification

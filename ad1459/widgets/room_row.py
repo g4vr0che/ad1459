@@ -44,6 +44,25 @@ class RoomKind(Enum):
         }
         return strings[self.value]
 
+class RoomIcon(Enum):
+    """ Classify the icon each RoomRow uses."""
+    NONE = 1
+    SERVER = 2
+    MESSAGE = 3
+    ACTION = 3
+    NOTICE = 3
+    MINE = 3
+    HIGHLIGHT = 4
+
+    def __str__(self):
+        strings = {
+            1: 'radio-symbolic',
+            2: 'radio-mixed-symbolic',
+            3: 'radio-checked-symbolic',
+            4: 'emblem-important-symbolic'
+        }
+        return strings[self.value]
+
 def sort_by_server(row1, row2):
     """Sorts the rows alphabetically by their network name."""
     if row1.room.network.name < row2.room.network.name:
@@ -135,6 +154,7 @@ class RoomRow(Gtk.ListBoxRow):
     def __init__(self, room):
         super().__init__()
         self.room = room
+        self._icon = RoomIcon.NONE
         self.set_can_focus(False)
 
         grid = Gtk.Grid()
@@ -182,4 +202,23 @@ class RoomRow(Gtk.ListBoxRow):
     def kind(self):
         """Easier compatibility with sort func."""
         return self.room.kind
+    
+    @property
+    def icon(self):
+        """`RoomIcon`: The icon that this row should have."""
+        return self._icon
+    
+    @icon.setter
+    def icon(self, icon):
+        try:
+            _icon = str(icon).upper()
+            self._icon = RoomIcon[_icon]
+        
+        except AttributeError:
+            self._icon = RoomIcon(icon)
+        
+        self.unread_indicator.set_from_icon_name(
+            str(self._icon),
+            Gtk.IconSize.SMALL_TOOLBAR
+        )
    
