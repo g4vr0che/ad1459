@@ -199,6 +199,11 @@ class Ad1459Application:
             handlers.on_join_entry_activate,
             window
         )
+        window.join_entry.connect(
+            'icon-release',
+            handlers.on_join_entry_icon_release,
+            window
+        )
 
     def remove_window(self, window, data=None):
         """ Deletes a window and moves all of its stuff to another window.

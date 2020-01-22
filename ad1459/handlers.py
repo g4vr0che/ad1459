@@ -186,3 +186,19 @@ def on_join_entry_activate(entry, window, data=None):
         room = network.get_room_for_name(room_name)
     
     entry.set_text('')
+
+def on_join_entry_icon_release(entry, icon_pos, event, window, data=None):
+    """`activate` signal handler for join entry.
+
+    also handles the `icon-release` signal.
+    """
+    room_name = entry.get_text()
+    network = window.message_stack.get_visible_child().room.network
+    
+    if room_name.startswith('#'):
+        network.join_channel(room_name)
+    
+    else:
+        room = network.get_room_for_name(room_name)
+    
+    entry.set_text('')
