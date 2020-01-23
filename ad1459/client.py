@@ -145,11 +145,11 @@ class Client(pydle.Client):
 
     async def on_ctcp(self, by, target, what, contents):
         self.log.debug('%s received CTCP %s from %s: %s', target, what, by, contents)
-        super().on_ctcp(by, target, what, contents)
+        await super().on_ctcp(by, target, what, contents)
     
     async def on_ctcp_reply(self, by, target, what, contents):
         self.log.debug('%s received REPLY CTCP %s from %s: %s', target, what, by, contents)
-        super().on_ctcp(by, target, what, contents)
+        await super().on_ctcp(by, target, what, contents)
 
     async def on_ctcp_action(self, by, target, contents):
         await self.network_.on_ctcp_action(target, by, contents)

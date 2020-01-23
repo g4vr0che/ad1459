@@ -152,7 +152,9 @@ class IrcEntry(Gtk.Entry):
             except IndexError:
                 return True
 
-            complete_list = room.users
+            complete_list = room.users.copy()
+            for command in room.network.commands:
+                complete_list.append(command)
             for user in room.tab_complete:
                 if user in complete_list[::-1]:
                     complete_list.remove(user)
@@ -175,7 +177,7 @@ class IrcEntry(Gtk.Entry):
                 completion = self.possible_completions.pop()
                 self.possible_completions.insert(0, completion)
 
-                if len(text_list) == 0:
+                if len(text_list) == 0 and not completion.startswith('/'):
                     completion = f'{completion}:'
 
                 completion = f'{completion} '

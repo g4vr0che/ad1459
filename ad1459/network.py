@@ -52,7 +52,20 @@ class Network:
     """
     cmd = Commands()
     commands = {
-        '/me': cmd.me
+        '/me': cmd.me,
+        '/join': cmd.join,
+        '/quit': cmd.quit,
+        '/part': cmd.part,
+        '/kick': cmd.kick,
+        '/ban': cmd.ban,
+        '/kickban': cmd.kickban,
+        # '/cycle': cmd.cycle,
+        '/nick': cmd.nick,
+        '/query': cmd.query,
+        '/msg': cmd.query,
+        '/whisper': cmd.query,
+        '/notice': cmd.notice,
+        '/topic': cmd.topic
     }
 
     def __init__(self, app, window):
@@ -123,7 +136,7 @@ class Network:
                 loop=asyncio.get_event_loop()
             )
     
-    def disconnect(self):
+    def disconnect(self, message='AD1459 Quit'):
         """Disconnect from this network."""
         self.log.debug('Disconnecting from %s', self.name)
         asyncio.run_coroutine_threadsafe(
@@ -196,13 +209,18 @@ class Network:
         message_text = self.parser.format_text(message)
         for command in self.commands:
             if not message.startswith(command):
-                asyncio.run_coroutine_threadsafe(
-                    self.client.message(room.name, message_text),
-                    loop=asyncio.get_event_loop()
-                )
+                continue
             else:
-                self.commands[command](room, self.client, message_text)
+                message_text = message_text.replace(command, '')
+                self.log.debug('Got command: %s (%s)', command, message_text)
+                self.commands[command](room, self, message_text)
+                return 0
 
+        self.log.debug('Sending message to %s: %s', room.name, message_text)
+        asyncio.run_coroutine_threadsafe(
+            self.client.message(room.name, message_text),
+            loop=asyncio.get_event_loop()
+        )
     
     # Asynchronous Callbacks
     async def on_connected(self):
@@ -359,7 +377,13 @@ class Network:
         GLib.idle_add(self.do_private_notice, target, source, message)
         
     def do_private_notice(self, target, source, message):
-        room = self.get_room_for_name(source)
+        if target == self.nickname:
+            room = self.get_room_for_name(source)
+            self.log.debug('Adding message from %s', room.id)
+        else:
+            room = self.get_room_for_name(target)
+            self.log.debug('Adding message to %s', room.id)
+
         self.log.debug('Adding notice from %s', room.id)
         room.add_message(message, source, kind='notice')
         self.window.show_all()
