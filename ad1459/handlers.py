@@ -38,7 +38,7 @@ def on_send_button_clicked(widget, text, room, window, data=None):
         window (:obj:`Ad1459Application`): The window we're in
     """
     log.debug('on_send_button_clicked handler triggered')
-    room = window.message_stack.get_visible_child().room
+    room = window.active_room
     network = room.network
     message = window.irc_entry.get_text()
 

@@ -100,7 +100,9 @@ class Commands:
                 )
         else:
             room.add_message(
-                f'You are not an op in {room.name}', kind='notice'
+                f'You are not an op in {room.name}', 
+                sender=f'/kick {room.name} {user} reason={reason}',
+                kind='notice'
             )
     
     def ban(self, room, network, command):
@@ -114,7 +116,9 @@ class Commands:
             )
         else:
             room.add_message(
-                f'You are not an op in {room.name}', kind='notice'
+                f'You are not an op in {room.name}', 
+                sender=f'/ban {room.name} {user}',
+                kind='notice'
             )
     
     def kickban(self, room, network, command):
@@ -134,7 +138,9 @@ class Commands:
                 )
         else:
             room.add_message(
-                f'You are not an op in {room.name}', kind='notice'
+                f'You are not an op in {room.name}', 
+                sender=f'/kickban {room.name} {user} reason={reason}',
+                kind='notice'
             )
     
     def nick(self, room, network, command):

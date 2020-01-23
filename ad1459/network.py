@@ -30,6 +30,7 @@ from gi.repository import Gtk, GLib
 from .widgets.room_row import RoomRow
 from .widgets.message_row import MessageRow
 from .client import Client
+from .testclient import TestClient
 from .commands import Commands
 from .formatting import Parser
 from .room import Room
@@ -91,42 +92,64 @@ class Network:
     # Synchronous Methods for this object.
     def connect(self):
         """ Connect to the network."""
-        if self.client:
-            if self.client.connected:
-                self.log.info('Disconnecting from %s', self.host)
-                self.disconnect()
+        if not self.host == 'test':
+            if self.client:
+                if self.client.connected:
+                    self.log.info('Disconnecting from %s', self.host)
+                    self.disconnect()
 
-        elif self.auth == 'sasl':
-            self.client = Client(
-                self.nickname, 
-                self, 
-                sasl_password=self.password, 
-                sasl_username=self.username
-            )
+            elif self.auth == 'sasl':
+                self.client = Client(
+                    self.nickname, 
+                    self, 
+                    sasl_password=self.password, 
+                    sasl_username=self.username
+                )
+            else:
+                self.client = Client(self.nickname, self)
+            
+            self.log.debug('Spinning up async connection to %s', self.host)
+            self.client.username = self.username
+            self.server_room = Room(self.app, self, self.window, self.name)
+            self.server_room.kind = "server"
+            self.add_room(self.server_room)
+
+            # Actually do the connection
+            if self.auth == 'pass':
+                self.log.debug('Using password authentication')
+                asyncio.run_coroutine_threadsafe(
+                    self.client.connect(
+                        hostname=self.host,
+                        port=self.port,
+                        tls=self.tls,
+                        password=self.password
+                    ),
+                    loop=asyncio.get_event_loop()
+                )
+
+            else:
+                self.log.debug('Using SASL authentication (or none)')
+                asyncio.run_coroutine_threadsafe(
+                    self.client.connect(
+                        hostname=self.host,
+                        port=self.port,
+                        tls=self.tls
+                    ),
+                    loop=asyncio.get_event_loop()
+                )
         else:
-            self.client = Client(self.nickname, self)
-        
-        self.log.debug('Spinning up async connection to %s', self.host)
-        self.client.username = self.username
-        self.server_room = Room(self.app, self, self.window, self.name)
-        self.server_room.kind = "server"
-        self.add_room(self.server_room)
-
-        # Actually do the connection
-        if self.auth == 'pass':
-            self.log.debug('Using password authentication')
-            asyncio.run_coroutine_threadsafe(
-                self.client.connect(
-                    hostname=self.host,
-                    port=self.port,
-                    tls=self.tls,
-                    password=self.password
-                ),
-                loop=asyncio.get_event_loop()
+            self.generate_test_data()
+            self.client = TestClient(
+                    self.nickname, 
+                    self, 
+                    sasl_password=self.password, 
+                    sasl_username=self.username
             )
 
-        else:
-            self.log.debug('Using SASL authentication (or none)')
+            self.server_room = Room(self.app, self, self.window, self.name)
+            self.server_room.kind = "server"
+            self.add_room(self.server_room)
+
             asyncio.run_coroutine_threadsafe(
                 self.client.connect(
                     hostname=self.host,
@@ -135,6 +158,16 @@ class Network:
                 ),
                 loop=asyncio.get_event_loop()
             )
+
+            for channel in self.client.channels:
+                room = Room(self.app, self, self.window, channel, test=True)
+                room.kind = 'channel'
+                self.add_room(room)
+            
+            popup = self.window.header.server_popup
+            popup.reset_all_text()
+            popup.layout_grid.set_sensitive(True)
+            self.do_connected()
     
     def disconnect(self, message='AD1459 Quit'):
         """Disconnect from this network."""
@@ -224,11 +257,13 @@ class Network:
     
     # Asynchronous Callbacks
     async def on_connected(self):
+        self.log.debug('Firing network.on_connected')
         """ Called upon connection to IRC."""
         self.log.info('Connected to %s', self.name)
         GLib.idle_add(self.do_connected)
     
     def do_connected(self):
+        self.log.debug('Sync: running network.do_connected')
         popup = self.window.header.server_popup
         popup.reset_all_text()
         popup.layout_grid.set_sensitive(True)
@@ -236,10 +271,12 @@ class Network:
         self.window.switcher.invalidate_sort()
     
     async def on_nick_change(self, old, new):
+        self.log.debug('Firing network.on_nick_change')
         self.log.debug('Nick %s changed to %s', old, new)
         GLib.idle_add(self.do_nick_change, old, new)
     
     def do_nick_change(self, old, new):
+        self.log.debug('Sync: running network.do_nick_change')
         if old == self.nickname or old == '<unregistered>':
             self.nickname = new
             self.window.nick_button.set_label(self.nickname)
@@ -252,10 +289,12 @@ class Network:
                     room.update_users()
     
     async def on_join(self, channel, user):
+        self.log.debug('Firing network.on_join')
         self.log.debug('%s has joined %s', user, channel)
         GLib.idle_add(self.do_join, channel, user)
     
     def do_join(self, channel, user):
+        self.log.debug('Sync: running network.do_join')
         if user == self.nickname:
             new_channel = Room(self.app, self, self.window, channel)
             new_channel.kind = 'channel'
@@ -273,10 +312,12 @@ class Network:
             room.update_users()
     
     async def on_part(self, channel, user, message=None):
+        self.log.debug('Firing network.on_part')
         self.log.debug('%s has left %s, (%s)', user, channel, message)
         GLib.idle_add(self.do_part, channel, user, message)
     
     def do_part(self, channel, user, message=None):
+        self.log.debug('Sync: running network.do_part')
         room = self.get_room_for_name(channel)
         if user == self.nickname:
             room.leave()
@@ -292,9 +333,11 @@ class Network:
             self.window.show_all()
     
     async def on_kick(self, channel, target, by, reason=None):
+        self.log.debug('Firing network.on_kick')
         GLib.idle_add(self.do_kick, channel, target, by, reason)
     
     def do_kick(self, channel, target, by, reason=None):
+        self.log.debug('Sync: running network.do_kick')
         room = self.get_room_for_name(channel)
         if target == self.nickname:
             room.leave()
@@ -314,10 +357,12 @@ class Network:
             self.window.show_all()
 
     async def on_quit(self, user, message=None):
+        self.log.debug('Firing network.on_quit')
         self.log.debug('%s has quit! (%s)', user, message)
         GLib.idle_add(self.do_quit, user, message)
     
     def do_quit(self, user, message=None):
+        self.log.debug('Sync: running network.do_quit')
         qmessage = f'{user} quit ({message}).'
         for room in self.rooms:
             if user in room.old_users:
@@ -325,9 +370,11 @@ class Network:
                 room.update_users()
     
     async def on_kill(self, target, by, reason=None):
+        self.log.debug('Firing network.on_kill')
         GLib.idle_add(self.do_kill, target, by, reason)
     
     def do_kill(self, target, by, reason=None):
+        self.log.debug('Sync: running network.do_kill')
         qmessage = f'{target} killed by {by}, ({reason}).'
         for room in self.rooms:
             if target in room.old_users:
@@ -335,9 +382,11 @@ class Network:
                 room.update_users()
     
     async def on_message(self, target, source, message):
+        self.log.debug('Firing network.on_message')
         GLib.idle_add(self.do_message, target, source, message)
     
     def do_message(self, target, source, message):
+        self.log.debug('Sync: running network.do_message')
         if target.startswith('#'):
             room = self.get_room_for_name(target)
             self.log.debug('Adding message to %s', room.id)
@@ -346,10 +395,12 @@ class Network:
             self.window.show_all()
 
     async def on_notice(self, target, source, message):
+        self.log.debug('Firing network.on_notice')
         self.log.debug('%s noticed to %s: %s', source, target, message)
         GLib.idle_add(self.do_notice, target, source, message)
     
     def do_notice(self, target, source, message):
+        self.log.debug('Sync: running network.do_notice')
         if target.startswith('#'):
             room = self.get_room_for_name(target)
             self.log.debug('Adding notice to %s', room.id)
@@ -358,10 +409,12 @@ class Network:
             self.window.show_all()
     
     async def on_private_message(self, target, source, message):
+        self.log.debug('Firing network.on_private_message')
         self.log.debug('PM to %s from %s: %s', target, source, message)
         GLib.idle_add(self.do_private_message, target, source, message)
 
     def do_private_message(self, target, source, message):
+        self.log.debug('Sync: running network.do_private_message')
         if target == self.nickname:
             room = self.get_room_for_name(source)
             self.log.debug('Adding message from %s', room.id)
@@ -373,10 +426,12 @@ class Network:
         self.window.show_all()
     
     async def on_private_notice(self, target, source, message):
+        self.log.debug('Firing network.on_private_notice')
         self.log.debug('Private Notice to %s from %s: %s', target, source, message)
         GLib.idle_add(self.do_private_notice, target, source, message)
         
     def do_private_notice(self, target, source, message):
+        self.log.debug('Sync: running network.do_private_notice')
         if target == self.nickname:
             room = self.get_room_for_name(source)
             self.log.debug('Adding message from %s', room.id)
@@ -389,9 +444,11 @@ class Network:
         self.window.show_all()
     
     async def on_topic_change(self, channel, message, by):
+        self.log.debug('Firing network.on_topic_change')
         GLib.idle_add(self.do_topic_change, channel, message, by)
     
     def do_topic_change(self, channel, message, by):
+        self.log.debug('Sync: running network.do_topic_change')
         self.log.debug('Changing topic in %s', channel)
         room = self.get_room_for_name(channel)
         room.topic_pane.update_topic()
@@ -400,9 +457,11 @@ class Network:
         )
     
     async def on_mode_change(self, channel, modes, by):
+        self.log.debug('Firing network.on_mode_change')
         GLib.idle_add(self.do_mode_change, channel, modes, by)
 
     def do_mode_change(self, channel, modes, by):
+        self.log.debug('Sync: running network.do_mode_change')
         room = self.get_room_for_name(channel)
         mode_codes = modes[0]
         mode_index = 1
@@ -490,16 +549,20 @@ class Network:
         room.update_users()
 
     async def on_user_invite(self, target, channel, by):
+        self.log.debug('Firing network.on_user_invite')
         GLib.idle_add(self.do_user_invite, target, channel, by)
     
     def do_user_invite(self, target, channel, by):
+        self.log.debug('Sync: running network.do_user_invite')
         room = self.get_room_for_name(channel)
         room.add_message(f'{by} invited {target}', kind='server')
 
     async def on_invite(self, channel, by):
+        self.log.debug('Firing network.on_invite')
         GLib.idle_add(self.do_invite, channel, by)
     
     def do_invite(self, channel, by):
+        self.log.debug('Sync: running network.do_invite')
         self.server_room.add_message(
             f'You were invited to {channel} by {by}', kind='server'
         )
@@ -507,10 +570,12 @@ class Network:
 
 
     async def on_ctcp_action(self, target, source, action):
+        self.log.debug('Firing network.on_ctcp_action')
         self.log.debug('Action in %s from %s: %s %s', target, source, source, action )
         GLib.idle_add(self.do_ctcp_action, target, source, action)
         
     def do_ctcp_action(self, target, source, action):
+        self.log.debug('Sync: running network.do_ctcp_action')
         self.log.debug('Adding action from %s to %s', source, target)
         if target.startswith('#'):
             room = self.get_room_for_name(target)
@@ -611,3 +676,15 @@ class Network:
     def password(self, password):
         self.log.debug('Setting password')
         self._config['password'] = password
+
+    # Junk Data, for taking screenshots
+    def generate_test_data(self):
+        self.name = 'IRC Server'
+        self.auth = 'sasl'
+        self.host = 'test'
+        self.port = 6697
+        self.tls = True
+        self.nickname = 'Composedly'
+        self.username = 'testing'
+        self.realname = 'Comp O. Sedly'
+        self.password = 'hunter2'

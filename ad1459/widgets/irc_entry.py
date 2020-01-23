@@ -82,14 +82,6 @@ class IrcEntry(Gtk.Entry):
         keys = Gdk.Keymap.get_default()
         mods = keys.get_modifier_state()
 
-        self.log.debug('Keyval: %s', Gdk.keyval_name(event.keyval))
-        self.log.debug('Modifiers: %s', mods)
-        self.log.debug('Completion debugging:')
-        self.log.debug('window recents: %s', self.window.recents)
-        self.log.debug('room recents: %s', room.recents)
-        self.log.debug('recents_mode: %s', self.recents_mode)
-        self.log.debug('possible_completions: %s', self.possible_completions)
-
         if event.keyval == Gdk.keyval_from_name('Up'):
             if mods == 16:
                 if self.recents_mode != 'room':

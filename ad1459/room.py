@@ -44,7 +44,7 @@ class Room:
         row (:obj:`RoomRow`) The row for this room in the switcher.
     """
 
-    def __init__(self, app, network, window, name):
+    def __init__(self, app, network, window, name, test=False):
         Notify.init('AD1459')
         self.log = logging.getLogger('ad1459.room')
         self.log.debug('Creating new room %s', name)
@@ -54,6 +54,7 @@ class Room:
         self.window = window
 
         self.name = name
+        self._kind = RoomKind.CHANNEL
 
         self.notification = Notify.Notification.new('AD1459', 'Init')
         self.buffer = MessageBuffer(self)

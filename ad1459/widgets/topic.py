@@ -94,7 +94,7 @@ class TopicPane(Gtk.Grid):
     
     def update_topic(self):
         """Update the channel topic."""
-        self.log.debug('Updating topic for %s', self.room.name)
+        self.log.debug('Updating topic for %s', self.room.id)
 
         try:
             topic_expander_label = '<small>Set by '
