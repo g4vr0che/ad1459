@@ -62,7 +62,7 @@ class Network:
         # '/cycle': cmd.cycle,
         '/nick': cmd.nick,
         '/query': cmd.query,
-        '/msg': cmd.query,
+        '/msg': cmd.msg,
         '/whisper': cmd.query,
         '/notice': cmd.notice,
         '/topic': cmd.topic
@@ -517,7 +517,7 @@ class Network:
         elif target == self.nickname:
             room = self.get_room_for_name(source)
         
-        message = f'{source} {action}'
+        message = f'\x1D{source} {action}\x1D'
         room.add_message(message, kind='action')
         self.window.show_all()
         room.update_tab_complete(source)

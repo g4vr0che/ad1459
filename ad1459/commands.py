@@ -149,6 +149,14 @@ class Commands:
         if message:
             network.send_message(msgroom, message)
     
+    def msg(self, room, network, command):
+        com = command.split()
+        user = com.pop(0)
+        message = ' '.join(com)
+        msgroom = network.get_room_for_name(user)
+        if message:
+            network.send_message(msgroom, message)
+    
     def notice(self, room, network, command):
         com = command.split()
         target = com.pop(0)
