@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.15.0](https://github-g///compare/v1.14.0...v1.15.0) (2020-01-23)
+
+
+### Features
+
+* Add commands for IRC controls ([40da83c](https://github-g///commit/40da83c565ac71d5562c1c643ac4385405c5165f))
+* Add recent message recall and per-channel buffers ([e708c4f](https://github-g///commit/e708c4f2d2c0be012627bfdae33a40107ecd5486)), closes [#10](https://github-g///issues/10)
+* Allow expanding and collapsing server messages ([5c8aeaf](https://github-g///commit/5c8aeaf0cd590807b451fabfb61583ccfda9347c))
+* Allow opening PM with users on double-click ([59fac20](https://github-g///commit/59fac205f7c926c9631f28949d49e33f8a30a962))
+* Display user status in menu. ([bc7ecb9](https://github-g///commit/bc7ecb9a5e982dfea68ec2a36bf93dae6adaa94b)), closes [#12](https://github-g///issues/12)
+
+
+### Bug Fixes
+
+* Formatting and margin improvements ([5a32a13](https://github-g///commit/5a32a1302f4ee62760b43f563b9c3b68b5e3a54a))
+* Hook up join entry icon ([38efa1d](https://github-g///commit/38efa1d7d62791399ed4ee944ceffa1434845181))
+* Improve HL logic ([1286993](https://github-g///commit/1286993bebd49d288a3845e13b680842de7bd8cb))
+* Improve unread indicator with enums ([877e37b](https://github-g///commit/877e37b41fe43a62e535bed0a69e0a76134bbd85))
+* Improved wording of mode changes ([b8ce443](https://github-g///commit/b8ce4439f1139b5baaca0445051d849c1798c788))
+* separate msg from other privmsg commands ([9899bbb](https://github-g///commit/9899bbb480f3c4491f20485b2eca53258d619626))
+* Spacing improvements ([d0f4010](https://github-g///commit/d0f401037ef42067b40c46934565ab509d0a0fa1))
+* Topic expander is now animated. ([67c9f44](https://github-g///commit/67c9f449eb61fccb417d6b6e0500adbf8df6b23d))
+* update user list when modes change. ([2f8f24a](https://github-g///commit/2f8f24a1c7ad98084774cc936704a2d404d1708e))
+
 ## [1.14.0](https://github-g///compare/v1.13.4...v1.14.0) (2020-01-15)
 
 
