@@ -66,6 +66,33 @@ class Release(Command):
                 ['git', 'push', '--follow-tags']
             )
 
+class PyPI(Command):
+    """ Generate a release to PyPI."""
+    description = 'Generate a release to PyPI'
+    user_options = [
+        ('no-clean', None, 'Don\'t clean up the build after pushing.'),
+        ('no-push', None, 'Don\'t push the release to PyPI.')
+    ]
+
+    def initialize_options(self):
+        self.no_clean = False
+        self.no_push = False
+    
+    def finalize_options(self):
+        pass
+    
+    def run(self):
+        build_command = ['python3', 'setup.py', 'sdist', 'bdist_wheel']
+        subprocess.run(build_command)
+        
+        if not self.no_push:
+            release_command = ['python3', '-m', 'twine', 'upload', 'dist/*']
+            subprocess.run(release_command)
+        
+        if not self.no_clean:
+            clean_command = ['rm', '-r', 'dist/', 'build/', 'ad1459.egg-info']
+            subprocess.run(clean_command)
+
 setup(
     name='ad1459',
     version=version['__version__'],
@@ -91,7 +118,10 @@ setup(
     ],
 
     # Commands
-    cmdclass={'release': Release},
+    cmdclass={
+        'release': Release,
+        'pypi': PyPI
+    },
 
     # Project Metadata
     author='Gaven Royer',

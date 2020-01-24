@@ -41,6 +41,7 @@ Currently planned features include:
 These are problems that have been currently identified:
 
 * Large buffers make the application unresponsive
+* CTCP ACTION messages sent from the client also highlight the client.
 
 ### Connecting to IRC
 
