@@ -106,7 +106,7 @@ setup(
         "Environment :: X11 Applications :: Gnome",
         "Environment :: X11 Applications :: GTK",
         "Intended Audience :: End Users/Desktop",
-        "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
+        'License :: OSI Approved :: ISC License (ISCL)',
         "Natural Language :: English",
         "Operating System :: POSIX :: Linux",
         "Topic :: Communications :: Chat :: Internet Relay Chat"
