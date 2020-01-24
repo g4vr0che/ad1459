@@ -19,7 +19,7 @@
   Handling for networks and their rooms.
 """
 
-import asyncio
+from asyncio import get_event_loop, run_coroutine_threadsafe
 import logging
 import time
 
@@ -30,7 +30,6 @@ from gi.repository import Gtk, GLib
 from .widgets.room_row import RoomRow
 from .widgets.message_row import MessageRow
 from .client import Client
-from .testclient import TestClient
 from .commands import Commands
 from .formatting import Parser
 from .room import Room
@@ -117,27 +116,28 @@ class Network:
             # Actually do the connection
             if self.auth == 'pass':
                 self.log.debug('Using password authentication')
-                asyncio.run_coroutine_threadsafe(
+                run_coroutine_threadsafe(
                     self.client.connect(
                         hostname=self.host,
                         port=self.port,
                         tls=self.tls,
                         password=self.password
                     ),
-                    loop=asyncio.get_event_loop()
+                    loop=get_event_loop()
                 )
 
             else:
                 self.log.debug('Using SASL authentication (or none)')
-                asyncio.run_coroutine_threadsafe(
+                run_coroutine_threadsafe(
                     self.client.connect(
                         hostname=self.host,
                         port=self.port,
                         tls=self.tls
                     ),
-                    loop=asyncio.get_event_loop()
+                    loop=get_event_loop()
                 )
         else:
+            from .testclient import TestClient
             self.generate_test_data()
             self.client = TestClient(
                     self.nickname, 
@@ -150,13 +150,13 @@ class Network:
             self.server_room.kind = "server"
             self.add_room(self.server_room)
 
-            asyncio.run_coroutine_threadsafe(
+            run_coroutine_threadsafe(
                 self.client.connect(
                     hostname=self.host,
                     port=self.port,
                     tls=self.tls
                 ),
-                loop=asyncio.get_event_loop()
+                loop=get_event_loop()
             )
 
             for channel in self.client.channels:
@@ -172,9 +172,9 @@ class Network:
     def disconnect(self, message='AD1459 Quit'):
         """Disconnect from this network."""
         self.log.debug('Disconnecting from %s', self.name)
-        asyncio.run_coroutine_threadsafe(
+        run_coroutine_threadsafe(
             self.client.quit(message='AD1459 Quit'),
-            loop=asyncio.get_event_loop()
+            loop=get_event_loop()
         )
     
     def change_nick(self, new_nick):
@@ -183,9 +183,9 @@ class Network:
         Arguments:
             new_nick (str): The new nickname to use.
         """
-        asyncio.run_coroutine_threadsafe(
+        run_coroutine_threadsafe(
             self.client.set_nickname(new_nick),
-            loop=asyncio.get_event_loop()
+            loop=get_event_loop()
         )
 
     def join_channel(self, channel):
@@ -194,8 +194,8 @@ class Network:
         Arguments:
             channel (str): The name of the channel to join.
         """
-        asyncio.run_coroutine_threadsafe(
-            self.client.join(channel), loop=asyncio.get_event_loop()
+        run_coroutine_threadsafe(
+            self.client.join(channel), loop=get_event_loop()
         )
 
     def add_room(self, room):
@@ -250,9 +250,9 @@ class Network:
                 return 0
 
         self.log.debug('Sending message to %s: %s', room.name, message_text)
-        asyncio.run_coroutine_threadsafe(
+        run_coroutine_threadsafe(
             self.client.message(room.name, message_text),
-            loop=asyncio.get_event_loop()
+            loop=get_event_loop()
         )
     
     # Asynchronous Callbacks

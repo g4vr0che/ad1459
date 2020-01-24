@@ -23,28 +23,23 @@ even in its currently incomplete state.
 * Notifications
 * User list
 * Topic
+* Some commands for doing IRC Things
+* Last message recall
+* Compacted server messages
 
 
 ## TODOS
 
 Currently planned features include:
 
-* Commands 
-  - Currently only the /me command is supported
 * CTCP
-* UI Improvements
-* Last message recall
 * Logging
-* Compacted server messages
 
 
 ## Known Issues
 
 These are problems that have been currently identified:
 
-* Rooms on every network must have unique names
-* No server messages for Op-actions (kick, ban, modes)
-* Can't set an initial nick which is different from username
 * Large buffers make the application unresponsive
 
 ### Connecting to IRC
