@@ -193,7 +193,11 @@ class MessageRow(Gtk.ListBoxRow):
         """
         # We use '/n' because our parsing later on filters out newlines.
         # It will ignore '/n', so we use that and replace it before setting.
-        self.text += f'/n{text} '
+        self.log.debug('Updating message text')
+        self.log.debug('Old text: \n%s', self.text)
+        oldtext = self.text.replace('\u000A', '/u000A')
+        self.text = f'{oldtext} /u000A{text} '
+        self.log.debug('New text: \n%s', self.text)
         self.server_count += 1
         self.server_message_expander.set_label(
             f'{self.server_count} server messages'
@@ -275,8 +279,8 @@ class MessageRow(Gtk.ListBoxRow):
         linked_text = self.parser.hyperlinks(formatted_text.replace('/n', ' /n'))
 
         # Set both of the labels to the same text.
-        self.message_text.set_markup(linked_text)
-        self.server_text.set_markup(linked_text.replace('/n', '\n'))
+        self.message_text.set_markup(linked_text.replace('/u000A', '\u000A'))
+        self.server_text.set_markup(linked_text.replace('/u000A', '\u000A'))
     
     def show_all_contents(self):
         self.show_all()

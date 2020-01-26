@@ -111,13 +111,14 @@ class Parser:
 
         linked_words = []
         for word in words:
-            scheme = urlparse(word).scheme
+            stripped = word.replace('/u000A', '')
+            scheme = urlparse(stripped).scheme
             if scheme == 'http' or scheme == 'https':
                 paren = False
                 if word.endswith(')'):
                     word = word.strip(')')
                     paren = True
-                word = f'<a href="{word}">{word}</a>'
+                word = f'<a href="{stripped}">{word}</a>'
                 if paren:
                     word = f'{word})'
             linked_words.append(word)

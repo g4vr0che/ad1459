@@ -129,6 +129,10 @@ class Room:
                     last_message.update_server_message(message)
                     last_message.time = time
                 
+                elif last_message.sender == sender:
+                    last_message.update_server_message(message)
+                    last_message.time = time
+                
                 else:
                     last_message.server_message_expander.set_expanded(False)
                     self.buffer.add_message_to_buffer(new_message)
