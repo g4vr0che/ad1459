@@ -55,7 +55,7 @@ def on_send_button_clicked(widget, text, room, window, data=None):
     while len(room.recents) > 50:
         room.recents.pop(0)
     while len(window.recents) > 50:
-        room.recents.pop(0)
+        window.recents.pop(0)
     
 
 def on_nick_button_clicked(button, window, data=None):
