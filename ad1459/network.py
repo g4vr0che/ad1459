@@ -583,7 +583,7 @@ class Network:
             room = self.get_room_for_name(source)
         
         message = f'\x1D{source} {action}\x1D'
-        room.add_message(message, kind='action')
+        room.add_message(message, sender="**", kind='action')
         self.window.show_all()
         room.update_tab_complete(source)
 
