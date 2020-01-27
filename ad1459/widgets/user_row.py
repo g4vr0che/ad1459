@@ -19,9 +19,13 @@
   ListBoxRows for networks/rooms.
 """
 
+import asyncio
+
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
+
+from .right_click_menus import UserRowMenu
 
 class UserRow(Gtk.ListBoxRow):
     """ A row for a user in the user list.
@@ -41,7 +45,17 @@ class UserRow(Gtk.ListBoxRow):
         grid.set_margin_bottom(3)
         grid.set_margin_start(3)
         grid.set_margin_end(3)
-        self.add(grid)
+
+        self.context_menu = UserRowMenu(self.room, self)
+        self.context_menu.set_relative_to(self)
+        self.context_menu.set_modal(True)
+
+        event = Gtk.EventBox()
+        self.add(event)
+
+        event.add(grid)
+
+        event.connect('button-press-event', self.on_user_row_button_release)
 
         self.status_image = Gtk.Image.new_from_icon_name(
             'radio-symbolic',
@@ -54,6 +68,31 @@ class UserRow(Gtk.ListBoxRow):
         grid.attach(self.user_label, 1, 0, 1, 1)
 
         self._modes = []
+    
+    def get_voice(self):
+        if 'v' in self.modes:
+            return True
+        return False
+    
+    def get_op(self):
+        if 'o' in self.modes:
+            return True
+        return False
+    
+    def get_mute(self):
+        if 'q' in self.modes:
+            return True
+        return False
+    
+    # Internal Handlers
+    def on_user_row_button_release(self, widget, event, data=None):
+        if event.button == 3:
+            print(f'User row {self.nick} right-clicked')
+            self.context_menu.popup()
+            asyncio.run_coroutine_threadsafe(
+                self.context_menu.update_info(self.nick),
+                loop=asyncio.get_event_loop()
+            )
     
     # Data
     @property
@@ -68,7 +107,10 @@ class UserRow(Gtk.ListBoxRow):
     @property
     def modes(self):
         """:list: of str: The current user modes for this user"""
-        return self._modes
+        try:
+            return self._modes
+        except AttributeError:
+            return []
     
     @modes.setter
     def modes(self, modes):
