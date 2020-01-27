@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.17.0](https://github-g///compare/v1.16.0...v1.17.0) (2020-01-27)
+
+
+### Features
+
+* Combine user messages from the same user ([1dfbe97](https://github-g///commit/1dfbe97835eca4067f8f3a6dbe643e042f2ef190))
+
+
+### Bug Fixes
+
+* Improve application focus speed with large numbers of messages ([acc9d4a](https://github-g///commit/acc9d4a534b562372889bfb991cfdccc31be1396))
+
 ## [1.16.0](https://github-g///compare/v1.15.0...v1.16.0) (2020-01-24)
 
 
