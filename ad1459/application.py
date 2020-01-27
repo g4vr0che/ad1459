@@ -71,41 +71,19 @@ class Ad1459Application:
         self.app.parser = Parser()
         self.parser = Parser()
 
-                # Set up CSS
-        css = (
-            b'.message-row {'
-            b'  border-radius: 6px;'
-            b'  background-color: alpha(@theme_selected_bg_color, 0.1);'
-            b'}'
-            b'.message-row label {'
-            b'  color: @theme_text_color;'
-            b'}'
-            b'.message-row label:backdrop {'
-            b'  color: @theme_text_color;'
-            b'}'
-            b'.mine {'
-            b'  background-color: alpha(@theme_selected_bg_color, 0.2);'
-            b'}'
-            b'.highlight {'
-            b'    background-color: alpha(@success_color, 0.3);'
-            b'}'
-            b'.server {'
-            b'    background-color: transparent;'
-            b'}'
-            b'.notice {'
-            b'    background-color: alpha(@warning_color, 0.3);'
-            b'}'
-            b'.connect-entry {'
-            b'    background-color: @theme_base_color;'
-            b'}'
-            b'.topic-expander {'
-            b'    font-size: 0.75em;'
-            b'}'
+        resource_path = os.path.join(
+            os.path.dirname(__file__),
+            'resources',
+            'in.donotspellitgav.ad1459.gresource'
         )
+        resource = Gio.Resource.load(resource_path)
+        Gio.resources_register(resource)
 
         screen = Gdk.Screen.get_default()
         css_provider = Gtk.CssProvider()
-        css_provider.load_from_data(css)
+        css_provider.load_from_resource(
+            '/in/donotspellitgav/ad1459/styles/application.css'
+        )
         style_context = Gtk.StyleContext()
         style_context.add_provider_for_screen(
             screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION

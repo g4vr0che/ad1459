@@ -1,0 +1,80 @@
+/*
+AD1459, an IRC Client
+
+  Copyright ©2019-2020 by Gaven Royer
+
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
+  TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+  FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR
+  CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+  DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS
+  ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+  SOFTWARE.
+
+  This file is the CSS for the application
+*/
+
+/* Message Rows */
+.message-row {
+  border-radius: 6px;
+  background-color: alpha(@theme_selected_bg_color, 0.1);
+}
+
+.message-row label {
+  color: @theme_text_color;
+}
+
+.message-row label:backdrop {
+  color: @theme_text_color;
+}
+
+.mine {
+  background-color: alpha(@theme_selected_bg_color, 0.2);
+}
+
+.highlight {
+    background-color: alpha(@success_color, 0.3);
+}
+
+.server {
+    background-color: transparent;
+}
+
+.notice {
+    background-color: alpha(@warning_color, 0.3);
+}
+
+/* Connection UI */
+.connect-entry {
+    background-color: @theme_base_color;
+}
+
+/* Topic expanders */
+.topic-expander {
+    font-size: 0.75em;
+}
+
+/* User Tags in Context Menu */
+.user-tag {
+    border-radius: 4px;
+    padding: 2px 6px;
+}
+
+.user-tag.tls {
+    background-color: @success_color;
+    color: @theme_selected_fg_color;
+}
+
+.user-tag.login {
+    background-color: @theme_selected_bg_color;
+    color: @theme_selected_fg_color;
+}
+
+.user-tag.oper {
+    background-color: @error_color;
+    color: @theme_selected_fg_color;
+}

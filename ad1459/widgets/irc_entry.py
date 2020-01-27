@@ -83,50 +83,58 @@ class IrcEntry(Gtk.Entry):
         mods = keys.get_modifier_state()
 
         if event.keyval == Gdk.keyval_from_name('Up'):
-            if mods == 16:
+            self.log.debug('Recalling last message...')
+            self.log.debug('Keys debug: %s, Mods: %s', event.keyval, mods)
+            if mods == 16 or mods == 0:
                 if self.recents_mode != 'room':
                     self.recents_mode = 'room'
                     self.possible_recents = room.recents.copy()
                     self.possible_recents.append(self.get_text())
                     self.index = len(self.possible_recents) - 1
 
+                self.log.debug('Recent mode: %s', self.recents_mode)
                 self.index -= 1
                 self.index = self.clamp_index(self.index, len(self.possible_recents))
                 self.set_text_updown(self.possible_recents, self.index)
                 return True
             
-            elif mods == 20:
+            elif mods == 20 or mods == 4:
                 if self.recents_mode != 'window':
                     self.recents_mode = 'window'
                     self.possible_recents = self.window.recents.copy()
                     self.possible_recents.append(self.get_text())
                     self.index = len(self.possible_recents) - 1
 
+                self.log.debug('Recent mode: %s', self.recents_mode)
                 self.index -= 1
                 self.index = self.clamp_index(self.index, len(self.possible_recents))
                 self.set_text_updown(self.possible_recents, self.index)
                 return True
         
         elif event.keyval == Gdk.keyval_from_name('Down'):
-            if mods == 16:
+            self.log.debug('Recalling next message...')
+            self.log.debug('Keys debug: %s, Mods: %s', event.keyval, mods)
+            if mods == 16 or mods == 0:
                 if self.recents_mode != 'room':
                     self.recents_mode = 'room'
                     self.possible_recents = room.recents.copy()
                     self.possible_recents.append(self.get_text())
                     self.index = len(self.possible_recents) - 1
 
+                self.log.debug('Recent mode: %s', self.recents_mode)
                 self.index += 1
                 self.index = self.clamp_index(self.index, len(self.possible_recents))
                 self.set_text_updown(self.possible_recents, self.index)
                 return True
             
-            elif mods == 20:
+            elif mods == 20 or mods == 4:
                 if self.recents_mode != 'window':
                     self.recents_mode = 'window'
                     self.possible_recents = self.window.recents.copy()
                     self.possible_recents.append(self.get_text())
                     self.index = len(self.possible_recents) - 1
 
+                self.log.debug('Recent mode: %s', self.recents_mode)
                 self.index += 1
                 self.index = self.clamp_index(self.index, len(self.possible_recents))
                 self.set_text_updown(self.possible_recents, self.index)

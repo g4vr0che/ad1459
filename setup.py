@@ -22,6 +22,10 @@
 from setuptools import setup, find_packages, Command
 import subprocess
 
+prefix = '/usr/share'
+rdnn_base = 'in.donotspellitgav'
+rdnn = f'{rdnn_base}.Ad1459'
+
 version = {}
 with open('ad1459/__version__.py') as fp:
     exec(fp.read(), version)
@@ -93,6 +97,26 @@ class PyPI(Command):
             clean_command = ['rm', '-r', 'dist/', 'build/', 'ad1459.egg-info']
             subprocess.run(clean_command)
 
+class GResource(Command):
+    """ Generate the GResource file."""
+    description = 'Generate the GResource file.'
+    user_options = []
+
+    def initialize_options(self):
+        pass
+    
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        build_command = [
+            'glib-compile-resources',
+            '--sourcedir=data',
+            '--target=ad1459/resources/in.donotspellitgav.ad1459.gresource',
+            'data/in.donotspellitgav.ad1459.gresource.xml'
+        ]
+        subprocess.run(build_command)
+
 setup(
     name='ad1459',
     version=version['__version__'],
@@ -107,20 +131,20 @@ setup(
     ],
 
     data_files=[
-      ('/usr/share/applications', ['data/in.donotspellitgav.ad1459.desktop']),
-      ('/usr/share/icons/hicolor/scalable/apps', [
-          'data/in.donotspellitgav.Ad1459.svg',
-          'data/in.donotspellitgav.Ad1459.Devel.svg'
+      (f'{prefix}/applications', [f'data/meta/{rdnn_base}.ad1459.desktop']),
+      (f'{prefix}/icons/hicolor/scalable/apps', [
+          f'data/icons/{rdnn}.svg',
+          f'data/icons/{rdnn}.Devel.svg'
       ]),
-      ('/usr/share/icons/hicolor/symbolic/apps', [
-          'data/in.donotspellitgav.Ad1459-symbolic.svg'
-      ])
+      (f'{prefix}/icons/hicolor/symbolic/apps', [f'data/icons/{rdnn}-symbolic.svg']),
     ],
+    package_data={'ad1459': [f'resources/*.gresource']},
 
     # Commands
     cmdclass={
         'release': Release,
-        'pypi': PyPI
+        'pypi': PyPI,
+        'gresource': GResource
     },
 
     # Project Metadata

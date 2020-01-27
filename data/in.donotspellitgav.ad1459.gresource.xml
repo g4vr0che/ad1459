@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/in/donotspellitgav/ad1459">
+    <file>styles/application.css</file>
+  </gresource>
+</gresources>

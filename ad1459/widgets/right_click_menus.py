@@ -91,22 +91,40 @@ class UserRowMenu(Gtk.Popover):
         self.whois_grid.attach(self.server, 1, 4, 1, 1)
 
         deets_grid = Gtk.Grid()
+        deets_grid.set_hexpand(False)
+        deets_grid.set_halign(Gtk.Align.CENTER)
+        deets_grid.set_column_spacing(18)
         self.whois_grid.attach(deets_grid, 0, 5, 2, 1)
 
         self.tls = Gtk.Label()
-        self.tls.set_hexpand(True)
-        self.tls.set_markup(f'<i><small>TLS</small></i>')
+        self.tls.set_markup(f'<i>TLS</i>')
+        Gtk.StyleContext.add_class(
+            self.tls.get_style_context(), 'user-tag'
+        )
+        Gtk.StyleContext.add_class(
+            self.tls.get_style_context(), 'tls'
+        )
         deets_grid.attach(self.tls, 0, 0, 1, 1)
 
         self.login = Gtk.Label()
-        self.login.set_hexpand(True)
-        self.login.set_markup(f'<i><small>Logged in</small></i>')
+        self.login.set_markup(f'<i>Logged in</i>')
+        Gtk.StyleContext.add_class(
+            self.login.get_style_context(), 'user-tag'
+        )
+        Gtk.StyleContext.add_class(
+            self.login.get_style_context(), 'login'
+        )
         deets_grid.attach(self.login, 1, 0, 1, 1)
         self.show_all()
 
         self.oper = Gtk.Label()
-        self.oper.set_hexpand(True)
-        self.oper.set_markup(f'<i><small>IRCOp</small></i>')
+        self.oper.set_markup(f'<i>IRCOp</i>')
+        Gtk.StyleContext.add_class(
+            self.oper.get_style_context(), 'user-tag'
+        )
+        Gtk.StyleContext.add_class(
+            self.oper.get_style_context(), 'oper'
+        )
         deets_grid.attach(self.oper, 2, 0, 1, 1)
         
         privmsg_button = Gtk.ModelButton()
