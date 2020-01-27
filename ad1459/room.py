@@ -132,6 +132,8 @@ class Room:
                 elif last_message.sender == sender:
                     last_message.update_server_message(message)
                     last_message.time = time
+                    if self.network.nickname in message:
+                        last_message.kind = 'highlight'
                 
                 else:
                     last_message.server_message_expander.set_expanded(False)
