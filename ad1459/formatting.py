@@ -137,3 +137,13 @@ class Parser:
             text = text.replace(i, mu_formatting[i])
         
         return text
+
+DEFAULT_PARSER = Parser()
+
+def get_default_parser():
+    """ Get a copy of the current parser.
+
+    Returns:
+        The :obj:`Parser` we're currently using.
+    """
+    return DEFAULT_PARSER

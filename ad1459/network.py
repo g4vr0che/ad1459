@@ -284,7 +284,7 @@ class Network:
         else:
             for room in self.rooms:
                 if new in room.users:
-                    room.add_message(f'{old} is now {new}.', kind='server')
+                    room.add_message(f'{old} is now {new}.', msg_type='server')
                     room.window.show_all()
                     room.update_users()
     
@@ -307,7 +307,7 @@ class Network:
         
         else:
             room = self.get_room_for_name(channel)
-            room.add_message(f'{user} joined.', kind='server')
+            room.add_message(f'{user} joined.', msg_type='server')
             self.window.show_all()
             room.update_users()
     
@@ -322,14 +322,14 @@ class Network:
         if user == self.nickname:
             room.leave()
             room.network.server_room.add_message(
-                f'You have left {room.name}', kind='server'
+                f'You have left {room.name}', msg_type='server'
             )
             self.rooms.remove(room)
             self.window.switcher.invalidate_sort()
         
         else:
             room.update_users()
-            room.add_message(f'{user} left ({message}).', kind='server')
+            room.add_message(f'{user} left ({message}).', msg_type='server')
             self.window.show_all()
     
     async def on_kick(self, channel, target, by, reason=None):
@@ -343,7 +343,7 @@ class Network:
             room.leave()
             room.network.server_room.add_message(
                 f'You were kicked from {room.name} by {by}, reason: "{reason}"', 
-                kind='server'
+                msg_type='server'
             )
             room.network.server_room.row.set_icon('emblem-important-symbolic')
             self.rooms.remove(room)
@@ -352,7 +352,7 @@ class Network:
         else:
             room.update_users()
             room.add_message(
-                f'{target} kicked by {by},({reason}).', kind='server'
+                f'{target} kicked by {by},({reason}).', msg_type='server'
             )
             self.window.show_all()
 
@@ -366,7 +366,7 @@ class Network:
         qmessage = f'{user} quit ({message}).'
         for room in self.rooms:
             if user in room.old_users:
-                room.add_message(qmessage, kind='server')
+                room.add_message(qmessage, msg_type='server')
                 room.update_users()
     
     async def on_kill(self, target, by, reason=None):
@@ -378,7 +378,7 @@ class Network:
         qmessage = f'{target} killed by {by}, ({reason}).'
         for room in self.rooms:
             if target in room.old_users:
-                room.add_message(qmessage, kind='server')
+                room.add_message(qmessage, msg_type='server')
                 room.update_users()
     
     async def on_message(self, target, source, message):
@@ -404,7 +404,7 @@ class Network:
         if target.startswith('#'):
             room = self.get_room_for_name(target)
             self.log.debug('Adding notice to %s', room.id)
-            room.add_message(message, source, kind='notice')
+            room.add_message(message, source, msg_type='notice')
             room.update_tab_complete(source)
             self.window.show_all()
     
@@ -440,7 +440,7 @@ class Network:
             self.log.debug('Adding message to %s', room.id)
 
         self.log.debug('Adding notice from %s', room.id)
-        room.add_message(message, source, kind='notice')
+        room.add_message(message, source, msg_type='notice')
         self.window.show_all()
     
     async def on_topic_change(self, channel, message, by):
@@ -453,7 +453,7 @@ class Network:
         room = self.get_room_for_name(channel)
         room.topic_pane.update_topic()
         room.add_message(
-            f'{by} set the topic to "{message}"', kind='server'
+            f'{by} set the topic to "{message}"', msg_type='server'
         )
     
     async def on_mode_change(self, channel, modes, by):
@@ -545,7 +545,7 @@ class Network:
         
         mode_msg = mode_msg.strip()
         mode_msg = mode_msg.strip(',')
-        room.add_message(f'{mode_msg}.', kind='server')
+        room.add_message(f'{mode_msg}.', msg_type='server')
         room.update_users()
 
     async def on_user_invite(self, target, channel, by):
@@ -555,7 +555,7 @@ class Network:
     def do_user_invite(self, target, channel, by):
         self.log.debug('Sync: running network.do_user_invite')
         room = self.get_room_for_name(channel)
-        room.add_message(f'{by} invited {target}', kind='server')
+        room.add_message(f'{by} invited {target}', msg_type='server')
 
     async def on_invite(self, channel, by):
         self.log.debug('Firing network.on_invite')
@@ -564,7 +564,7 @@ class Network:
     def do_invite(self, channel, by):
         self.log.debug('Sync: running network.do_invite')
         self.server_room.add_message(
-            f'You were invited to {channel} by {by}', kind='server'
+            f'You were invited to {channel} by {by}', msg_type='server'
         )
         self.server_room.row.set_icon('emblem-important-symbolic')
 
@@ -583,7 +583,7 @@ class Network:
             room = self.get_room_for_name(source)
         
         message = f'\x1D{source} {action}\x1D'
-        room.add_message(message, sender="**", kind='action')
+        room.add_message(message, sender="**", msg_type='action')
         self.window.show_all()
         room.update_tab_complete(source)
 

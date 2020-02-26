@@ -30,6 +30,7 @@ from gi.repository import Notify
 
 from .widgets.message_buffer import MessageBuffer
 from .widgets.message_row import MessageRow
+from .widgets.message import Message
 from .widgets.room_row import RoomRow, RoomKind, RoomIcon
 from .widgets.topic import TopicPane
 
@@ -66,46 +67,63 @@ class Room:
         self.recents = []
     
     # Methods
-    def add_message(self, message, sender='*', kind='message', time=None):
+    def add_message(self, message, sender='*', msg_type='message', time=None):
         """ Adds a message into this room and inserts it into the buffer.
 
         Arguments:
             message (str): the text of the message to add.
             sender (str): The person/entity who sent the message
             time (str): The time the message was sent.
-            kind (str): The type of message this is (default: 'message')
+            msg_type (str): The type of message this is (default: 'message')
         """
         if not time:
             time = Time.ctime().split()[3]
         
-        if (self.network.nickname in message and kind != 'server'):
-            kind = 'highlight'
+        if (self.network.nickname in message and msg_type != 'server'):
+            msg_type = 'highlight'
         
-        if sender == self.network.nickname and kind != 'server':
-            kind = 'mine'
+        if sender == self.network.nickname and msg_type != 'server':
+            msg_type = 'mine'
+        
+        try:
+            last_message = self.buffer.list_box.get_children()[-1]
+        except IndexError:
+            last_message = None
+        
+        server_msg = msg_type in ['server']
+        message_row = MessageRow(server_msg=server_msg)
 
-        # Create the new message
-        new_message = MessageRow()
-        new_message.time = time
-        new_message.sender = sender
-        new_message.text = message
-        new_message.kind = kind
+        if last_message:
+            if last_message.sender == sender:
+                message_row = last_message
+            else:
+                self.buffer.add_message_to_buffer(message_row)
+        else:
+            self.buffer.add_message_to_buffer(message_row)
+
+        new_message = Message(message, time)
+        new_message.style = msg_type
+
+        # Add the new message
+        message_row.time = time
+        message_row.sender = sender
+        message_row.add_message(new_message)
 
         # Get the same of the unread Icon
         current_room = self.window.message_stack.get_visible_child().room
         
         # This sets the unread indicator for the channel
         if self.window.active_room != self or not self.window.focused:
-            if self.row.icon.value <= RoomIcon[kind.upper()].value:
-                self.row.icon = kind
+            if self.row.icon.value <= RoomIcon[msg_type.upper()].value:
+                self.row.icon = msg_type
         
         # TODO: This can be improved
         # This shows the notification
         if not self.window.focused:
             if (
-                    new_message.kind == 'highlight' or 
+                    msg_type == 'highlight' or 
                     (self.kind == RoomKind.DIALOG and
-                    new_message.kind != 'mine')
+                    msg_type != 'mine')
             ):
                 if self.kind == RoomKind.CHANNEL:
                     self.notification.update(
@@ -119,32 +137,6 @@ class Room:
                         message
                     )
                 self.notification.show()
-        
-        # This posts the message, in either the last server message or a new one
-        messages = self.buffer.list_box.get_children()
-        if messages:
-            last_message = messages[-1]
-            if last_message:
-                if kind == 'server' and last_message.kind == 'server':
-                    last_message.update_server_message(message)
-                    last_message.time = time
-                
-                elif last_message.sender == sender and kind != 'action':
-                    last_message.update_server_message(message)
-                    last_message.time = time
-                    if self.network.nickname in message:
-                        last_message.kind = 'highlight'
-                
-                else:
-                    last_message.server_message_expander.set_expanded(False)
-                    self.buffer.add_message_to_buffer(new_message)
-
-            else:
-                last_message.server_message_expander.set_expanded(False)
-                self.buffer.add_message_to_buffer(new_message)
-        
-        else:
-            self.buffer.add_message_to_buffer(new_message)
         
         self.window.show_all()
     
