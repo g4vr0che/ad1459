@@ -39,30 +39,39 @@ class Release(Command):
 
     user_options = [
         ('dry-run', None, 'Skip the actual release and do a dry run instead.'),
-        ('prerelease', None, 'Release this version as a pre-release.'),
-        ('force-version=', None, 'Force the version to update to the given value.')
+        ('prerelease=', None, 'Release this version as a "alpha", "beta" or "rc".'),
+        ('force-version=', None, 'Force a specific MAJOR, MINOR, or PATCH increment.')
     ]
 
     def initialize_options(self):
         self.dry_run = False
-        self.prerelease = False
+        self.prerelease = None
         self.force_version = None
     
     def finalize_options(self):
         if self.force_version:
-            if not isinstance(self.force_version, str):
-                raise Exception('Please specify the test version to release')
+            if not self.force_version.upper() in ['MAJOR', 'MINOR', 'PATCH']:
+                raise Exception(
+                    f'Invalid component {self.force_version}\n'
+                    'Please specify a version component to increment. Can be '
+                    'MAJOR MINOR or PATCH.'
+                )
+        
+        if self.prerelease:
+            if not self.prerelease.lower() in ['alpha', 'beta', 'rc']:
+                raise Exception(
+                    f'Invalid prerelease {self.prerelease}\n'
+                    'Please specify a prerelease type. Can be alpha beta or rc.'
+                )
 
     def run(self):
-        command = ['npx', 'standard-version@next']
+        command = ['cz', 'bump']
         if self.dry_run:
             command.append('--dry-run')
         if self.prerelease:
-            command.append('--prerelease')
+            command += ['--prerelease', self.prerelease]
         if self.force_version:
-            # See https://github.com/conventional-changelog/standard-version#release-as-a-target-type-imperatively-npm-version-like
-            command.append('--release-as')
-            command.append(self.force_version)
+            command += ['--increment', self.force_version]
         print(command)
         subprocess.run(command)
         if not self.dry_run:
