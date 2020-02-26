@@ -69,9 +69,9 @@ class Release(Command):
         if self.dry_run:
             command.append('--dry-run')
         if self.prerelease:
-            command += ['--prerelease', self.prerelease]
+            command += ['--prerelease', self.prerelease.lower()]
         if self.force_version:
-            command += ['--increment', self.force_version]
+            command += ['--increment', self.force_version.upper()]
         print(command)
         subprocess.run(command)
         if not self.dry_run:
