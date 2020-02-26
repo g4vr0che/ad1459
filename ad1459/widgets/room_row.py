@@ -56,10 +56,10 @@ class RoomIcon(Enum):
 
     def __str__(self):
         strings = {
-            1: 'radio-symbolic',
-            2: 'radio-mixed-symbolic',
-            3: 'radio-checked-symbolic',
-            4: 'emblem-important-symbolic'
+            1: 'message-read-symbolic',
+            2: 'message-server-symbolic',
+            3: 'message-unread-symbolic',
+            4: 'message-highlight-symbolic'
         }
         return strings[self.value]
 

@@ -119,21 +119,21 @@ class UserRow(Gtk.ListBoxRow):
 
         if 'q' in self._modes:
             self.status_image.set_from_icon_name(
-                'view-conceal-symbolic',
+                'user-mute-symbolic',
                 Gtk.IconSize.SMALL_TOOLBAR
             )
             self.status_image.set_opacity(0.5)
         
         if 'v' in self._modes:
             self.status_image.set_from_icon_name(
-                'media-record-symbolic',
+                'user-voice-symbolic',
                 Gtk.IconSize.SMALL_TOOLBAR
             )
             self.status_image.set_opacity(1)
 
         if 'o' in self._modes:
             self.status_image.set_from_icon_name(
-                'starred-symbolic',
+                'user-op-symbolic',
                 Gtk.IconSize.SMALL_TOOLBAR
             )
             self.status_image.set_opacity(1)

@@ -129,7 +129,7 @@ class Room:
                     last_message.update_server_message(message)
                     last_message.time = time
                 
-                elif last_message.sender == sender:
+                elif last_message.sender == sender and kind != 'action':
                     last_message.update_server_message(message)
                     last_message.time = time
                     if self.network.nickname in message:

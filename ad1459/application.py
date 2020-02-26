@@ -65,7 +65,7 @@ class Ad1459Application:
         self.networks = []
 
         self.app = Gtk.Application.new(
-            'in.donotspellitgav.in', Gio.ApplicationFlags.FLAGS_NONE
+            'in.donotspellitgav.ad1459', Gio.ApplicationFlags.FLAGS_NONE
         )
         self.app.connect('activate', self.init_application)
         self.app.parser = Parser()
@@ -87,6 +87,11 @@ class Ad1459Application:
         style_context = Gtk.StyleContext()
         style_context.add_provider_for_screen(
             screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+
+        self.icons = Gtk.IconTheme.get_for_screen(screen)
+        self.icons.add_resource_path(
+            '/in/donotspellitgav/ad1459/icons'
         )
 
     def init_application(self):

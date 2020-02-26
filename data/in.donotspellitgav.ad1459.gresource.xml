@@ -3,4 +3,15 @@
   <gresource prefix="/in/donotspellitgav/ad1459">
     <file>styles/application.css</file>
   </gresource>
+  <gresource prefix="/in/donotspellitgav/ad1459/icons">
+    <file>symbolic/apps/message-highlight-symbolic.svg</file>
+    <file>symbolic/apps/message-read-symbolic.svg</file>
+    <file>symbolic/apps/message-server-symbolic.svg</file>
+    <file>symbolic/apps/message-unread-symbolic.svg</file>
+    <file>symbolic/apps/user-ban-symbolic.svg</file>
+    <file>symbolic/apps/user-kick-symbolic.svg</file>
+    <file>symbolic/apps/user-mute-symbolic.svg</file>
+    <file>symbolic/apps/user-op-symbolic.svg</file>
+    <file>symbolic/apps/user-voice-symbolic.svg</file>
+  </gresource>
 </gresources>

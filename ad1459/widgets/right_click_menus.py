@@ -139,7 +139,7 @@ class UserRowMenu(Gtk.Popover):
 
         self.op_voice = Gtk.ToggleButton()
         self.op_voice_image = Gtk.Image.new_from_icon_name(
-            'media-record-symbolic',
+            'user-voice-symbolic',
             Gtk.IconSize.SMALL_TOOLBAR
         )
         self.op_voice.set_image(self.op_voice_image)
@@ -149,7 +149,7 @@ class UserRowMenu(Gtk.Popover):
 
         self.op_op = Gtk.ToggleButton()
         self.op_op_image = Gtk.Image.new_from_icon_name(
-            'starred-symbolic',
+            'user-op-symbolic',
             Gtk.IconSize.SMALL_TOOLBAR
         )
         self.op_op.set_image(self.op_op_image)
@@ -159,7 +159,7 @@ class UserRowMenu(Gtk.Popover):
 
         self.op_mute = Gtk.ToggleButton()
         self.op_mute_image = Gtk.Image.new_from_icon_name(
-            'view-conceal-symbolic',
+            'user-mute-symbolic',
             Gtk.IconSize.SMALL_TOOLBAR
         )
         self.op_mute.set_image(self.op_mute_image)
@@ -169,7 +169,7 @@ class UserRowMenu(Gtk.Popover):
 
         self.op_kick = Gtk.ToggleButton()
         self.op_kick_image = Gtk.Image.new_from_icon_name(
-            'media-eject-symbolic',
+            'user-kick-symbolic',
             Gtk.IconSize.SMALL_TOOLBAR
         )
         self.op_kick.set_image(self.op_kick_image)
@@ -179,7 +179,7 @@ class UserRowMenu(Gtk.Popover):
 
         self.op_ban = Gtk.ToggleButton()
         self.op_ban_image = Gtk.Image.new_from_icon_name(
-            'action-unavailable-symbolic',
+            'user-ban-symbolic',
             Gtk.IconSize.SMALL_TOOLBAR
         )
         self.op_ban.set_image(self.op_ban_image)

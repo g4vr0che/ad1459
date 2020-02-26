@@ -1,0 +1,7 @@
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "1.17.0"
+tag_format = "v$version"
+version_files = [
+    "ad1459/__version__.py"
+]
