@@ -85,7 +85,6 @@ class MessageRow(Gtk.ListBoxRow):
         self.time_label.set_margin_end(6)
         self.time_label.set_halign(Gtk.Align.END)
         layout.attach(self.time_label, 2, 0, 1, 1)
-        self.show_all()
 
         self.expander = Gtk.Expander()
         self.expander.set_halign(Gtk.Align.START)
@@ -107,14 +106,17 @@ class MessageRow(Gtk.ListBoxRow):
         Arguments:
             message(:obj:`Message`): The message object to add.
         """
-        self.expander.set_expanded(False)
+        # self.expander.set_expanded(False)
         self.messages_box.add(message)
-        self.expander.set_expanded(True)
+        # self.expander.set_expanded(True)
+        self.show_all()
 
         if self.server:
             self.expander.set_label(f'{self.count} server messages')
             if self.count > 10 and not self.toggled:
                 self.expander.set_expanded(False)
+        elif not self.expander.get_expanded():
+            self.expander.set_label(f'{self.count} collapsed messages')
     
     # Internal Handlers
     def show_hide(self, expander, data=None):
@@ -128,7 +130,7 @@ class MessageRow(Gtk.ListBoxRow):
         if not state and not self.server:
             self.expander.set_label(f'{self.count} collapsed messages')
         elif state and not self.server:
-            self.expander.set_label('')
+            self.expander.set_label('                                ')
         # User toggled manually, remember that.
         self.toggled = True
     
