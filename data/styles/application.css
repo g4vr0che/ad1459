@@ -62,7 +62,6 @@ AD1459, an IRC Client
 .message.server {
   padding: 3px 12px;
   border-radius: 4px;
-  background-color: alpha(@warning_color, 0.2);
   color: alpha(@theme_text_color, 0.7);
 }
 
