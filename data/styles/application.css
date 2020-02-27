@@ -59,6 +59,13 @@ AD1459, an IRC Client
   background-color: alpha(@warning_color, 0.2);
 }
 
+.message.server {
+  padding: 3px 12px;
+  border-radius: 4px;
+  background-color: alpha(@warning_color, 0.2);
+  color: alpha(@theme_text_color, 0.7);
+}
+
 /* Connection UI */
 .connect-entry {
   background-color: @theme_base_color;
