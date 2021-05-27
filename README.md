@@ -59,11 +59,11 @@ with a server password, then use `pass`. If the network supports using SASL, use
 
 #### `name`
 
-This is the name for the network in the list. (e.g. `freenode`, `Esper`)
+This is the name for the network in the list. (e.g. `Libera`, `Esper`)
 
 #### `host`
 
-The hostname of the server to connect to, e.g. `chat.freenode.net`
+The hostname of the server to connect to, e.g. `irc.libera.esper`
 
 #### `port`
 
@@ -89,6 +89,6 @@ otherwise.
 
 `sasl Esper irc.esper.net 6697 jeans tls hunter2`
 
-`none freenode chat.freenode.net 6666 g4vr0che`
+`none Libera irc.libera.chat 6666 g4vr0che`
 
 `pass My-Private-Network my.private-network.com 12345 secret_username tls hunter3`
